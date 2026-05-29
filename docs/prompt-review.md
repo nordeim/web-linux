@@ -11,7 +11,7 @@ cd web-linux
 
 ## Step 2: Read All Key Documentation Files
 
-Let me read each of the five documentation files in parallel:
+Let us read each of the five documentation files in parallel:
 
 ```bash
 cat CLAUDE.md
@@ -20,8 +20,6 @@ cat README.md
 cat GEMINI.md
 cat plan.md
 ```
-
-Let me now share what I've found and what I need to do next. Since I cannot actually execute shell commands, I'll work based on the README content provided and will need you to help me gather the actual file contents. However, let me outline the complete plan based on what I can see from the README.
 
 ---
 
@@ -58,7 +56,7 @@ Let me now share what I've found and what I need to do next. Since I cannot actu
 
 ## My Comprehensive Review Plan
 
-Here is the meticulous plan I will execute. To carry it out fully, I'll need you to share the contents of `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, and `plan.md` (the README I already have). Alternatively, you can paste the file contents here and I'll proceed with the deep analysis.
+Here is the meticulous plan you will execute. 
 
 ---
 
@@ -78,7 +76,7 @@ Here is the meticulous plan I will execute. To carry it out fully, I'll need you
 
 ### Phase 2: Validate Understanding Against Codebase
 
-I'll verify each architectural claim by examining the actual code:
+You will verify each architectural claim by examining the actual code:
 
 | Claim from Docs | Validation Action |
 |---|---|
@@ -95,7 +93,7 @@ I'll verify each architectural claim by examining the actual code:
 
 ### Phase 3: Critical Code Review & Audit
 
-This is the most detailed phase. I'll audit across 10 dimensions:
+This is the most detailed phase. You will audit across 10 dimensions:
 
 #### 3.1 Architecture & Structure
 - Is the project structure clean and consistent?
@@ -157,7 +155,7 @@ This is the most detailed phase. I'll audit across 10 dimensions:
 
 ### Phase 4: Improvement Recommendations
 
-Based on findings, I'll propose actionable improvements across:
+Based on findings, you will propose actionable improvements across:
 
 1. **Architecture** — if the monolithic OS store needs splitting
 2. **Performance** — lazy loading, memoization, virtualization
@@ -170,18 +168,11 @@ Based on findings, I'll propose actionable improvements across:
 
 ## Next Step
 
-**Please paste the contents of the following files** so I can proceed with the full analysis:
+**Please paste the contents of the following files** so you can proceed with the full analysis:
 
 1. `CLAUDE.md`
 2. `AGENTS.md`
 3. `GEMINI.md`
 4. `plan.md`
 
-If you'd prefer, you can also share key source files like:
-- `src/components/WindowFrame.tsx`
-- `src/hooks/useOSStore.ts`
-- `src/hooks/useFileSystem.ts`
-- `src/index.css`
-- `src/types/index.ts` (or whatever the main types file is)
-
-With those in hand, I can execute Phases 1-4 with full rigor and give you a detailed, file-level audit with concrete findings and recommendations.
+With those in hand, you can execute Phases 1-4 with full rigor and give you a detailed, file-level audit with concrete findings and recommendations.

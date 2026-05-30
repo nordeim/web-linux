@@ -7,7 +7,8 @@ import type { OSState, OSAction, Window, DesktopIcon, Notification, DockItem, Wi
 import { APP_REGISTRY, getAppById, getDefaultDockApps } from '@/apps/registry';
 
 // ---- Helpers ----
-const generateId = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+let idCounter = 0;
+const generateId = () => `${Date.now().toString(36)}-${++idCounter}-${Math.random().toString(36).slice(2)}`;
 
 const TOP_PANEL_HEIGHT = 28;
 
@@ -56,12 +57,10 @@ const createInitialDockItems = (): DockItem[] => {
   }));
 };
 
+import { validateDesktopIcons, saveDesktopIcons } from '@/utils/storageValidation';
+
 const loadDesktopIcons = (): DesktopIcon[] => {
-  try {
-    const saved = localStorage.getItem('ubuntuos_desktop_icons');
-    if (saved) return JSON.parse(saved) as DesktopIcon[];
-  } catch { /* ignore */ }
-  return defaultDesktopIcons;
+  return validateDesktopIcons(defaultDesktopIcons);
 };
 
 const initialState: OSState = {
@@ -142,9 +141,7 @@ function osReducer(state: OSState, action: OSAction): OSState {
           d.appId === appId ? { ...d, isOpen: false, isFocused: false } : d
         );
       }
-      const newActiveId = remaining.length > 0
-        ? remaining.reduce((a, b) => (a.zIndex > b.zIndex ? a : b)).id
-        : null;
+      const newActiveId = remaining.length > 0 ? remaining.reduce((a, b) => (a.zIndex > b.zIndex ? a : b)).id : null;
       return {
         ...state,
         windows: remaining,
@@ -166,9 +163,8 @@ function osReducer(state: OSState, action: OSAction): OSState {
       const updatedDock = state.dockItems.map((d) =>
         d.appId === appId ? { ...d, isFocused: hasVisible, isOpen: hasVisible || d.isPinned } : d
       );
-      const newActiveId = updated
-        .filter((w) => w.state !== 'minimized')
-        .reduce((a, b) => (a && a.zIndex > b.zIndex ? a : b), null as Window | null);
+      const visibleWindows = updated.filter((w) => w.state !== 'minimized');
+      const newActiveId = visibleWindows.length > 0 ? visibleWindows.reduce((a, b) => (a.zIndex > b.zIndex ? a : b)).id : null;
       return { ...state, windows: updated, activeWindowId: newActiveId?.id ?? null, dockItems: updatedDock };
     }
 
@@ -213,7 +209,7 @@ function osReducer(state: OSState, action: OSAction): OSState {
     }
 
     case 'FOCUS_WINDOW': {
-      const nextZ = state.nextZIndex + 1;
+      const nextZ = Math.min(state.nextZIndex + 1, 2147483647);
       return {
         ...state,
         windows: state.windows.map((w) =>
@@ -410,7 +406,7 @@ function osReducer(state: OSState, action: OSAction): OSState {
           windows: state.windows.map((w) =>
             w.id === target.id ? { ...w, isFocused: true, zIndex: state.nextZIndex } : { ...w, isFocused: false }
           ),
-          nextZIndex: state.nextZIndex + 1,
+        nextZIndex: Math.min(state.nextZIndex + 1, 2147483647),
         } : {}),
       };
     }

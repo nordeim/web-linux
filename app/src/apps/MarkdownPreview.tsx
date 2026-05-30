@@ -4,10 +4,36 @@
 
 import { useState, useCallback, useMemo, useRef } from 'react';
 import { useFileSystem } from '@/hooks/useFileSystem';
+import { sanitizeHtml } from '@/utils/sanitizeHtml';
+
+function sanitizeMarkdownHtml(html: string): string {
+  return sanitizeHtml(html, {
+    ALLOWED_TAGS: [
+      'p', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+      'ul', 'ol', 'li', 'strong', 'em', 'code', 'pre',
+      'blockquote', 'a', 'img', 'del', 'table', 'thead',
+      'tbody', 'tr', 'th', 'td', 'hr',
+    ],
+    ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'style', 'class'],
+  });
+}
+
 import {
   Bold, Italic, Heading, Link, Image, Code, Quote, List,
   ListOrdered, CheckSquare, Minus, Eye, FileCode, Copy, Save, Download, FileUp,
 } from 'lucide-react';
+
+function sanitizeMarkdownHtml(html: string): string {
+  return sanitizeHtml(html, {
+    ALLOWED_TAGS: [
+      'p', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+      'ul', 'ol', 'li', 'strong', 'em', 'code', 'pre',
+      'blockquote', 'a', 'img', 'del', 'table', 'thead',
+      'tbody', 'tr', 'th', 'td', 'hr',
+    ],
+    ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'style', 'class'],
+  });
+}
 
 function markdownToHtml(md: string): string {
   let html = md;
@@ -284,7 +310,7 @@ export default function MarkdownPreview() {
             className="flex-1 overflow-auto p-6 custom-scrollbar"
             style={{ background: 'var(--bg-window)' }}
           >
-            <div dangerouslySetInnerHTML={{ __html: html }} />
+            <div dangerouslySetInnerHTML={{ __html: sanitizeMarkdownHtml(html) }} />
           </div>
         </div>
       </div>

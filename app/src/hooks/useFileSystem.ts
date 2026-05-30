@@ -4,6 +4,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import type { FileSystemNode, FileSystemState, FileAssociation } from '@/types';
+import { validateFileSystem, saveFileSystem } from '@/utils/storageValidation';
 
 const generateId = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
 
@@ -89,16 +90,12 @@ export const getFileAssociation = (filename: string): FileAssociation | undefine
 const FS_STORAGE_KEY = 'ubuntuos_filesystem';
 
 function loadFS(): FileSystemState {
-  try {
-    const saved = localStorage.getItem(FS_STORAGE_KEY);
-    if (saved) return JSON.parse(saved) as FileSystemState;
-  } catch { /* ignore */ }
-  return createDefaultFS();
+  return validateFileSystem(createDefaultFS());
 }
 
 function saveFS(state: FileSystemState) {
   try {
-    localStorage.setItem(FS_STORAGE_KEY, JSON.stringify(state));
+    saveFileSystem(state);
   } catch { /* ignore */ }
 }
 

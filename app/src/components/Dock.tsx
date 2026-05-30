@@ -9,10 +9,10 @@ import { LayoutGrid, Trash2 } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import type { LucideProps } from 'lucide-react';
 
-const DynamicIcon = ({ name, ...props }: { name: string } & LucideProps) => {
+const DynamicIcon = memo(function DynamicIcon({ name, ...props }: { name: string } & LucideProps) {
   const IconComp = (Icons as unknown as Record<string, React.ComponentType<LucideProps>>)[name];
   return IconComp ? <IconComp {...props} /> : null;
-};
+});
 
 const Dock = memo(function Dock() {
   const { state, dispatch } = useOS();

@@ -4,6 +4,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useFileSystem } from '@/hooks/useFileSystem';
+import { safeEval } from '@/utils/safeEval';
 
 interface TerminalLine {
   type: 'input' | 'output' | 'error' | 'system';
@@ -152,11 +153,7 @@ const COMMANDS: Record<string, (args: string[], ctx: TerminalContext) => string 
     if (!args.length) return 'calc: missing expression';
     const expr = args.join('');
     try {
-      // Safe evaluation - only allow numbers and basic operators
-      const sanitized = expr.replace(/[^0-9+\-*/().\s]/g, '');
-      if (sanitized !== expr) return 'calc: invalid characters in expression';
-      // eslint-disable-next-line no-new-func
-      const result = new Function('return ' + sanitized)();
+      const result = safeEval(expr);
       return String(result);
     } catch {
       return 'calc: invalid expression';

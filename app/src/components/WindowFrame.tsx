@@ -13,10 +13,10 @@ const RESIZE_HANDLE = 8;
 const MIN_W = 320;
 const MIN_H = 200;
 
-const DynamicIcon = ({ name, ...props }: { name: string } & LucideProps) => {
-  const IconComp = (Icons as unknown as unknown as Record<string, React.ComponentType<LucideProps>>)[name];
+const DynamicIcon = memo(function DynamicIcon({ name, ...props }: { name: string } & LucideProps) {
+  const IconComp = (Icons as unknown as Record<string, React.ComponentType<LucideProps>>)[name];
   return IconComp ? <IconComp {...props} /> : <Icons.HelpCircle {...props} />;
-};
+});
 
 interface WindowFrameProps {
   window: Window;

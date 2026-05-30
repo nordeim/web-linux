@@ -9,6 +9,16 @@ This document provides high-signal technical context for AI coding agents. It fo
 - **Window States**: `normal`, `minimized`, `maximized`. Restoring from maximized uses `prevPosition` and `prevSize` stored in the window object.
 - **Cascading**: New windows are offset by 30px from the last window of the same app type using the `createWindow` helper.
 
+### Safe Evaluator (`safeEval.ts`)
+> **MANDATORY**: All math evaluation (spreadsheet formulas, terminal `calc`) must use `safeEval()` from `@/utils/safeEval`. This replaces `eval()` and `new Function()` with a hardened shunting-yard parser.
+> - **Guideline**: Any new app doing math must import and use `safeEval(expr: string): number`
+> - **Bug fix of**: `Spreadsheet.tsx` and `Terminal.tsx` previously used `eval()` and `new Function()` — both removed.
+
+### XSS Sanitization (`sanitizeHtml.ts`)
+> **MANDATORY**: Any `dangerouslySetInnerHTML` must wrap content in `sanitizeHtml()` from `@/utils/sanitizeHtml`.
+> - **Markdown**: Use `sanitizeMarkdownHtml()` which has a whitelist for common markdown tags.
+> - **Bug fix of**: `Notes.tsx`, `MarkdownPreview.tsx`, `RegexTester.tsx`, and `CodeEditor.tsx` all previously rendered raw HTML without sanitization.
+
 ### Virtual File System (Logic: `useFileSystem.ts`)
 - **ID-Based**: Nodes are referenced by unique IDs, not paths. Use `findNodeByPath(path)` only when resolving a user-provided string.
 - **Persistence**: The VFS is synced to `localStorage` under `ubuntuos_filesystem`.

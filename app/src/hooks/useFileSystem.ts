@@ -108,8 +108,13 @@ export function useFileSystem() {
   }, [fs]);
 
   const getChildren = useCallback(
-    (parentId: string): FileSystemNode[] =>
-      Object.values(fs.nodes).filter((n) => n.parentId === parentId),
+    (parentId: string): FileSystemNode[] => {
+      const children: FileSystemNode[] = [];
+      for (const n of Object.values(fs.nodes)) {
+        if (n.parentId === parentId) children.push(n);
+      }
+      return children;
+    },
     [fs.nodes]
   );
 
@@ -122,6 +127,7 @@ export function useFileSystem() {
     (id: string): string => {
       const parts: string[] = [];
       let current: FileSystemNode | undefined = fs.nodes[id];
+      if (!current) return '/';
       while (current) {
         parts.unshift(current.name);
         current = current.parentId ? fs.nodes[current.parentId] : undefined;
@@ -294,8 +300,9 @@ export function useFileSystem() {
 
   const findNodeByPath = useCallback(
     (path: string): FileSystemNode | undefined => {
-      if (path === '/') return Object.values(fs.nodes).find((n) => n.parentId === null);
-      const parts = path.split('/').filter(Boolean);
+      const normalized = path.replace(/\/+/g, '/').replace(/\/$/, '') || '/';
+      if (normalized === '/') return Object.values(fs.nodes).find((n) => n.parentId === null);
+      const parts = normalized.split('/').filter(Boolean);
       let current = Object.values(fs.nodes).find((n) => n.parentId === null);
       for (const part of parts) {
         const found = Object.values(fs.nodes).find((n) => n.parentId === current?.id && n.name === part);

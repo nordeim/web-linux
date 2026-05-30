@@ -50,7 +50,7 @@ function AppShell() {
       }
 
       // Super+D minimize all
-      if ((e.metaKey || e.key === 'Meta') && e.key === 'd') {
+      if (e.key === 'd' && (e.metaKey || e.altKey)) {
         e.preventDefault();
         dispatch({ type: 'MINIMIZE_ALL' });
         return;

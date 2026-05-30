@@ -1,3 +1,16 @@
+/** @fileoverview
+ * Safe Math Evaluator — Replaces eval() and new Function() for spreadsheet/terminal math.
+ * Uses a shunting-yard algorithm with RPN evaluation. Only allows decimal numbers
+ * and the operators +, -, *, /, ^. Parentheses are supported.
+ *
+ * Security: Only characters in ALLOWED_CHARS can enter the tokenizer.
+ * Any deviation throws "Invalid expression". No side effects, no globals.
+ *
+ * @example
+ *   safeEval("(1 + 2) * 3") // => 9
+ *   safeEval("2 ^ 3 + 1")  // => 9
+ */
+
 const OPERATORS: Record<string, { precedence: number; associativity: 'left' | 'right' }> = {
   '+': { precedence: 1, associativity: 'left' },
   '-': { precedence: 1, associativity: 'left' },

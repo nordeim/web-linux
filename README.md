@@ -1,3 +1,5 @@
+<img width="931" height="689" alt="image" src="https://github.com/user-attachments/assets/f6d4911a-438c-4db2-9372-6e844f238e20" />
+
 # UbuntuOS Web
 
 [![React 19](https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=black)](https://react.dev/)

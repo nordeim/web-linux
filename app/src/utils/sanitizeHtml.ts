@@ -3,6 +3,7 @@
 // ============================================================
 
 import DOMPurify from 'dompurify';
+import type { Config } from 'dompurify';
 
 /**
  * Sanitize HTML string to prevent XSS attacks.
@@ -16,15 +17,16 @@ import DOMPurify from 'dompurify';
  *   const clean = sanitizeHtml(userInput);
  *   return <div dangerouslySetInnerHTML={{ __html: clean }} />;
  */
-export function sanitizeHtml(dirtyHtml: string, options?: DOMPurify.Config): string {
+export function sanitizeHtml(dirtyHtml: string, options?: Config): string {
   if (typeof window === 'undefined') {
     // Server-side rendering fallback - strip all HTML tags
     return dirtyHtml.replace(/<[^>]*>?/gm, '');
   }
-  return DOMPurify.sanitize(dirtyHtml, {
+  const clean = DOMPurify.sanitize(dirtyHtml, {
     USE_PROFILES: { html: true },
     ...options,
   });
+  return String(clean);
 }
 
 /**

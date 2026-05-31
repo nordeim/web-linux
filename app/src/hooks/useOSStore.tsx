@@ -165,7 +165,7 @@ function osReducer(state: OSState, action: OSAction): OSState {
       );
       const visibleWindows = updated.filter((w) => w.state !== 'minimized');
       const newActiveId = visibleWindows.length > 0 ? visibleWindows.reduce((a, b) => (a.zIndex > b.zIndex ? a : b)).id : null;
-      return { ...state, windows: updated, activeWindowId: newActiveId?.id ?? null, dockItems: updatedDock };
+      return { ...state, windows: updated, activeWindowId: newActiveId, dockItems: updatedDock };
     }
 
     case 'MAXIMIZE_WINDOW': {

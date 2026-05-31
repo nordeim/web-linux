@@ -106,3 +106,34 @@ Security:  eval/new Function replaced, XSS sanitized, localStorage validated
 4. **Consider IndexedDB for VFS** — localStorage has a ~5MB limit for file storage
 5. **Add Error Boundaries** — Wrap `WindowFrame` and `AppRouter` with React error boundaries
 
+---
+
+## Updated Documentation
+
+All project documentation has been aligned with the latest code changes:
+
+| Document | Changes |
+|----------|---------|
+| `README.md` | Added security improvements section, updated tech stack with DOMPurify and Zod, added known issues section |
+| `AGENTS.md` | Added `Safe Evaluator`, `XSS Sanitization`, and `localStorage Schema Validation` sections to core architecture; expanded troubleshooting and anti-patterns |
+| `CLAUDE.md` | Added security rules, persistence guidelines, and lessons learned from the audit |
+
+---
+
+## Final Validation Results
+
+| Check | Command | Result |
+|-------|---------|--------|
+| TypeScript Typecheck | `npx tsc --noEmit` | **PASS** (0 errors) |
+| Production Build | `npx vite build` | **PASS** (with chunk size warning — see AGENTS.md #4) |
+| safeEval TDD Tests | `npx vitest run src/utils/__tests__/safeEval.test.ts` | **PASS** (24/24) |
+
+---
+
+## Lessons Learned
+
+- **`eval()` is never safe**, even with regex sanitization. Build a proper parser or use a restricted subset.
+- **TypeScript types are not runtime guarantees**. `JSON.parse()` + `as T` is a security and reliability risk. Always validate persisted data.
+- **Monolithic reducers are hard to maintain**. The 499-line `osReducer` works but is difficult to test and reason about. Consider splitting by domain.
+- **Window state transitions are surprisingly complex**. The interaction of z-index, focus, minimize, maximize, and close requires careful handling of edge cases.
+

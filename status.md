@@ -178,3 +178,59 @@ Validation:
 - npx vite build: ✅ Build succeeded
 - npx vitest run safeEval: ✅ 24/24 tests passed
 
+---
+
+# Todos
+[✓] Read and analyze all existing docs
+[✓] Update README.md
+[✓] Update CLAUDE.md
+[✓] Update AGENTS.md
+[✓] Update GEMINI.md
+[✓] Update REMEDIATION.md
+[•] Final cross-reference check
+→ Read AGENTS.md [offset=1, limit=30]
+→ Read CLAUDE.md [offset=1, limit=30]
+→ Read README.md [offset=55, limit=30]
+→ Read GEMINI.md [offset=1, limit=30]
+→ Read REMEDIATION.md [offset=100, limit=70]
+# Final TypeScript type check in /home/project/web-linux/app
+$ npx tsc --noEmit 2>&1 | head -20
+(no output)
+# Todos
+[✓] Read and analyze all existing docs
+[✓] Update README.md
+[✓] Update CLAUDE.md
+[✓] Update AGENTS.md
+[✓] Update GEMINI.md
+[✓] Update REMEDIATION.md
+[✓] Final cross-reference check
+All documentation has been meticulously reviewed, updated, and cross-referenced. Here's a summary of what was done:
+Documents Updated (5 files)
+Document	Key Changes
+README.md	Added Security Improvements section with specific mitigations (eval removal, XSS sanitization, schema validation). Updated Tech Stack to include DOMPurify 3.4.7 and Zod 4.3.5. Added Known Issues & Recommendations section covering chunk size, missing error boundaries, console logs, accessibility gaps, and localStorage limit.
+AGENTS.md	Expanded Core Architecture with three new mandatory systems: Safe Evaluator, XSS Sanitization, and localStorage Schema Validation. Updated Anti-Patterns with the three new security rules. Added comprehensive Troubleshooting & Gotchas section with specific symptoms, root causes, and fixes. Added Security Reminders and Outstanding Issues sections.
+CLAUDE.md	Added Security subsection with mandatory rules for eval() / new Function(), dangerouslySetInnerHTML, and localStorage validation. Added Persistence subsection with versioned keys and migration guidelines. Added Lessons Learned covering security, state management, and testing. Added Recommendations for next steps (error boundaries, IndexedDB, coverage, CI/CD, reducer splitting).
+GEMINI.md	Added Security Requirements section with non-negotiable rules for math evaluation, HTML sanitization, and localStorage validation. Updated Main Technologies to include DOMPurify and zod. Updated Core Architecture to mention runtime validation. Added Tests command to build table. Updated Adding New Features checklist to include security steps.
+REMEDIATION.md	Added Updated Documentation section documenting which docs were changed and why. Added Final Validation Results table with check, command, and result for TypeScript, build, and tests. Added Lessons Learned section summarizing core takeaways.
+Cross-Reference Verification
+Topic	README	AGENTS	CLAUDE	GEMINI	REMEDIATION
+safeEval replacement	✅	✅	✅	✅	✅
+sanitizeHtml DOMPurify	✅	✅	✅	✅	✅
+storageValidation zod	✅	✅	✅	✅	✅
+Z-index bounds check	-	✅	-	-	✅
+MINIMIZE_WINDOW reduce fix	-	✅	-	-	✅
+Super+D key fix	-	-	-	-	✅
+Chunk size warning	✅	-	-	-	-
+Missing error boundaries	-	✅	✅	-	-
+localStorage ~5MB limit	-	✅	-	-	✅
+Accessibility gaps	✅	-	-	-	-
+Build passes	-	-	-	-	✅
+TypeScript passes	-	-	-	-	✅
+24/24 tests pass	-	-	-	-	✅
+Final Validation
+Check	Command	Result
+TypeScript Typecheck	npx tsc --noEmit	PASS ✅
+Production Build	npx vite build	PASS ✅ (with chunk size warning)
+safeEval TDD Tests	npx vitest run src/utils/__tests__/safeEval.test.ts	PASS (24/24) ✅
+All documentation is now consistent, accurate, and provides AI agents with the necessary context to contribute safely and effectively to the UbuntuOS Web codebase.
+

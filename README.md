@@ -1,6 +1,6 @@
-<img width="931" height="689" alt="image" src="https://github.com/user-attachments/assets/f6d4911a-438c-4db2-9372-6e844f238e20" />
-
 # UbuntuOS Web
+
+<img width="931" height="689" alt="UbuntuOS Web Desktop" src="https://github.com/user-attachments/assets/f6d4911a-438c-4db2-9372-6e844f238e20" />
 
 [![React 19](https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![TypeScript 5.9](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -12,7 +12,7 @@ A comprehensive, high-fidelity web-based replica of the Ubuntu Linux desktop env
 
 ## 🌟 Overview
 
-UbuntuOS Web solves the challenge of creating a complex, component-based desktop experience in a web environment. It demonstrates the power of modern React by managing a multi-windowed UI with a custom z-index stacking system and a virtualized file system (VFS) that persists data locally. 
+UbuntuOS Web solves the challenge of creating a complex, component-based desktop experience in a web environment. It demonstrates the power of modern React by managing a multi-windowed UI with a custom z-index stacking system and a virtualized file system (VFS) that persists data locally.
 
 Built for developers as a showcase of architectural patterns and for users as a portable, web-accessible toolset.
 
@@ -28,6 +28,18 @@ Built for developers as a showcase of architectural patterns and for users as a 
 | **🛠️ DevTools** | 8 Apps | Code Editor, Git Client, JSON Formatter, Regex Tester, API Tester |
 | **🎨 Creative** | 4 Apps | Drawing, Image Gallery, Color Picker, ASCII Art |
 
+## 🛡️ Recent Security & Reliability Improvements
+
+This codebase has undergone a comprehensive security audit and remediation. Key fixes include:
+
+- **Eliminated Arbitrary Code Execution**: Replaced `eval()` (Spreadsheet) and `new Function()` (Terminal) with a hardened shunting-yard math parser.
+- **Fixed XSS Vulnerabilities**: All `dangerouslySetInnerHTML` instances now wrap content in `DOMPurify`-based sanitization.
+- **Added localStorage Schema Validation**: Prevents data corruption by validating all persisted state with `zod` at runtime.
+- **Fixed Z-Index Overflow**: Added bounds checking to prevent focus stacking issues in long sessions.
+- **Resolved Fragile Reduce Logic**: Fixed window state restoration logic to prevent crashes when minimizing all windows.
+
+See [REMEDIATION.md](REMEDIATION.md) for the full audit report.
+
 ## 🏗️ Architecture
 
 ### Tech Stack
@@ -39,27 +51,13 @@ Built for developers as a showcase of architectural patterns and for users as a 
 | **Components** | Radix UI / Shadcn | Latest | Accessible primitive components |
 | **Icons** | Lucide React | 0.562.0 | Vector iconography for apps and UI |
 | **Storage** | LocalStorage | N/A | Persistence for the Virtual File System |
+| **Security** | DOMPurify | 3.4.7 | XSS sanitization for user-generated HTML |
+| **Validation** | Zod | 4.3.5 | Runtime schema validation for persistence |
 
 ### Core Systems
 1.  **Window Manager:** A custom engine in `src/components/WindowFrame.tsx` handling dragging, resizing, focus management, and state transitions (min/max/restore).
 2.  **OS Store:** Centralized state management using React Context + `useReducer` to sync the Dock, Desktop, and Windows.
-3.  **Virtual File System (VFS):** A robust file management layer with associations, trash handling, and directory traversal.
-
-## 📂 File Hierarchy
-
-```text
-📂 web-linux/
-├── 📂 app/
-│   ├── 📂 public/          # Static assets & wallpapers
-│   └── 📂 src/
-│       ├── 📂 apps/        # Individual Application implementations
-│       ├── 📂 components/  # OS Shell (Dock, Desktop, TopPanel)
-│       ├── 📂 hooks/       # Core OS logic (useOSStore, useFileSystem)
-│       ├── 📂 lib/         # Utility functions
-│       ├── 📂 types/       # Global TypeScript definitions
-│       └── 📄 index.css    # Global Ubuntu design tokens
-└── 📄 CLAUDE.md            # Agent-specific coding standards
-```
+3.  **Virtual File System (VFS):** A robust file management layer with associations, trash handling, and directory traversal. Data is persisted to `localStorage` and validated with `zod` schemas.
 
 ## ⚡ Quick Start
 
@@ -94,6 +92,24 @@ After running `npm run dev`, open your browser at the provided port (usually `ht
 | `npm run lint` | Run ESLint static analysis |
 | `npm run preview` | Local preview of the production build |
 | `tsc -b` | Project-wide type checking |
+
+## 🗂️ Documentation
+
+| Document | Purpose |
+| :--- | :--- |
+| `AGENTS.md` | High-signal architectural briefing for AI agents |
+| `CLAUDE.md` | Coding standards and implementation guidelines |
+| `GEMINI.md` | Project context for Gemini AI interactions |
+| `REMEDIATION.md` | Full security audit and remediation report |
+| `plan.md` | Original project roadmap and feature checklist |
+
+## ⚠️ Known Issues & Recommendations
+
+1. **Chunk Size Warning**: The production build exceeds the 500 kB chunk size warning. Consider dynamic `import()` for game apps to improve initial load time.
+2. **Missing Error Boundaries**: The `AppRouter` and `WindowManager` are not wrapped in React Error Boundaries. A crash in one app could bring down the entire shell.
+3. **Console Logs**: Several apps still contain debug `console.log` statements that should be removed in production.
+4. **Accessibility**: Some games and media apps lack full keyboard navigation and ARIA labels. Run a Lighthouse accessibility audit for details.
+5. **VFS localStorage Limit**: The virtual file system uses `localStorage`, which has a ~5 MB limit. For large file storage, consider migrating to IndexedDB.
 
 ## 📜 License
 

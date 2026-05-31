@@ -294,13 +294,11 @@ function osReducer(state: OSState, action: OSAction): OSState {
     case 'ADD_DESKTOP_ICON': {
       const icon: DesktopIcon = { ...action.icon, id: generateId() };
       const next = [...state.desktopIcons, icon];
-      localStorage.setItem('ubuntuos_desktop_icons', JSON.stringify(next));
       return { ...state, desktopIcons: next };
     }
 
     case 'REMOVE_DESKTOP_ICON': {
       const next = state.desktopIcons.filter((i) => i.id !== action.id);
-      localStorage.setItem('ubuntuos_desktop_icons', JSON.stringify(next));
       return { ...state, desktopIcons: next };
     }
 
@@ -308,7 +306,6 @@ function osReducer(state: OSState, action: OSAction): OSState {
       const next = state.desktopIcons.map((i) =>
         i.id === action.id ? { ...i, position: action.position } : i
       );
-      localStorage.setItem('ubuntuos_desktop_icons', JSON.stringify(next));
       return { ...state, desktopIcons: next };
     }
 
@@ -455,6 +452,13 @@ const OSContext = createContext<OSContextType | null>(null);
 
 export const OSProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(osReducer, initialState);
+
+  // Sync desktop icons to localStorage whenever the icon state changes.
+  // Moved out of the reducer to preserve reducer purity.
+  useEffect(() => {
+    localStorage.setItem('ubuntuos_desktop_icons', JSON.stringify(state.desktopIcons));
+  }, [state.desktopIcons]);
+
   return (
     <OSContext.Provider value={{ state, dispatch }}>
       {children}

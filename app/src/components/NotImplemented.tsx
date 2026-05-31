@@ -4,17 +4,11 @@
 
 import { useEffect, useState } from 'react';
 import { getAppById } from '@/apps/registry';
-import * as Icons from 'lucide-react';
-import type { LucideProps } from 'lucide-react';
+import DynamicIcon from './DynamicIcon';
 
 interface Props {
   appId: string;
 }
-
-const DynamicIcon = ({ name, ...props }: { name: string } & LucideProps) => {
-  const IconComp = (Icons as unknown as unknown as Record<string, React.ComponentType<LucideProps>>)[name];
-  return IconComp ? <IconComp {...props} /> : <Icons.HelpCircle {...props} />;
-};
 
 export default function NotImplemented({ appId }: Props) {
   const app = getAppById(appId);

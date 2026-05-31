@@ -6,13 +6,7 @@ import { useState, useCallback, useRef, useEffect, memo } from 'react';
 import { useOS } from '@/hooks/useOSStore';
 import { getAppById } from '@/apps/registry';
 import { Search, X } from 'lucide-react';
-import * as Icons from 'lucide-react';
-import type { LucideProps } from 'lucide-react';
-
-const DynamicIcon = ({ name, ...props }: { name: string } & LucideProps) => {
-  const IconComp = (Icons as unknown as Record<string, React.ComponentType<LucideProps>>)[name];
-  return IconComp ? <IconComp {...props} /> : null;
-};
+import DynamicIcon from './DynamicIcon';
 
 const CATEGORIES = ['Favorites', 'All', 'System', 'Productivity', 'Internet', 'Media', 'Games', 'DevTools', 'Creative'];
 

@@ -6,13 +6,7 @@ import { useState, memo, useCallback } from 'react';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay, addMonths, subMonths } from 'date-fns';
 import { Bell, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useOS } from '@/hooks/useOSStore';
-import * as Icons from 'lucide-react';
-import type { LucideProps } from 'lucide-react';
-
-const DynamicIcon = ({ name, ...props }: { name: string } & LucideProps) => {
-  const IconComp = (Icons as unknown as Record<string, React.ComponentType<LucideProps>>)[name];
-  return IconComp ? <IconComp {...props} /> : null;
-};
+import DynamicIcon from './DynamicIcon';
 
 const NotificationCenter = memo(function NotificationCenter() {
   const { state, dispatch } = useOS();

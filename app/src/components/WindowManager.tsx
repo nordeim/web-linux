@@ -6,6 +6,7 @@ import { memo } from 'react';
 import { useOS } from '@/hooks/useOSStore';
 import WindowFrame from './WindowFrame';
 import AppRouter from '@/apps/AppRouter';
+import GlobalErrorBoundary from './GlobalErrorBoundary';
 
 const WindowManager = memo(function WindowManager() {
   const { state } = useOS();
@@ -15,7 +16,9 @@ const WindowManager = memo(function WindowManager() {
     <>
       {visibleWindows.map((win) => (
         <WindowFrame key={win.id} window={win}>
-          <AppRouter appId={win.appId} windowId={win.id} />
+          <GlobalErrorBoundary>
+            <AppRouter appId={win.appId} windowId={win.id} />
+          </GlobalErrorBoundary>
         </WindowFrame>
       ))}
     </>

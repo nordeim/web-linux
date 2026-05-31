@@ -4,14 +4,8 @@
 
 import { useEffect, useState, memo } from 'react';
 import { X } from 'lucide-react';
-import * as Icons from 'lucide-react';
-import type { LucideProps } from 'lucide-react';
+import DynamicIcon from './DynamicIcon';
 import { useOS } from '@/hooks/useOSStore';
-
-const DynamicIcon = ({ name, ...props }: { name: string } & LucideProps) => {
-  const IconComp = (Icons as unknown as Record<string, React.ComponentType<LucideProps>>)[name];
-  return IconComp ? <IconComp {...props} /> : null;
-};
 
 interface ToastProps {
   notification: {

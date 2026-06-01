@@ -2,7 +2,7 @@
 // OS State Management — React Context + useReducer
 // ============================================================
 
-import React, { createContext, useContext, useReducer, useCallback } from 'react';
+import React, { createContext, useContext, useReducer, useCallback, useEffect } from 'react';
 import type { OSState, OSAction, Window, DesktopIcon, Notification, DockItem, WindowState } from '@/types';
 import { APP_REGISTRY, getAppById, getDefaultDockApps } from '@/apps/registry';
 
@@ -92,7 +92,7 @@ const initialState: OSState = {
 };
 
 // ---- Reducer ----
-function osReducer(state: OSState, action: OSAction): OSState {
+export function osReducer(state: OSState, action: OSAction): OSState {
   switch (action.type) {
     case 'SET_BOOT_PHASE': {
       return { ...state, bootPhase: action.phase };
@@ -126,7 +126,7 @@ function osReducer(state: OSState, action: OSAction): OSState {
         ...state,
         windows: [...newWindows, win],
         activeWindowId: win.id,
-        nextZIndex: state.nextZIndex + 1,
+        nextZIndex: Math.min(state.nextZIndex + 1, 2147483647),
         dockItems: updatedDock,
       };
     }

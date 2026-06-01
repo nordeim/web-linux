@@ -110,23 +110,47 @@ const ContextMenu = memo(function ContextMenu() {
   );
 });
 
-function handleMenuAction(action: string, _state: unknown, dispatch: React.Dispatch<import('@/types').OSAction>) {
+export function handleMenuAction(action: string, _state: import('@/types').OSState, dispatch: React.Dispatch<import('@/types').OSAction>) {
   const [cmd, ...args] = action.split(':');
   switch (cmd) {
     case 'OPEN_APP': {
       if (args[0]) dispatch({ type: 'OPEN_WINDOW', appId: args[0] });
       break;
     }
-    case 'NEW_FOLDER':
-    case 'NEW_DOCUMENT':
-    case 'OPEN_TERMINAL':
+    case 'NEW_FOLDER': {
+      dispatch({
+        type: 'ADD_DESKTOP_ICON',
+        icon: { name: 'New Folder', icon: 'Folder', appId: 'filemanager', position: { x: 80, y: 80 }, isSelected: true },
+      });
+      break;
+    }
+    case 'NEW_DOCUMENT': {
+      dispatch({
+        type: 'ADD_DESKTOP_ICON',
+        icon: { name: 'New Document', icon: 'FileText', appId: 'texteditor', position: { x: 80, y: 80 }, isSelected: true },
+      });
+      break;
+    }
+    case 'OPEN_TERMINAL': {
+      dispatch({ type: 'OPEN_WINDOW', appId: 'terminal' });
+      break;
+    }
     case 'CHANGE_BG':
-    case 'ARRANGE_ICONS':
-    case 'SHOW_SETTINGS':
+    case 'SHOW_SETTINGS': {
+      dispatch({ type: 'OPEN_WINDOW', appId: 'settings' });
+      break;
+    }
+    case 'ARRANGE_ICONS': {
+      dispatch({ type: 'CASCADE_WINDOWS' });
+      break;
+    }
     case 'PIN_DOCK':
-    case 'UNPIN_DOCK':
+    case 'UNPIN_DOCK': {
+      // Handled via dock context menu with contextData
+      break;
+    }
     case 'QUIT_APP': {
-      // Placeholder: will be handled by the component that opens the menu
+      // Handled via window title bar context menu with contextData
       break;
     }
     case 'MINIMIZE_ALL': {

@@ -87,8 +87,6 @@ export const getFileAssociation = (filename: string): FileAssociation | undefine
   return FILE_ASSOCIATIONS.find((a) => a.extension === ext);
 };
 
-const FS_STORAGE_KEY = 'ubuntuos_filesystem';
-
 function loadFS(): FileSystemState {
   return validateFileSystem(createDefaultFS());
 }

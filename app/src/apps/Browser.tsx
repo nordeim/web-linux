@@ -19,10 +19,17 @@ interface Tab {
   loading: boolean;
 }
 
-interface Bookmark {
-  url: string;
-  title: string;
-}
+import { z } from 'zod';
+import { safeJsonParse } from '@/utils/safeJsonParse';
+
+const BookmarkSchema = z.object({
+  url: z.string(),
+  title: z.string(),
+});
+
+const BookmarksSchema = z.array(BookmarkSchema);
+
+type Bookmark = z.infer<typeof BookmarkSchema>;
 
 // ---- Quick Links ----
 const QUICK_LINKS: { icon: LucideIcon; name: string; url: string; color: string }[] = [
@@ -248,7 +255,7 @@ export default function Browser() {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>(() => {
     try {
       const saved = localStorage.getItem('ubuntuos_browser_bookmarks');
-      return saved ? JSON.parse(saved) : [];
+      return saved ? safeJsonParse(saved, BookmarksSchema, []) : [];
     } catch { return []; }
   });
   const [addressBarValue, setAddressBarValue] = useState('');

@@ -5,6 +5,7 @@
 import { useEffect, useState } from 'react';
 import { getAppById } from '@/apps/registry';
 import DynamicIcon from './DynamicIcon';
+import * as Icons from 'lucide-react';
 
 interface Props {
   appId: string;

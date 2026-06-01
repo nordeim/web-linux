@@ -1,18 +1,23 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
   Lock, Unlock, Plus, X, Search, Eye, EyeOff, Copy, Trash2, Edit2,
-  RefreshCw, ArrowLeft, Shield, KeyRound
+  RefreshCw, Shield, KeyRound
 } from 'lucide-react';
+import { z } from 'zod';
+import { safeJsonParse } from '@/utils/safeJsonParse';
 
-interface PasswordEntry {
-  id: string;
-  title: string;
-  username: string;
-  password: string;
-  url: string;
-  notes: string;
-  createdAt: number;
-}
+const PasswordEntrySchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  username: z.string(),
+  password: z.string(),
+  url: z.string(),
+  notes: z.string(),
+  createdAt: z.number(),
+});
+
+const PasswordEntriesSchema = z.array(PasswordEntrySchema);
+export type PasswordEntry = z.infer<typeof PasswordEntrySchema>;
 
 const STORAGE_KEY = 'ubuntuos_passwords';
 const MASTER_PIN = '1234';
@@ -21,11 +26,10 @@ const b64e = (s: string) => { try { return btoa(s); } catch { return s; } };
 const b64d = (s: string) => { try { return atob(s); } catch { return s; } };
 
 const loadEntries = (): PasswordEntry[] => {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) return JSON.parse(saved).map((e: PasswordEntry) => ({ ...e, password: b64d(e.password) }));
-  } catch { /* ignore */ }
-  return [];
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (!saved) return [];
+  const data = safeJsonParse(saved, PasswordEntriesSchema, []);
+  return data.map(e => ({ ...e, password: b64d(e.password) }));
 };
 
 const saveEntries = (entries: PasswordEntry[]) => {

@@ -70,6 +70,13 @@ Follow this six-phase workflow for all implementation tasks:
 - Files are identified by unique IDs, not just paths.
 - File associations are defined in `app/src/hooks/useFileSystem.ts`.
 
+## Performance
+
+### Code Splitting
+- **React.lazy() + Suspense** reduced initial bundle from ~1 MB to ~360 KB by splitting 54 apps into individual chunks.
+- **Shared DynamicIcon** eliminates ~8× code duplication across Dock, WindowFrame, Desktop, AppLauncher, and other components.
+- **Lucide monolithic import** (`import * as Icons from 'lucide-react'`) still imports the entire library (~587 KB). Use named imports when possible.
+
 ## Lessons Learned
 
 ### Security
@@ -88,8 +95,8 @@ Follow this six-phase workflow for all implementation tasks:
 
 ## Recommendations
 
-1. **Add React Error Boundaries** around `AppRouter` and `WindowManager` to prevent one app crash from taking down the shell.
-2. **Migrate VFS from localStorage to IndexedDB** for larger file storage (>5 MB).
-3. **Add `vitest` coverage collection** to track test coverage across all modules.
-4. **Implement CI/CD pipeline** with automated `build`, `lint`, and `test` gates.
-5. **Split `osReducer` into domain-specific reducers** (window management, notifications, desktop icons, etc.).
+1. **Migrate VFS from localStorage to IndexedDB** for larger file storage (>5 MB).
+2. **Add `vitest` coverage collection** to track test coverage across all modules.
+3. **Implement CI/CD pipeline** with automated `build`, `lint`, and `test` gates.
+4. **Split `osReducer` into domain-specific reducers** (window management, notifications, desktop icons, etc.).
+5. **Remove remaining `console.log` statements** from production builds.

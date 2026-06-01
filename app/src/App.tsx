@@ -4,6 +4,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { OSProvider, useOS } from '@/hooks/useOSStore';
+import DynamicIcon from '@/components/DynamicIcon';
 import BootSequence from '@/components/BootSequence';
 import LoginScreen from '@/components/LoginScreen';
 import Desktop from '@/components/Desktop';
@@ -177,21 +178,7 @@ function AppShell() {
                       >
                         <div className="w-12 h-12 rounded-xl flex items-center justify-center"
                           style={{ background: 'var(--bg-hover)' }}>
-                          {app?.icon && (
-                            <img
-                              src={`data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%237C4DFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>`}
-                              alt=""
-                              className="w-6 h-6 opacity-0"
-                            />
-                          )}
-                          <span className="text-xl absolute">{app?.icon === 'Folder' && '📁'}</span>
-                          <span className="text-xl absolute">{app?.icon === 'Terminal' && '⌨'}</span>
-                          <span className="text-xl absolute">{app?.icon === 'Globe' && '🌐'}</span>
-                          <span className="text-xl absolute">{app?.icon === 'Settings' && '⚙'}</span>
-                          <span className="text-xl absolute">{app?.icon === 'FileText' && '📄'}</span>
-                          <span className="text-xl absolute">
-                            {!['Folder', 'Terminal', 'Globe', 'Settings', 'FileText'].includes(app?.icon || '') && '📱'}
-                          </span>
+                          <DynamicIcon name={app?.icon || 'Smartphone'} size={24} className="text-[var(--accent-primary)]" />
                         </div>
                         <span className="text-[10px] text-[var(--text-primary)] text-center truncate max-w-[64px]">
                           {w.title}

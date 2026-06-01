@@ -2,19 +2,24 @@ import { useState, useEffect, useMemo } from 'react';
 import {
   Users, Plus, X, Search, Star, Phone, Mail, MapPin, Edit2, Trash2, ChevronLeft, User
 } from 'lucide-react';
+import { z } from 'zod';
+import { safeJsonParse } from '@/utils/safeJsonParse';
 
-interface Contact {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  address: string;
-  notes: string;
-  group: 'personal' | 'work';
-  favorite: boolean;
-}
+const ContactSchema = z.object({
+  id: z.string(),
+  firstName: z.string(),
+  lastName: z.string(),
+  email: z.string(),
+  phone: z.string(),
+  address: z.string(),
+  notes: z.string(),
+  group: z.enum(['personal', 'work']),
+  favorite: z.boolean(),
+});
 
+const ContactsSchema = z.array(ContactSchema);
+
+type Contact = z.infer<typeof ContactSchema>;
 type GroupFilter = 'all' | 'favorites' | 'work' | 'personal';
 
 const STORAGE_KEY = 'ubuntuos_contacts';
@@ -22,7 +27,7 @@ const STORAGE_KEY = 'ubuntuos_contacts';
 const loadContacts = (): Contact[] => {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) return JSON.parse(saved);
+    if (saved) return safeJsonParse(saved, ContactsSchema, []);
   } catch { /* ignore */ }
   // Default demo contacts
   return [

@@ -105,11 +105,11 @@ After running `npm run dev`, open your browser at the provided port (usually `ht
 
 ## ⚠️ Known Issues & Recommendations
 
-1. **Chunk Size Warning**: The production build exceeds the 500 kB chunk size warning. Consider dynamic `import()` for game apps to improve initial load time.
-2. **Missing Error Boundaries**: The `AppRouter` and `WindowManager` are not wrapped in React Error Boundaries. A crash in one app could bring down the entire shell.
-3. **Console Logs**: Several apps still contain debug `console.log` statements that should be removed in production.
-4. **Accessibility**: Some games and media apps lack full keyboard navigation and ARIA labels. Run a Lighthouse accessibility audit for details.
-5. **VFS localStorage Limit**: The virtual file system uses `localStorage`, which has a ~5 MB limit. For large file storage, consider migrating to IndexedDB.
+1. **VFS localStorage Limit**: The virtual file system uses `localStorage`, which has a ~5 MB limit. For large file storage, consider migrating to IndexedDB.
+2. **Console Logs**: Several apps still contain debug `console.log` statements that should be removed in production.
+3. **Accessibility**: Some games and media apps lack full keyboard navigation and ARIA labels. Run a Lighthouse accessibility audit for details.
+4. **Split osReducer**: The 503-line `osReducer` handles window, dock, notification, context menu, icon, theme, and alt-tab logic. Consider splitting into domain-specific reducers.
+5. **CI/CD Pipeline**: Automated build + lint + test gates are not yet implemented.
 
 ## 📜 License
 

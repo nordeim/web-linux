@@ -34,7 +34,7 @@ This codebase has undergone a comprehensive security audit and remediation. Key 
 
 - **Eliminated Arbitrary Code Execution**: Replaced `eval()` (Spreadsheet) and `new Function()` (Terminal) with a hardened shunting-yard math parser.
 - **Fixed XSS Vulnerabilities**: All `dangerouslySetInnerHTML` instances now wrap content in `DOMPurify`-based sanitization.
-- **Added localStorage Schema Validation**: Prevents data corruption by validating all persisted state with `zod` at runtime.
+- **Added localStorage Schema Validation**: Prevents data corruption by validating all persisted state with `zod` at runtime. Introduced the `safeJsonParse(raw, schema, fallback)` utility for app-specific validation.
 - **Fixed Z-Index Overflow**: Added bounds checking to prevent focus stacking issues in long sessions.
 - **Resolved Fragile Reduce Logic**: Fixed window state restoration logic to prevent crashes when minimizing all windows.
 
@@ -53,6 +53,7 @@ See [REMEDIATION.md](REMEDIATION.md) for the full audit report.
 | **Storage** | LocalStorage | N/A | Persistence for the Virtual File System |
 | **Security** | DOMPurify | 3.4.7 | XSS sanitization for user-generated HTML |
 | **Validation** | Zod | 4.3.5 | Runtime schema validation for persistence |
+| **Testing** | Vitest | 4.x | Unit tests for utils and components |
 
 ### Core Systems
 1.  **Window Manager:** A custom engine in `src/components/WindowFrame.tsx` handling dragging, resizing, focus management, and state transitions (min/max/restore).
@@ -90,6 +91,7 @@ After running `npm run dev`, open your browser at the provided port (usually `ht
 | :--- | :--- |
 | `npm run build` | Type-check and production build |
 | `npm run lint` | Run ESLint static analysis |
+| `npm run test` | Run Vitest unit test suite (41 tests) |
 | `npm run preview` | Local preview of the production build |
 | `tsc -b` | Project-wide type checking |
 
@@ -106,9 +108,9 @@ After running `npm run dev`, open your browser at the provided port (usually `ht
 ## ⚠️ Known Issues & Recommendations
 
 1. **VFS localStorage Limit**: The virtual file system uses `localStorage`, which has a ~5 MB limit. For large file storage, consider migrating to IndexedDB.
-2. **Console Logs**: Several apps still contain debug `console.log` statements that should be removed in production.
+2. **Remaining JSON.parse in ~17 Apps**: While `storageValidation.ts` (desktop icons, VFS) and `safeJsonParse.ts` (PasswordManager, Contacts, Browser) now validate localStorage with zod, many individual apps still use raw `JSON.parse`. Review each app and apply the `safeJsonParse` utility with an app-specific zod schema.
 3. **Accessibility**: Some games and media apps lack full keyboard navigation and ARIA labels. Run a Lighthouse accessibility audit for details.
-4. **Split osReducer**: The 503-line `osReducer` handles window, dock, notification, context menu, icon, theme, and alt-tab logic. Consider splitting into domain-specific reducers.
+4. **Split osReducer**: The 500-line `osReducer` handles window, dock, notification, context menu, icon, theme, and alt-tab logic. Now `export`ed for testing (see `src/hooks/__tests__/osReducer-zindex.test.tsx`). Consider splitting into domain-specific reducers.
 5. **CI/CD Pipeline**: Automated build + lint + test gates are not yet implemented.
 
 ## 📜 License

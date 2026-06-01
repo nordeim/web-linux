@@ -35,7 +35,7 @@ Follow this six-phase workflow for all implementation tasks:
   - For regex test results, use `sanitizeHtml(..., {ADD_TAGS: ['mark']})`.
 
 ### Persistence
-- **localStorage Schema Validation**: All `localStorage` reads must go through `validateDesktopIcons()` or `validateFileSystem()` from `@/utils/storageValidation`. Never trust `JSON.parse()` output without runtime validation.
+- **localStorage Schema Validation**: All `localStorage` reads must go through `validateDesktopIcons()` or `validateFileSystem()` from `@/utils/storageValidation`. For ad-hoc app-specific reads, use `safeJsonParse(raw, schema, fallback)` from `@/utils/safeJsonParse`. Never trust `JSON.parse()` output without runtime validation.
 - **Versioned Keys**: The VFS uses `ubuntuos_filesystem_v2`. Legacy keys are supported for migration but new code should only write to the versioned key.
 
 ## Project Structure
@@ -82,7 +82,7 @@ Follow this six-phase workflow for all implementation tasks:
 ### Security
 - **`eval()` and `new Function()` are never safe**, even with regex sanitization. A hardened parser is the only acceptable solution for math evaluation.
 - **`dangerouslySetInnerHTML` without sanitization is a persistent XSS vector**, especially when combined with `localStorage` persistence (stored XSS).
-- **Runtime schema validation is non-optional** for any persisted state. TypeScript types are erased at runtime; `zod` is the correct defense.
+- **Runtime schema validation is non-optional** for any persisted state. TypeScript types are erased at runtime; `zod` is the correct defense. The new `safeJsonParse(raw, schema, fallback)` utility in `src/utils/safeJsonParse.ts` provides a reusable pattern for ad-hoc localStorage reads.
 
 ### State Management
 - **Monolithic reducers are hard to maintain**. The 499-line `osReducer` works but violates separation of concerns. Consider splitting into domain-specific reducers or switching to a state management library with selectors.
@@ -99,4 +99,4 @@ Follow this six-phase workflow for all implementation tasks:
 2. **Add `vitest` coverage collection** to track test coverage across all modules.
 3. **Implement CI/CD pipeline** with automated `build`, `lint`, and `test` gates.
 4. **Split `osReducer` into domain-specific reducers** (window management, notifications, desktop icons, etc.).
-5. **Remove remaining `console.log` statements** from production builds.
+5. **Fix remaining ~17 apps using raw `JSON.parse`** on localStorage without zod validation (Clock, Todo, ColorPalette, ColorPicker, TextEditor, Calendar, Reminders, Memory, Spreadsheet, Chat, RssReader, Settings, Notes, ArchiveManager, ScreenRecorder, Calculator, VoiceRecorder). Apply the `safeJsonParse` + zod schema pattern demonstrated in PasswordManager, Contacts, and Browser.

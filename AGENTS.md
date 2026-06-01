@@ -197,6 +197,7 @@ This document provides high-signal technical context for AI coding agents. It fo
 
 ### localStorage Schema Validation (`storageValidation.ts`)
 > **MANDATORY**: Any code reading from `localStorage` must validate with `zod` schemas from `@/utils/storageValidation`. Never trust `JSON.parse()` output.
+> - **`safeJsonParse(raw, schema, fallback)`** (`@/utils/safeJsonParse`): A convenience wrapper around `JSON.parse` + `zod.safeParse`. Use this in individual apps for ad-hoc localStorage reads. Use `storageValidation.ts` for OS-level state (desktop icons, VFS).
 > - **Desktop Icons**: Use `validateDesktopIcons(defaultIcons)` which runs `z.array(DesktopIconSchema).safeParse(parsed)`.
 > - **VFS**: Use `validateFileSystem(defaultFS)` which runs `FileSystemStateSchema.safeParse(parsed)`.
 > - **Versioned Keys**: The VFS uses `ubuntuos_filesystem_v2`. Legacy key `ubuntuos_filesystem` is supported for forward migration only.
@@ -239,14 +240,15 @@ Run from the `app/` directory:
 - `src/apps/AppRouter.tsx`: Central component mapping for windows.
 - `src/utils/safeEval.ts`: Secure math evaluator.
 - `src/utils/sanitizeHtml.ts`: XSS sanitization.
-- `src/utils/storageValidation.ts`: localStorage schema validation.
+- `src/utils/safeJsonParse.ts`: Generic `JSON.parse` + zod validation utility.
+- `src/utils/storageValidation.ts`: localStorage schema validation for OS-level data.
 
 ## 🚨 Troubleshooting & Gotchas
 
 ### Z-Index Overflow
 **Symptom**: Window focus becomes erratic after a very long session.  
-**Root Cause**: `nextZIndex` exceeds CSS max.  
-**Fix**: Already fixed with `Math.min(nextZIndex + 1, 2147483647)`. If you see this, confirm the bounds check is present in both `OPEN_WINDOW` and `FOCUS_WINDOW`.
+**Root Cause**: `nextZIndex` exceeded CSS max.  
+**Fix**: Bounds check `Math.min(nextZIndex + 1, 2147483647)` is now present in `OPEN_WINDOW`, `FOCUS_WINDOW`, and `END_ALT_TAB`. If you see this, confirm all three locations have the cap.
 
 ### Window State Restoration
 **Symptom**: After minimizing a window, the wrong window is focused.  
@@ -257,6 +259,11 @@ Run from the `app/` directory:
 **Symptom**: App crashes on load, or desktop icons/files appear corrupted.  
 **Root Cause**: `localStorage` data was modified by the user or corrupted.  
 **Fix**: The app now validates all stored state with `zod` and falls back to defaults if validation fails. Check browser DevTools → Application → Local Storage to inspect the data.
+
+### NotImplemented "Icons is not defined" ReferenceError
+**Symptom**: Opening an unbuilt/unsupported app causes a white screen with `ReferenceError: Icons is not defined`.  
+**Root Cause**: `NotImplemented.tsx` referenced `Icons.HelpCircle` and `Icons.Hammer` without importing `lucide-react`.  
+**Fix**: Ensure `NotImplemented.tsx` imports `* as Icons from 'lucide-react'`. This also enables any Lucide icon to be used as a fallback icon.
 
 ### Math Evaluation Failures
 **Symptom**: Spreadsheet formulas or terminal `calc` always returns `#VALUE!` or "invalid expression".  
@@ -272,11 +279,10 @@ Run from the `app/` directory:
 
 ## 📋 Outstanding Issues (As of 2026-06-01)
 
-1. **Console Logs**: Several apps still contain debug `console.log` statements. Remove before production.
+1. **Unvalidated JSON.parse in ~17 Apps**: While `storageValidation.ts` (desktop icons, VFS) and the new `safeJsonParse.ts` utility (PasswordManager, Contacts, Browser) are used, many apps still read from `localStorage` with raw `JSON.parse(saved)` without zod schemas. Apps to audit: Clock, Todo, ColorPalette, ColorPicker, TextEditor, Calendar, Reminders, Memory, Spreadsheet, Chat, RssReader, Settings, Notes, ArchiveManager, ScreenRecorder, Calculator, VoiceRecorder.
 2. **VFS localStorage Limit**: ~5 MB cap. Consider migrating to IndexedDB for large file storage.
 3. **Accessibility**: Some games and media apps lack full keyboard navigation and ARIA labels.
-4. **Reducer Purity**: `ADD_DESKTOP_ICON`, `REMOVE_DESKTOP_ICON`, and `UPDATE_DESKTOP_ICON_POSITION` no longer contain side effects (moved to `OSProvider` `useEffect`), but the 503-line `osReducer` still mixes many domains. Consider splitting into domain-specific reducers.
-5. **CI/CD Pipeline**: Automated build + lint + test gates are not yet implemented.
+4. **CI/CD Pipeline**: Automated build + lint + test gates are not yet implemented.
 
 ## 📐 Performance Patterns
 
@@ -301,6 +307,8 @@ Run from the `app/` directory:
 ## 💡 Lessons Learned
 
 - **`eval()` is never safe**, even with regex sanitization. Build a proper parser or use a restricted subset.
-- **TypeScript types are not runtime guarantees**. `JSON.parse()` + `as T` is a security and reliability risk. Always validate persisted data.
+- **TypeScript types are not runtime guarantees**. `JSON.parse()` + `as T` is a security and reliability risk. Always validate persisted data with **zod** at runtime.
+- **Shared zod validation utility saves boilerplate**. `safeJsonParse(raw, schema, fallback)` (in `src/utils/safeJsonParse.ts`) provides a zero-boilerplate wrapper for `storageValidation.ts`-style validation in ad-hoc app reads.
 - **Monolithic reducers are hard to maintain**. The 499-line `osReducer` works but is difficult to test and reason about. Consider splitting by domain.
 - **Window state transitions are surprisingly complex**. The interaction of z-index, focus, minimize, maximize, and close requires careful handling of edge cases.
+- **Dead import (Icons) can crash an entire app**. `NotImplemented.tsx` was missing `import * as Icons from 'lucide-react'`, causing a `ReferenceError` whenever any unbuilt app opened. Always verify imports manually.

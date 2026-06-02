@@ -43,7 +43,12 @@ This codebase has undergone a comprehensive security audit and remediation. Key 
 - **Refactored RegexTester Rendering**: Replaced `dangerouslySetInnerHTML` with React component-based match highlighting to eliminate XSS risk.
 - **Fixed Misleading Recording Extensions**: Changed `.webm` to `.txt` for ScreenRecorder and VoiceRecorder simulated downloads.
 - **Fixed Calculator Keyboard Stale Closures**: Added all handler functions to `useEffect` dependency array to prevent stale closure bugs.
-- **Fixed z-Index Overflow in CASCADE_WINDOWS**: Added `Math.min(z, MAX_Z)` cap to prevent z-index exceeding CSS maximum.
+- **Fixed WindowFrame Wildcard Import**: Replaced `import * as Icons from 'lucide-react'` with named imports (`Minus`, `Copy`, `Square`, `X`), saving ~587 KB of bundle bloat per chunk.
+- **Fixed MINIMIZE_ALL Losing Window Positions**: `MINIMIZE_ALL` now captures `prevPosition` and `prevSize` before minimizing, matching the拨付r behavior of `MINIMIZE_WINDOW`.
+- **Exported sanitizeMarkdownHtml from Utils**: `sanitizeMarkdownHtml()` was local to `MarkdownPreview.tsx` but is now properly exported from `@/utils/sanitizeHtml` for reuse across apps.
+- **Removed Dead Commented Import from Desktop.tsx**: Cleaned up a commented `import * as Icons from 'lucide-react'` line that violated build hygiene.
+- **Corrected Stale Documentation Line Counts**: Updated osReducer line count from "499-line" to "approximately 350 lines" across all documentation files.
+- **Added GlobalErrorBoundary Around AppShell**: The `AppShell` component (boot, login, keyboard handlers) is now wrapped in `GlobalErrorBoundary`, preventing shell-level errors from crashing the entire OS.
 
 See [REMEDIATION.md](REMEDIATION.md) for the full security audit report, [REMEDIATION_MIMO2.md](REMEDIATION_MIMO2.md) for the prior code review audit remediation, and [REMEDIATION_KIMI2.md](REMEDIATION_KIMI2.md) for the latest code review audit.
 

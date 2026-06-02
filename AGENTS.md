@@ -242,9 +242,10 @@ Run from the `app/` directory:
 - `src/hooks/useFileSystem.ts`: VFS logic and associations.
 - `src/apps/AppRouter.tsx`: Central component mapping for windows.
 - `src/utils/safeEval.ts`: Secure math evaluator.
-- `src/utils/sanitizeHtml.ts`: XSS sanitization.
+- `src/utils/sanitizeHtml.ts`: XSS sanitization (also exports `sanitizeMarkdownHtml()` for markdown content).
 - `src/utils/safeJsonParse.ts`: Generic `JSON.parse` + zod validation utility.
 - `src/utils/storageValidation.ts`: localStorage schema validation for OS-level data.
+- `src/components/GlobalErrorBoundary.tsx`: Error boundary wrapper for apps and shell.
 
 ## 🚨 Troubleshooting & Gotchas
 
@@ -303,14 +304,11 @@ Run from the `app/` directory:
 **Fix**: Calculator keyboard handler's `useEffect` now includes all referenced handlers in its dependency array: `[inputDigit, inputDecimal, performOp, calculate, clear, backspace, percentage]`. Always include all referenced values in `useEffect` dependency arrays, or use refs for values that change frequently.
 **Context**: This was a subtle bug found during the 2026-06-02 audit. The handlers ARE recreated on every render, so including them in the dep array is correct (they won't cause infinite re-renders because they're stable).
 
-## 🔒 Security Reminders
-
-1. Any new app that evaluates math must use `safeEval()`.
-2. Any new app that renders user HTML must use `sanitizeHtml()`. **Prefer React components over `dangerouslySetInnerHTML` wherever possible.**
-3. Any new feature that persists to `localStorage` must validate with `zod`.
-4. Never add `eval()`, `new Function()`, or `Function()` to any app unless it is the `safeEval` implementation itself.
-5. **Any app accepting user-supplied regex must limit `exec()` iterations** to prevent ReDoS (catastrophic backtracking). Use a max iteration counter (e.g., 1000) and bail out early.
-6. **Any function creating arrays from user input must cap the size** before allocation to prevent memory exhaustion crashes.
+### MINIMIZE_ALL Losing Window Positions
+**Symptom**: After using "Minimize All" (Super+D), restoring individual windows returns them to incorrect positions.  
+**Root Cause**: `MINIMIZE_ALL` reducer sets `state: 'minimized'` but does NOT capture `prevPosition` and `prevSize` (unlike `MINIMIZE_WINDOW` which does). Restoration falls back to current values instead of pre-minimize positions.  
+**Fix**: `MINIMIZE_ALL` now captures `prevPosition: { ...w.position }` and `prevSize: { ...w.size }` before minimizing, matching the behavior of `MINIMIZE_WINDOW`.
+**Context**: This inconsistency created a UX regression where the restore behavior differed depending on whether windows were minimized individually or via "Minimize All".
 
 ## 🔒 Security Reminders
 
@@ -320,6 +318,10 @@ Run from the `app/` directory:
 4. Never add `eval()`, `new Function()`, or `Function()` to any app unless it is the `safeEval` implementation itself.
 5. **Any app accepting user-supplied regex must limit `exec()` iterations** to prevent ReDoS (catastrophic backtracking). Use a max iteration counter (e.g., 1000) and bail out early.
 6. **Any function creating arrays from user input must cap the size** before allocation to prevent memory exhaustion crashes.
+7. **Always use named imports for Lucide React icons**. Wildcard imports (`import * as Icons from 'lucide-react'`) bloat the bundle by ~587 KB. `DynamicIcon.tsx` is the only authorized wildcard import since it resolves icons by string name at runtime. `WindowFrame.tsx` was fixed to use named imports (`Minus`, `Copy`, `Square`, `X`).
+8. **Wrap `dangerouslySetInnerHTML` with `sanitizeHtml()` even for internal CSS injection**. The `chart.tsx` UI component generates CSS variables from `ChartConfig` color values. While these values come from application-level configuration (not user input), always validate dynamic content before injection. If chart colors are ever sourced from user input, add hex/rgb/hsl color value validation.
+9. **Export shared sanitization utilities from `@/utils/` modules**. `sanitizeMarkdownHtml()` was local to `MarkdownPreview.tsx` but is now properly exported from `@/utils/sanitizeHtml` for reuse across apps.
+10. **Remove dead code immediately**, not just comment it out. `Desktop.tsx` retained a commented `import * as Icons from 'lucide-react'` line that served no purpose and violated build hygiene.
 
 ## 📐 Performance Patterns
 
@@ -354,6 +356,12 @@ Run from the `app/` directory:
 - **ReDoS (catastrophic backtracking) from user regex is real**. A pattern like `(a+)+$` against a long string can freeze the browser tab entirely. Always limit `exec()` iterations (e.g., 1000) and bail out early. Never trust user-supplied regex without guards.
 - **Unbounded array creation from user input crashes browsers**. The Calculator factorial function previously created an array of size `Math.floor(v)` without a cap, allowing input like `1e8` to crash the tab. Always cap input-dependent allocations (factorial capped at 170, where JavaScript `Number` overflows to `Infinity`).
 - **Stale closures in keyboard handlers are subtle bugs**. The Calculator keyboard handler's `useEffect` dependency array didn't include the handler functions (`inputDigit`, `performOp`, etc.), capturing the first render's versions. Always include all referenced values in `useEffect` dependency arrays, or use refs for values that change frequently.
+- **`MINIMIZE_ALL` must save `prevPosition`/`prevSize`** just like `MINIMIZE_WINDOW`. Failing to capture window positions before minimizing causes restoration to fall back to incorrect coordinates. Always mirror state-saving logic across related actions.
+- **Named imports for Lucide React save bundle size**. `WindowFrame.tsx` previously imported `* as Icons from 'lucide-react'` (~587 KB), which was fixed to use named imports (`Minus`, `Copy`, `Square`, `X`). Only `DynamicIcon.tsx` should use wildcard imports since it resolves icons dynamically by string name.
+- **Shared sanitization utilities must be exported from `@/utils/`**. `sanitizeMarkdownHtml()` was local to `MarkdownPreview.tsx`, forcing any app needing markdown sanitization to duplicate the logic or import from an app file. It is now properly exported from `@/utils/sanitizeHtml` for reuse across the codebase.
+- **Dead commented code is still dead code**. `Desktop.tsx` retained a commented `import * as Icons from 'lucide-react'` line that served no purpose. `tsconfig.app.json` enforces `noUnusedLocals`, so dead code must be removed, not just commented out.
+- **Documentation line counts drift**. The `osReducer` was documented as "499-line" but is actually ~350 lines. Always re-verify quantitative claims (line counts, file sizes, test counts) before documenting them. Prefer relative descriptions ("large monolithic reducer") over specific numbers that go stale.
+- **Internal CSS injection via `dangerouslySetInnerHTML` still needs validation**. The `chart.tsx` UI component generates CSS variables from `ChartConfig` color values. Even though these come from application-level config (not user input), always validate dynamic content before injection. If chart colors are ever sourced from user input, add hex/rgb/hsl color value validation.
 - **Window state transitions are surprisingly complex**. The interaction of z-index, focus, minimize, maximize, and close requires careful handling of edge cases.
 - **Dead import (Icons) can crash an entire app**. `NotImplemented.tsx` was missing `import * as Icons from 'lucide-react'`, causing a `ReferenceError` whenever any unbuilt app opened. Always verify imports manually.
 - **Dead code breaks builds, not just aesthetics**. `tsconfig.app.json` enforces `noUnusedLocals` and `noUnusedParameters`. A single unused import (e.g., a stolen from `lucide-react`) or unread state variable will cause `npm run build` to fail with `TS6133`. Clean up dead code immediately when removing features.

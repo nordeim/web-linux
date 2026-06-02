@@ -116,3 +116,6 @@ Follow this six-phase workflow for all implementation tasks:
 7. **Replace all remaining `dangerouslySetInnerHTML` usage**: After RegexTester was refactored to use React components, audit all remaining `dangerouslySetInnerHTML` usage and replace with React component rendering where possible.
 8. **Add ReDoS guards to all regex-accepting apps**: Notes search, Email filters, and any other app that accepts user-supplied regex should implement iteration limits.
 9. **Implement actual MediaRecorder for recorder apps**: ScreenRecorder and VoiceRecorder currently create placeholder text downloads. Production builds should implement the actual `MediaRecorder` API or clearly mark simulated behavior.
+10. **Validate chart color values before CSS injection**: The `chart.tsx` component generates CSS variables from `ChartConfig` color values. While currently from hardcoded config, add hex/rgb/hsl validation if colors ever come from user input.
+11. **Add ESLint rule to block wildcard lucide imports**: Prevent `import * as Icons from 'lucide-react'` everywhere except `DynamicIcon.tsx`. This enforces the named import convention at lint time.
+12. **Add test coverage for MINIMIZE_ALL**: Verify that `prevPosition` and `prevSize` are correctly saved and restored after "Minimize All" action.

@@ -11,8 +11,8 @@ app/vite.config.ts
 app/eslint.config.js
 app/postcss.config.js
 app/tsconfig.app.json
+app/vitest.setup.ts
 app/tailwind.config.js
-app/src/pages/Home.tsx
 app/src/App.tsx
 app/src/main.tsx
 app/src/components
@@ -23,7 +23,6 @@ app/src/components/ContextMenu.tsx
 app/src/components/NotImplemented.tsx
 app/src/components/ui/spinner.tsx
 app/src/components/ui/textarea.tsx
-app/src/components/ui/sonner.tsx
 app/src/components/ui/field.tsx
 app/src/components/ui/button-group.tsx
 app/src/components/ui/accordion.tsx
@@ -81,6 +80,8 @@ app/src/components/WindowManager.tsx
 app/src/components/TopPanel.tsx
 app/src/components/WindowFrame.tsx
 app/src/components/GlobalErrorBoundary.tsx
+app/src/components/__tests__/ContextMenu-actions.test.tsx
+app/src/components/__tests__/NotImplemented.test.tsx
 app/src/components/BootSequence.tsx
 app/src/components/AppLauncher.tsx
 app/src/apps/PhotoEditor.tsx
@@ -141,11 +142,16 @@ app/src/apps/RegexTester.tsx
 app/src/apps/Calculator.tsx
 app/src/apps/VoiceRecorder.tsx
 app/src/hooks/use-mobile.ts
+app/src/hooks/__tests__/osReducer-zindex.test.tsx
+app/src/hooks/__tests__/osReducer.test.ts
 app/src/hooks/useOSStore.tsx
 app/src/hooks/useFileSystem.ts
 app/src/utils/storageValidation.ts
 app/src/utils/sanitizeHtml.ts
 app/src/utils/safeEval.ts
+app/src/utils/safeJsonParse.ts
 app/src/utils/__tests__/safeEval.test.ts
+app/src/utils/__tests__/safeJsonParse-integration.test.ts
+app/src/utils/__tests__/safeJsonParse.test.ts
 app/src/lib/utils.ts
 app/src/types/index.ts

@@ -300,3 +300,24 @@ Verification
 - npm run build: ✅ Production build succeeds successfully.
 - No functional code was removed; only truly dead code (unused imports, variables, and state that was never read or written) was cleaned up.
 
+---
+
+✅ Documentation Update Complete
+I have meticulously reviewed and updated all three documentation files (README.md, CLAUDE.md, and AGENTS.md) to align with the latest codebase changes and lessons learned from the TS6133 remediation.
+Summary of Updates
+README.md:
+- Added "Eliminated 43 Build Errors from Dead Code" to the security & reliability improvements section.
+- Added "Unused Local / Import Hygiene" as a new known issue (#6), documenting the noUnusedLocals/noUnusedParameters configuration.
+CLAUDE.md:
+- Added "Build Hygiene" to Implementation Standards, enforcing dead code removal.
+- Updated Lucide React guidance to mandate named imports and warn against monolithic imports.
+- Created a new "Build Hygiene" subsection under Performance, detailing the 43 TS6133 remediation, root causes, and prevention.
+- Added a 6th recommendation to enforce import hygiene during code review.
+AGENTS.md:
+- Added "Leaving Dead Code / Unused Imports" to the Anti-Patterns list.
+- Created a new "Build Failures from Unused Imports / Variables" troubleshooting entry.
+- Updated "Outstanding Issues" date to 2026-06-02 and added "Build Hygiene Monitoring."
+- Added a new lesson: "Dead code breaks builds, not just aesthetics."
+Cross-Document Consistency
+All three documents now consistently reference the noUnusedLocals/noUnusedParameters configuration, the 43 TS6133 errors fixed, the root causes, and the prevention strategy (npx tsc -b --noEmit). The build remains clean, and all changes are traceable to specific code changes made during the remediation.
+

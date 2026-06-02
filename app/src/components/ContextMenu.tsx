@@ -23,6 +23,8 @@ const ContextMenu = memo(function ContextMenu() {
     };
   }, [contextMenu.visible, dispatch]);
 
+  if (!contextMenu.visible) return null;
+
   // Edge detection
   let x = contextMenu.x;
   let y = contextMenu.y;
@@ -35,8 +37,6 @@ const ContextMenu = memo(function ContextMenu() {
     if (x < 8) x = 8;
     if (y < 8) y = 8;
   }
-
-  if (!contextMenu.visible) return null;
 
   return (
     <div
@@ -141,7 +141,7 @@ export function handleMenuAction(action: string, _state: import('@/types').OSSta
       break;
     }
     case 'ARRANGE_ICONS': {
-      dispatch({ type: 'CASCADE_WINDOWS' });
+      dispatch({ type: 'ARRANGE_ICONS' });
       break;
     }
     case 'PIN_DOCK':

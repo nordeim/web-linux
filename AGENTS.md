@@ -233,6 +233,7 @@ Run from the `app/` directory:
 - **Path-Based VFS Calls**: Do not assume a file's path is its unique identifier. Always use the node `id`.
 - **Custom Window Chrome**: Do not build custom title bars or resize handles in individual apps. `WindowFrame.tsx` provides the standardized shell.
 - **Bypassing the Store**: App-to-app communication should go through the `useOS` hook or the File System, not local props.
+- **Leaving Dead Code / Unused Imports**: `tsconfig.app.json` enforces `"noUnusedLocals": true` and `"noUnusedParameters": true`. A single unused import, variable, or parameter will break the production build. Clean up immediately when removing features. Root cause of 43 `TS6133` build errors fixed on 2026-06-02.
 
 ## 🔗 Key Entry Points
 - `src/hooks/useOSStore.tsx`: Global OS state and reducer.
@@ -270,6 +271,12 @@ Run from the `app/` directory:
 **Root Cause**: `safeEval()` rejects any characters outside `0-9.+-*/^()` and whitespace.  
 **Fix**: Check the formula for unsupported operators (e.g., `%`, `&`, `|`, `!`, function names like `sin()`). Only basic arithmetic and `^` (exponent) are supported.
 
+### Build Failures from Unused Imports / Variables
+**Symptom**: `npm run build` fails with `error TS6133: 'X' is declared but its value is never read.`  
+**Root Cause**: `tsconfig.app.json` enforces `"noUnusedLocals": true` and `"noUnusedParameters": true`. Dead imports (especially from `lucide-react`), unused state variables, or unread function parameters trigger hard build errors.  
+**Fix**: Remove the unused import/variable, or prefix with `_` if it's an intentionally ignored destructuring parameter (e.g., `const [, setX] = useState()`). Run `npx tsc -b --noEmit` before committing to catch these early.
+**Context**: 43 `TS6133` errors were fixed on 2026-06-02 across 16 files. Common culprits: unused Lucide icon imports, React hook imports (`useCallback`), state variables that were set but never read, and forEach/index callback parameters that shadowed outer scope variables.
+
 ## 🔒 Security Reminders
 
 1. Any new app that evaluates math must use `safeEval()`.
@@ -277,12 +284,13 @@ Run from the `app/` directory:
 3. Any new feature that persists to `localStorage` must validate with `zod`.
 4. Never add `eval()`, `new Function()`, or `Function()` to any app unless it is the `safeEval` implementation itself.
 
-## 📋 Outstanding Issues (As of 2026-06-01)
+## 📋 Outstanding Issues (As of 2026-06-02)
 
 1. **Unvalidated JSON.parse in ~17 Apps**: While `storageValidation.ts` (desktop icons, VFS) and the new `safeJsonParse.ts` utility (PasswordManager, Contacts, Browser) are used, many apps still read from `localStorage` with raw `JSON.parse(saved)` without zod schemas. Apps to audit: Clock, Todo, ColorPalette, ColorPicker, TextEditor, Calendar, Reminders, Memory, Spreadsheet, Chat, RssReader, Settings, Notes, ArchiveManager, ScreenRecorder, Calculator, VoiceRecorder.
 2. **VFS localStorage Limit**: ~5 MB cap. Consider migrating to IndexedDB for large file storage.
 3. **Accessibility**: Some games and media apps lack full keyboard navigation and ARIA labels.
 4. **CI/CD Pipeline**: Automated build + lint + test gates are not yet implemented.
+5. **Build Hygiene Monitoring**: While the 43 `TS6133` errors have been fixed, the project uses `"noUnusedLocals": true` and `"noUnusedParameters": true`. A single unused import or dead variable will break the build. Ensure all new code is checked with `npx tsc -b --noEmit` before committing.
 
 ## 📐 Performance Patterns
 
@@ -312,3 +320,4 @@ Run from the `app/` directory:
 - **Monolithic reducers are hard to maintain**. The 499-line `osReducer` works but is difficult to test and reason about. Consider splitting by domain.
 - **Window state transitions are surprisingly complex**. The interaction of z-index, focus, minimize, maximize, and close requires careful handling of edge cases.
 - **Dead import (Icons) can crash an entire app**. `NotImplemented.tsx` was missing `import * as Icons from 'lucide-react'`, causing a `ReferenceError` whenever any unbuilt app opened. Always verify imports manually.
+- **Dead code breaks builds, not just aesthetics**. `tsconfig.app.json` enforces `noUnusedLocals` and `noUnusedParameters`. A single unused import (e.g., a stolen from `lucide-react`) or unread state variable will cause `npm run build` to fail with `TS6133`. Clean up dead code immediately when removing features.

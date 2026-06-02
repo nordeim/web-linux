@@ -408,6 +408,22 @@ export function osReducer(state: OSState, action: OSAction): OSState {
       };
     }
 
+    case 'ARRANGE_ICONS': {
+      const GRID_X = 80;
+      const GRID_Y = 90;
+      const COL_WIDTH = 80;
+      const COL_HEIGHT = 90;
+      const MAX_COLS = Math.floor(window.innerWidth / COL_WIDTH);
+      const arranged = state.desktopIcons.map((icon, i) => ({
+        ...icon,
+        position: {
+          x: GRID_X + (i % MAX_COLS) * COL_WIDTH,
+          y: GRID_Y + Math.floor(i / MAX_COLS) * COL_HEIGHT,
+        },
+      }));
+      return { ...state, desktopIcons: arranged };
+    }
+
     case 'CASCADE_WINDOWS': {
       let z = state.nextZIndex;
       const updated = state.windows.map((w, i) => ({

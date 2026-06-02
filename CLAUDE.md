@@ -20,11 +20,12 @@ Follow this six-phase workflow for all implementation tasks:
 - **Strict TypeScript**: No `any`, use explicit interfaces for props and state.
 - **State Management**: Use `useOS` hook (React Context + useReducer) for system-wide state.
 - **File System**: Use `useFileSystem` hook for all file operations (VFS).
+- **Build Hygiene**: `tsconfig.app.json` enforces `"noUnusedLocals": true` and `"noUnusedParameters": true`. Any unused import, variable, or parameter will break the build. Remove dead code immediately; do not leave it commented out.
 
 ### UI & Styling
 - **Tailwind CSS 3.4**: Use utility classes, following the design tokens in `index.css`.
 - **Shadcn UI**: Base components are in `src/components/ui`. Use them instead of custom ones.
-- **Lucide React**: Primary icon library.
+- **Lucide React**: Primary icon library. Use named imports (`import { IconName } from 'lucide-react'`) only. Do not use `import * as Icons from 'lucide-react'` (imports the entire ~587 KB library).
 - **Responsive Design**: Ensure apps handle window resizing correctly.
 
 ### Security
@@ -77,6 +78,11 @@ Follow this six-phase workflow for all implementation tasks:
 - **Shared DynamicIcon** eliminates ~8× code duplication across Dock, WindowFrame, Desktop, AppLauncher, and other components.
 - **Lucide monolithic import** (`import * as Icons from 'lucide-react'`) still imports the entire library (~587 KB). Use named imports when possible.
 
+### Build Hygiene
+- **"noUnusedLocals": true** and **"noUnusedParameters": true** are enforced in `tsconfig.app.json`. A single unused import or variable will break the production build (`npm run build`).
+- **Remediation (2026-06-02)**: 43 `TS6133` errors were fixed across 16 files. Root causes: dead imports (Lucide icons, React hooks), unused state variables, and unread function parameters.
+- **Prevention**: Clean up imports immediately when removing features. Use `npx tsc -b --noEmit` to catch errors before committing.
+
 ## Lessons Learned
 
 ### Security
@@ -100,3 +106,4 @@ Follow this six-phase workflow for all implementation tasks:
 3. **Implement CI/CD pipeline** with automated `build`, `lint`, and `test` gates.
 4. **Split `osReducer` into domain-specific reducers** (window management, notifications, desktop icons, etc.).
 5. **Fix remaining ~17 apps using raw `JSON.parse`** on localStorage without zod validation (Clock, Todo, ColorPalette, ColorPicker, TextEditor, Calendar, Reminders, Memory, Spreadsheet, Chat, RssReader, Settings, Notes, ArchiveManager, ScreenRecorder, Calculator, VoiceRecorder). Apply the `safeJsonParse` + zod schema pattern demonstrated in PasswordManager, Contacts, and Browser.
+6. **Enforce import hygiene during code review**: The `noUnusedLocals`/`noUnusedParameters` TypeScript checks catch dead code at build time, but IDE auto-imports can silently add unused imports. Add a pre-commit hook or lint rule to block commits with unused identifiers.

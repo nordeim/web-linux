@@ -222,6 +222,7 @@ export type OSAction =
   | { type: 'REMOVE_NOTIFICATION'; id: string }
   | { type: 'CLEAR_NOTIFICATIONS' }
   | { type: 'MARK_NOTIFICATION_READ'; id: string }
+  | { type: 'ARRANGE_ICONS' }
   | { type: 'ADD_DESKTOP_ICON'; icon: Omit<DesktopIcon, 'id'> }
   | { type: 'REMOVE_DESKTOP_ICON'; id: string }
   | { type: 'UPDATE_DESKTOP_ICON_POSITION'; id: string; position: Position }

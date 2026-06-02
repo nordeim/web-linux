@@ -4,8 +4,8 @@
 
 import { useEffect, useState } from 'react';
 import { getAppById } from '@/apps/registry';
+import { HelpCircle, Hammer } from 'lucide-react';
 import DynamicIcon from './DynamicIcon';
-import * as Icons from 'lucide-react';
 
 interface Props {
   appId: string;
@@ -25,7 +25,7 @@ export default function NotImplemented({ appId }: Props) {
   if (!app) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-[var(--text-secondary)]">
-        <Icons.HelpCircle size={48} className="mb-4 opacity-50" />
+        <HelpCircle size={48} className="mb-4 opacity-50" />
         <p className="text-lg font-medium">Unknown App</p>
         <p className="text-sm mt-1">App ID: {appId}</p>
       </div>
@@ -42,7 +42,7 @@ export default function NotImplemented({ appId }: Props) {
         {app.description}
       </p>
       <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--bg-hover)] text-xs text-[var(--text-secondary)]">
-        <Icons.Hammer size={14} />
+        <Hammer size={14} />
         <span>Coming Soon{dots}</span>
       </div>
     </div>

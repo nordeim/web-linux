@@ -37,8 +37,9 @@ This codebase has undergone a comprehensive security audit and remediation. Key 
 - **Added localStorage Schema Validation**: Prevents data corruption by validating all persisted state with `zod` at runtime. Introduced the `safeJsonParse(raw, schema, fallback)` utility for app-specific validation.
 - **Fixed Z-Index Overflow**: Added bounds checking to prevent focus stacking issues in long sessions.
 - **Resolved Fragile Reduce Logic**: Fixed window state restoration logic to prevent crashes when minimizing all windows.
+- **Eliminated 43 Build Errors from Dead Code**: Fixed all `TS6133` errors (unused locals/parameters) across 16 files, ensuring clean production builds.
 
-See [REMEDIATION.md](REMEDIATION.md) for the full audit report.
+See [REMEDIATION.md](REMEDIATION.md) for the full security audit report and [REMEDIATION_MIMO2.md](REMEDIATION_MIMO2.md) for the code review audit remediation.
 
 ## 🏗️ Architecture
 
@@ -112,6 +113,7 @@ After running `npm run dev`, open your browser at the provided port (usually `ht
 3. **Accessibility**: Some games and media apps lack full keyboard navigation and ARIA labels. Run a Lighthouse accessibility audit for details.
 4. **Split osReducer**: The 500-line `osReducer` handles window, dock, notification, context menu, icon, theme, and alt-tab logic. Now `export`ed for testing (see `src/hooks/__tests__/osReducer-zindex.test.tsx`). Consider splitting into domain-specific reducers.
 5. **CI/CD Pipeline**: Automated build + lint + test gates are not yet implemented.
+6. **Unused Local / Import Hygiene**: The `tsconfig.app.json` enforces `"noUnusedLocals": true` and `"noUnusedParameters": true`. Prior build broke with 43 `TS6133` errors across 16 files. Keep imports lean and remove dead code promptly to prevent build regressions.
 
 ## 📜 License
 

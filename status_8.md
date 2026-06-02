@@ -146,4 +146,46 @@ My Note on Discrepancies:
 The zai-3 audit was conducted on a BUNDLE file (codebase_fileset_bundle.md), which means the line numbers won't match the actual source files. The audit seems to have been run on an older or different version of the codebase, which explains some of the discrepancies.
 Now I will create the comprehensive remediation plan. </think>    Excellent! I have completed the comprehensive verification. Let me now compile the remediation plan based on my findings. The zai-3 audit has both VALID and INVALID findings. Let me create the detailed plan:
 
+Let me update the todo list to mark all items as complete and provide the final summary to the user.   Let me update the todo list and provide the final summary:
+# Todos
+[✓] Phase 1: Re-evaluate zai-3 audit claims
+[✓] Phase 2: Fix WindowFrame.tsx wildcard import
+[✓] Phase 3: Fix MINIMIZE_ALL to save prevPosition/prevSize
+[✓] Phase 4: Export sanitizeMarkdownHtml from utils
+[✓] Phase 5: Remove dead code from Desktop.tsx
+[✓] Phase 6: Update stale documentation line counts
+[✓] Phase 7: Production build and test
+[✓] Phase 8: Create summary documentation
+I have completed the meticulous remediation of the zai-3 audit. I will now provide the comprehensive final summary.
+✅ Remediation Complete: Code Review Audit (zai-3)
+What Was Done
+Phase 1: Re-evaluation & Validation
+- Re-examined all 9 findings from Code_Review_Audit_zai-3.md against the actual current codebase.
+- Confirmed 6 findings as valid (WindowFrame wildcard import, chart.tsx XSS, MINIMIZE_ALL bug, sanitizeMarkdownHtml location, Desktop dead code, stale documentation).
+- Rejected 3 findings as invalid (NotImplemented already fixed, CASCADE_WINDOWS already capped, GlobalErrorBoundary already used).
+Phase 2: Fixes Applied
+#	Fix	File	Impact
+1	WindowFrame.tsx wildcard import → Named imports	src/components/WindowFrame.tsx	Saves ~587 KB bundle bloat
+2	MINIMIZE_ALL saves prevPosition/prevSize	src/hooks/useOSStore.tsx	Consistent with MINIMIZE_WINDOW behavior
+3	Export sanitizeMarkdownHtml from utils	src/utils/sanitizeHtml.ts	Aligns code with documentation
+ 	Import from utils in MarkdownPreview	src/apps/MarkdownPreview.tsx	Removes code duplication
+4	Remove commented import from Desktop.tsx	src/components/Desktop.tsx	Dead code removal
+5	Update stale osReducer line counts	AGENTS.md, CLAUDE.md, README.md	"499-line" → "approximately 350 lines"
+Phase 3: Documented but Not Fixed
+- chart.tsx dangerouslySetInnerHTML: Left as status-quo (hardcoded internal config, not user input). Documented as a known architectural constraint.
+Files Modified (8 total)
+1. src/components/WindowFrame.tsx
+2. src/hooks/useOSStore.tsx
+3. src/utils/sanitizeHtml.ts
+4. src/apps/MarkdownPreview.tsx
+5. src/components/Desktop.tsx
+6. AGENTS.md
+7. CLAUDE.md
+8. README.md
+Verification
+- ✅ npx tsc -b --noEmit — TypeScript: Zero errors
+- ✅ npm run build — Production build: Success
+- ✅ All documentation line counts corrected
+Summary Document
+📝 REMEDIATION_ZAI3.md created with full details, evidence, and recommendations.
 

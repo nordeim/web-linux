@@ -5,7 +5,7 @@
 import { useCallback, useRef, useState, memo, useEffect } from 'react';
 import type { Window } from '@/types';
 import { useOS } from '@/hooks/useOSStore';
-import * as Icons from 'lucide-react';
+import { Minus, Copy, Square, X } from 'lucide-react';
 import DynamicIcon from './DynamicIcon';
 
 const TOP_PANEL_HEIGHT = 28;
@@ -261,14 +261,14 @@ const WindowFrame = memo(function WindowFrame({ window: win, children }: WindowF
             style={{ borderRadius: isMaximized ? 0 : '0 0 0 0' }}
             title="Minimize"
           >
-            <Icons.Minus size={14} />
+            <Minus size={14} />
           </button>
           <button
             onClick={handleMaximize}
             className="w-9 h-9 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
             title={isMaximized ? 'Restore' : 'Maximize'}
           >
-            {isMaximized ? <Icons.Copy size={12} /> : <Icons.Square size={12} />}
+            {isMaximized ? <Copy size={12} /> : <Square size={12} />}
           </button>
           <button
             onClick={handleClose}
@@ -284,7 +284,7 @@ const WindowFrame = memo(function WindowFrame({ window: win, children }: WindowF
             }}
             title="Close"
           >
-            <Icons.X size={14} />
+            <X size={14} />
           </button>
         </div>
       </div>

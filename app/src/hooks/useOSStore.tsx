@@ -446,7 +446,7 @@ export function osReducer(state: OSState, action: OSAction): OSState {
         ...state,
         windows: state.windows.map((w) =>
           w.state !== 'minimized'
-            ? { ...w, state: 'minimized' as WindowState, isFocused: false }
+            ? { ...w, state: 'minimized' as WindowState, isFocused: false, prevPosition: { ...w.position }, prevSize: { ...w.size } }
             : w
         ),
         activeWindowId: null,

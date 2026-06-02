@@ -41,3 +41,22 @@ export function escapeHtml(text: string): string {
   div.textContent = text;
   return div.innerHTML;
 }
+
+/**
+ * Sanitize markdown-generated HTML with a restricted tag whitelist.
+ * Use this when rendering markdown content to HTML.
+ *
+ * @param dirtyHtml - The potentially unsafe HTML string from markdown rendering
+ * @returns Sanitized HTML string safe for injection via dangerouslySetInnerHTML
+ */
+export function sanitizeMarkdownHtml(dirtyHtml: string): string {
+  return sanitizeHtml(dirtyHtml, {
+    ALLOWED_TAGS: [
+      'p', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+      'ul', 'ol', 'li', 'strong', 'em', 'code', 'pre',
+      'blockquote', 'a', 'img', 'del', 'table', 'thead',
+      'tbody', 'tr', 'th', 'td', 'hr',
+    ],
+    ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'style', 'class'],
+  });
+}

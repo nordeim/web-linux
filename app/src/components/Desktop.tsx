@@ -4,7 +4,7 @@
 
 import { useCallback, memo, useState, useRef } from 'react';
 import { useOS } from '@/hooks/useOSStore';
-import * as Icons from 'lucide-react';
+// import * as Icons from 'lucide-react';
 import DynamicIcon from './DynamicIcon';
 
 const GRID_X = 80;

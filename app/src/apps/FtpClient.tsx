@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import {
-  Server, Upload, Download, FolderPlus, Trash2, RefreshCw, ChevronRight,
-  File, Folder, HardDrive, Globe, Link, Unlink, X, Check
+  Server, Upload, Download, RefreshCw, ChevronRight,
+  File, Folder, HardDrive, Globe, Link, Unlink, Check
 } from 'lucide-react';
 import { useFileSystem } from '@/hooks/useFileSystem';
 
@@ -64,8 +64,7 @@ export default function FtpClient() {
   const [transfers, setTransfers] = useState<TransferItem[]>([]);
   const [selectedLocal, setSelectedLocal] = useState<string | null>(null);
   const [selectedRemote, setSelectedRemote] = useState<string | null>(null);
-  const [showNewFolder, setShowNewFolder] = useState(false);
-  const [newFolderName, setNewFolderName] = useState('');
+
 
   useEffect(() => {
     const rootNode = Object.values(fs.nodes).find(n => n.parentId === null);

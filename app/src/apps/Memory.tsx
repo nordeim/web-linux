@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Brain, RotateCcw, Star, Clock, MousePointer } from 'lucide-react';
+import { Brain, Star, Clock, MousePointer } from 'lucide-react';
 
 type Theme = 'colors' | 'numbers' | 'animals' | 'letters';
 type Difficulty = 'easy' | 'medium' | 'hard' | 'expert';

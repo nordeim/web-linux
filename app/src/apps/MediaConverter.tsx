@@ -1,7 +1,7 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import {
   RefreshCw, Play, Download, FileVideo, FileAudio, FileImage,
-  Settings2, Check, X, Trash2
+  Settings2, X, Trash2
 } from 'lucide-react';
 import { useFileSystem } from '@/hooks/useFileSystem';
 
@@ -100,7 +100,6 @@ export default function MediaConverter() {
   const clearCompleted = () => setJobs(prev => prev.filter(j => j.status !== 'completed'));
   const deleteJob = (id: string) => setJobs(prev => prev.filter(j => j.id !== id));
 
-  const formatTime = (ts: number) => new Date(ts).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
   return (
     <div className="flex flex-col h-full" style={{ background: 'var(--bg-window)' }}>

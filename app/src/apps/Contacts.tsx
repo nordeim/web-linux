@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
-  Users, Plus, X, Search, Star, Phone, Mail, MapPin, Edit2, Trash2, ChevronLeft, User
+  Users, Plus, X, Search, Star, Phone, Mail, MapPin, Edit2, Trash2, ChevronLeft
 } from 'lucide-react';
 import { z } from 'zod';
 import { safeJsonParse } from '@/utils/safeJsonParse';

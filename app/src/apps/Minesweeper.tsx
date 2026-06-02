@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Bomb, Clock, Flag, RotateCcw } from 'lucide-react';
+import { Bomb, Clock, Flag } from 'lucide-react';
 
 type CellState = 'hidden' | 'revealed' | 'flagged' | 'questioned';
 interface Cell {
@@ -228,7 +228,7 @@ export default function Minesweeper() {
   };
 
   const cellSize = difficulty === 0 ? 28 : difficulty === 1 ? 22 : 20;
-  const gridWidth = diff.cols * cellSize;
+  // const gridWidth = diff.cols * cellSize;
 
   return (
     <div className="flex flex-col items-center h-full select-none" style={{ background: 'var(--bg-window)', padding: 8 }}>

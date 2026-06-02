@@ -2,7 +2,7 @@
 // GlobalErrorBoundary — Prevents one app crash from destroying the OS shell
 // ============================================================
 
-import React, { Component, type ErrorInfo, type ReactNode } from 'react';
+import { Component, type ErrorInfo, type ReactNode } from 'react';
 
 interface Props {
   children: ReactNode;

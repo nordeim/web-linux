@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { RotateCcw, ChevronLeft, Crown } from 'lucide-react';
+import { RotateCcw, ChevronLeft } from 'lucide-react';
 
 type PieceType = 'p' | 'n' | 'b' | 'r' | 'q' | 'k';
 type PieceColor = 'w' | 'b';
@@ -263,7 +263,7 @@ export default function Chess() {
   });
 
   const [mode, setMode] = useState<'pvp' | 'ai'>('pvp');
-  const [aiDepth, setAiDepth] = useState(2);
+  // const [aiDepth, setAiDepth] = useState(2);
 
   const handleSquareClick = useCallback((row: number, col: number) => {
     if (state.gameStatus === 'checkmate' || state.gameStatus === 'stalemate') return;

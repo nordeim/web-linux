@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Layers, RotateCcw, Undo2, Settings } from 'lucide-react';
+import { RotateCcw, Undo2 } from 'lucide-react';
 
 type Suit = 'hearts' | 'diamonds' | 'clubs' | 'spades';
 type Rank = 'A' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | 'J' | 'Q' | 'K';
@@ -327,7 +327,7 @@ export default function Solitaire() {
   }, [saveSnapshot]);
 
   // Card rendering
-  const renderCard = (card: Card, pile: string, index: number, isTop: boolean, overlap = false) => {
+  const renderCard = (card: Card, pile: string, index: number, _isTop: boolean, overlap = false) => {
     const isSelected = state.selectedCard?.pile === pile && state.selectedCard?.index === index;
     if (!card.faceUp) {
       return (

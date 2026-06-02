@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo, type ReactElement } from 'react';
 import {
   FileText, Search, WrapText, List, X, FolderOpen,
-  ChevronLeft, ChevronRight, Type, Eye
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useFileSystem } from '@/hooks/useFileSystem';
 
@@ -77,7 +77,7 @@ function highlightLine(line: string, lang: string): ReactElement {
 }
 
 export default function DocumentViewer({ fileNodeId }: DocumentViewerProps) {
-  const { fs, readFile, getNodeById, getChildren } = useFileSystem();
+  const { fs, readFile, getNodeById } = useFileSystem();
   const [currentFileId, setCurrentFileId] = useState<string | undefined>(fileNodeId);
   const [showLineNumbers, setShowLineNumbers] = useState(true);
   const [wordWrap, setWordWrap] = useState(false);
@@ -85,7 +85,7 @@ export default function DocumentViewer({ fileNodeId }: DocumentViewerProps) {
   const [showSearch, setShowSearch] = useState(false);
   const [searchIndex, setSearchIndex] = useState(0);
   const [showFilePicker, setShowFilePicker] = useState(false);
-  const [pickerPath, setPickerPath] = useState<string>('Documents');
+
   const contentRef = useRef<HTMLDivElement>(null);
 
   const node = currentFileId ? getNodeById(currentFileId) : undefined;

@@ -46,8 +46,8 @@ export default function Whiteboard() {
   const [showTextInput, setShowTextInput] = useState(false);
   const [textPos, setTextPos] = useState({ x: 0, y: 0 });
   const [textValue, setTextValue] = useState('');
-  const [draggedNote, setDraggedNote] = useState<string | null>(null);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [, setDraggedNote] = useState<string | null>(null);
+  const [, setDragOffset] = useState({ x: 0, y: 0 });
 
   const getCanvasPoint = useCallback((e: React.MouseEvent) => {
     const canvas = canvasRef.current;
@@ -207,12 +207,12 @@ export default function Whiteboard() {
     // Draw notes
     const container = containerRef.current;
     if (container) {
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = CANVAS_WIDTH / rect.width;
-      const scaleY = CANVAS_HEIGHT / rect.height;
+      // const rect = canvas.getBoundingClientRect();
+      // const scaleX = CANVAS_WIDTH / rect.width;
+      // const scaleY = CANVAS_HEIGHT / rect.height;
       stickyNotes.forEach(note => {
-        const nx = note.x / scaleX * (rect.width / CANVAS_WIDTH);
-        const ny = note.y / scaleY * (rect.height / CANVAS_HEIGHT);
+        // const nx = note.x / scaleX * (rect.width / CANVAS_WIDTH);
+        // const ny = note.y / scaleY * (rect.height / CANVAS_HEIGHT);
         ctx.fillStyle = note.color;
         ctx.fillRect(note.x, note.y, 160, 120);
         ctx.fillStyle = '#000';

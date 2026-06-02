@@ -57,7 +57,7 @@ const createInitialDockItems = (): DockItem[] => {
   }));
 };
 
-import { validateDesktopIcons, saveDesktopIcons } from '@/utils/storageValidation';
+import { validateDesktopIcons } from '@/utils/storageValidation';
 
 const loadDesktopIcons = (): DesktopIcon[] => {
   return validateDesktopIcons(defaultDesktopIcons);

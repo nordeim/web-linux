@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef, useCallback, type ReactElement } from 'react';
+import { useState, useEffect, useRef, type ReactElement } from 'react';
 import {
-  Wifi, Activity, Globe, Server, Search, Play, X, Loader2,
+  Activity, Globe, Server, Search, Play, X, Loader2,
   CheckCircle, XCircle, HelpCircle
 } from 'lucide-react';
 
@@ -54,7 +54,7 @@ const COMMON_PORTS = [
   { port: 3389, service: 'RDP' },
 ];
 
-const generatePingResults = (host: string, count: number): PingResult[] => {
+const generatePingResults = (_host: string, count: number): PingResult[] => {
   const results: PingResult[] = [];
   for (let i = 0; i < count; i++) {
     const baseTime = 15 + Math.random() * 30;
@@ -84,7 +84,7 @@ const generateTraceroute = (host: string): TraceHop[] => {
   return hops;
 };
 
-const generatePortScan = (host: string): PortResult[] => {
+const generatePortScan = (_host: string): PortResult[] => {
   return COMMON_PORTS.map(cp => {
     const rand = Math.random();
     let status: 'open' | 'closed' | 'filtered';

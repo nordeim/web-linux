@@ -33,7 +33,7 @@ export default function Snake() {
   const [direction, setDirection] = useState<Direction>('RIGHT');
   const [food, setFood] = useState<Position>({ x: 15, y: 10 });
   const [specialFood, setSpecialFood] = useState<Position | null>(null);
-  const [specialTimer, setSpecialTimer] = useState(0);
+  const [, setSpecialTimer] = useState(0);
   const [gameState, setGameState] = useState<'menu' | 'playing' | 'paused' | 'over'>('menu');
   const [score, setScore] = useState(0);
   const [speed, setSpeed] = useState(INITIAL_SPEED);
@@ -239,7 +239,7 @@ export default function Snake() {
         {/* Grid cells */}
         {Array.from({ length: GRID_SIZE }, (_, y) =>
           Array.from({ length: GRID_SIZE }, (_, x) => {
-            const isSnake = snake.some((s, i) => s.x === x && s.y === y);
+            const isSnake = snake.some((s, _i) => s.x === x && s.y === y);
             const isHead = snake[0]?.x === x && snake[0]?.y === y;
             const isFood = food.x === x && food.y === y;
             const isSpecial = specialFood?.x === x && specialFood?.y === y;

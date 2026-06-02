@@ -36,6 +36,7 @@ Follow this six-phase workflow for all implementation tasks:
   - Code highlighting: Use `sanitizeHtml(..., {ALLOWED_TAGS: ['span', 'br', 'div']})`.
 - **ReDoS (Catastrophic Backtracking)**: Any app accepting user-supplied regex must limit `exec()` iterations to prevent browser tab freezing. Use `MAX_EXEC_ITERATIONS = 1000` and bail out early.
 - **Unbounded Array Creation**: Functions creating arrays from user input (e.g., factorial) must cap input size before allocation. Calculator caps factorial at 170 to prevent memory exhaustion.
+- **Error Boundaries**: Use `GlobalErrorBoundary` to wrap application content. The shell (`AppShell`) and each window (`AppRouter`) should both be wrapped to prevent one error from crashing the entire OS. See `GlobalErrorBoundary.tsx` for implementation.
 
 ### Persistence
 - **localStorage Schema Validation**: All `localStorage` reads must go through `validateDesktopIcons()` or `validateFileSystem()` from `@/utils/storageValidation`. For ad-hoc app-specific reads, use `safeJsonParse(raw, schema, fallback)` from `@/utils/safeJsonParse`. Never trust `JSON.parse()` output without runtime validation.

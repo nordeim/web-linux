@@ -15,6 +15,7 @@ import WindowManager from '@/components/WindowManager';
 import ContextMenu from '@/components/ContextMenu';
 import NotificationSystem from '@/components/NotificationSystem';
 import NotificationCenter from '@/components/NotificationCenter';
+import GlobalErrorBoundary from '@/components/GlobalErrorBoundary';
 
 function AppShell() {
   const { state, dispatch } = useOS();
@@ -205,7 +206,9 @@ function AppShell() {
 export default function App() {
   return (
     <OSProvider>
-      <AppShell />
+      <GlobalErrorBoundary>
+        <AppShell />
+      </GlobalErrorBoundary>
     </OSProvider>
   );
 }

@@ -113,6 +113,9 @@ After running `npm run dev`, open your browser at the provided port (usually `ht
 | `plan.md` | Original project roadmap and feature checklist |
 | `REMEDIATION_MIMO2.md` | Prior code review audit remediation |
 | `REMEDIATION_KIMI2.md` | Latest code review audit remediation (2026-06-02) |
+| `CONSISTENT.md` | Single source of truth for all audit findings and remediation status |
+| `REMEDIATION_PLAN.md` | Active remediation plan with todo list and execution tracking |
+| `STATUS_AUDIT_REPORT.md` | Validation report for status_5.md and status_6.md accuracy |
 
 ## ⚠️ Known Issues & Recommendations
 
@@ -124,6 +127,7 @@ After running `npm run dev`, open your browser at the provided port (usually `ht
 6. **Unused Local / Import Hygiene**: The `tsconfig.app.json` enforces `"noUnusedLocals": true` and `"noUnusedParameters": true`. Prior build broke with 43 `TS6133` errors across 16 files. Keep imports lean and remove dead code promptly to prevent build regressions.
 7. **ReDoS from User-Crafted Regex**: RegexTester now limits iterations, but apps accepting user regex (e.g., Notes search, Email filters) should also guard against catastrophic backtracking.
 8. **Simulated vs Real Recordings**: ScreenRecorder and VoiceRecorder create placeholder text downloads. Production builds should implement actual `MediaRecorder` API recording or clearly mark as simulated.
+9. **GlobalErrorBoundary Around AppShell**: The `AppShell` component (boot, login, keyboard handlers) was not wrapped in `GlobalErrorBoundary`. A shell-level error could crash the entire OS. **Fixed**: `AppShell` is now wrapped with `GlobalErrorBoundary` in `App.tsx`.
 
 ## 📜 License
 

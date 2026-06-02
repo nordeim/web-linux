@@ -29,11 +29,13 @@ Follow this six-phase workflow for all implementation tasks:
 - **Responsive Design**: Ensure apps handle window resizing correctly.
 
 ### Security
-- **`eval()` / `new Function()`**: **FORBIDDEN**. Any math evaluation must use `safeEval()` from `@/utils/safeEval`. This includes spreadsheet formulas, terminal `calc` commands, and any future math features.
-- **`dangerouslySetInnerHTML`**: **MANDATORY SANITIZATION**. Always wrap user-generated HTML with `sanitizeHtml()` from `@/utils/sanitizeHtml`. Never inject raw strings.
-  - For markdown content, use `sanitizeMarkdownHtml()` which has a whitelist for common markdown tags.
-  - For code highlighting, use `sanitizeHtml(..., {ALLOWED_TAGS: ['span', 'br', 'div']})`.
-  - For regex test results, use `sanitizeHtml(..., {ADD_TAGS: ['mark']})`.
+- **`eval()` / `new Function()``: **FORBIDDEN**. Any math evaluation must use `safeEval()` from `@/utils/safeEval`. This includes spreadsheet formulas, terminal `calc` commands, and any future math features.
+- **`dangerouslySetInnerHTML`: **AVOID WHENEVER POSSIBLE**. Prefer React components over `dangerouslySetInnerHTML` for highlighting, match rendering, or any dynamic content. If unavoidable, always wrap user-generated HTML with `sanitizeHtml()` from `@/utils/sanitizeHtml`.
+  - **Regex highlighting**: Use `<mark>` React components instead of concatenated HTML strings (as demonstrated in the RegexTester refactor).
+  - Markdown: Use `sanitizeMarkdownHtml()` which has a whitelist for common markdown tags.
+  - Code highlighting: Use `sanitizeHtml(..., {ALLOWED_TAGS: ['span', 'br', 'div']})`.
+- **ReDoS (Catastrophic Backtracking)**: Any app accepting user-supplied regex must limit `exec()` iterations to prevent browser tab freezing. Use `MAX_EXEC_ITERATIONS = 1000` and bail out early.
+- **Unbounded Array Creation**: Functions creating arrays from user input (e.g., factorial) must cap input size before allocation. Calculator caps factorial at 170 to prevent memory exhaustion.
 
 ### Persistence
 - **localStorage Schema Validation**: All `localStorage` reads must go through `validateDesktopIcons()` or `validateFileSystem()` from `@/utils/storageValidation`. For ad-hoc app-specific reads, use `safeJsonParse(raw, schema, fallback)` from `@/utils/safeJsonParse`. Never trust `JSON.parse()` output without runtime validation.
@@ -88,7 +90,10 @@ Follow this six-phase workflow for all implementation tasks:
 ### Security
 - **`eval()` and `new Function()` are never safe**, even with regex sanitization. A hardened parser is the only acceptable solution for math evaluation.
 - **`dangerouslySetInnerHTML` without sanitization is a persistent XSS vector**, especially when combined with `localStorage` persistence (stored XSS).
+- **Prefer React components over `dangerouslySetInnerHTML`**. RegexTester was refactored to use `<mark>` React components instead of concatenated HTML strings, eliminating XSS risk entirely.
 - **Runtime schema validation is non-optional** for any persisted state. TypeScript types are erased at runtime; `zod` is the correct defense. The new `safeJsonParse(raw, schema, fallback)` utility in `src/utils/safeJsonParse.ts` provides a reusable pattern for ad-hoc localStorage reads.
+- **ReDoS (catastrophic backtracking) from user regex is real**. A pattern like `(a+)+$` against a long string can freeze the browser tab entirely. Always limit `exec()` iterations (e.g., 1000) and bail out early. Never trust user-supplied regex without guards.
+- **Unbounded array creation from user input crashes browsers**. The Calculator factorial function previously created an array of size `Math.floor(v)` without a cap, allowing input like `1e8` to crash the tab. Always cap input-dependent allocations (factorial capped at 170, where JavaScript `Number` overflows to `Infinity`).
 
 ### State Management
 - **Monolithic reducers are hard to maintain**. The 499-line `osReducer` works but violates separation of concerns. Consider splitting into domain-specific reducers or switching to a state management library with selectors.
@@ -107,3 +112,6 @@ Follow this six-phase workflow for all implementation tasks:
 4. **Split `osReducer` into domain-specific reducers** (window management, notifications, desktop icons, etc.).
 5. **Fix remaining ~17 apps using raw `JSON.parse`** on localStorage without zod validation (Clock, Todo, ColorPalette, ColorPicker, TextEditor, Calendar, Reminders, Memory, Spreadsheet, Chat, RssReader, Settings, Notes, ArchiveManager, ScreenRecorder, Calculator, VoiceRecorder). Apply the `safeJsonParse` + zod schema pattern demonstrated in PasswordManager, Contacts, and Browser.
 6. **Enforce import hygiene during code review**: The `noUnusedLocals`/`noUnusedParameters` TypeScript checks catch dead code at build time, but IDE auto-imports can silently add unused imports. Add a pre-commit hook or lint rule to block commits with unused identifiers.
+7. **Replace all remaining `dangerouslySetInnerHTML` usage**: After RegexTester was refactored to use React components, audit all remaining `dangerouslySetInnerHTML` usage and replace with React component rendering where possible.
+8. **Add ReDoS guards to all regex-accepting apps**: Notes search, Email filters, and any other app that accepts user-supplied regex should implement iteration limits.
+9. **Implement actual MediaRecorder for recorder apps**: ScreenRecorder and VoiceRecorder currently create placeholder text downloads. Production builds should implement the actual `MediaRecorder` API or clearly mark simulated behavior.

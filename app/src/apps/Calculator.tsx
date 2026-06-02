@@ -138,7 +138,7 @@ const Calculator: React.FC = () => {
       case 'square': result = v * v; break;
       case 'cube': result = v * v * v; break;
       case '1/x': result = 1 / v; break;
-      case 'factorial': result = v < 0 || !Number.isInteger(v) ? NaN : Array.from({ length: Math.floor(v) }, (_, i) => i + 1).reduce((a, b) => a * b, 1); break;
+      case 'factorial': result = v < 0 || !Number.isInteger(v) ? NaN : v > 170 ? Infinity : Array.from({ length: Math.floor(v) }, (_, i) => i + 1).reduce((a, b) => a * b, 1); break;
       case 'abs': result = Math.abs(v); break;
       case 'pi': setDisplay(String(Math.PI)); setWaitingForOperand(true); return;
       case 'e': setDisplay(String(Math.E)); setWaitingForOperand(true); return;
@@ -171,7 +171,7 @@ const Calculator: React.FC = () => {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [display, waitingForOperand, operator, operand]);
+  }, [inputDigit, inputDecimal, performOp, calculate, clear, backspace, percentage]);
 
   const Btn: React.FC<{
     label: React.ReactNode;

@@ -426,17 +426,18 @@ export function osReducer(state: OSState, action: OSAction): OSState {
 
     case 'CASCADE_WINDOWS': {
       let z = state.nextZIndex;
+      const MAX_Z = 2147483647;
       const updated = state.windows.map((w, i) => ({
         ...w,
         position: { x: 40 + i * 30, y: TOP_PANEL_HEIGHT + 20 + i * 30 },
-        zIndex: z++,
+        zIndex: Math.min(z++, MAX_Z),
         isFocused: i === state.windows.length - 1,
       }));
       return {
         ...state,
         windows: updated,
         activeWindowId: updated.length > 0 ? updated[updated.length - 1].id : null,
-        nextZIndex: z,
+        nextZIndex: Math.min(z, MAX_Z),
       };
     }
 

@@ -38,8 +38,14 @@ This codebase has undergone a comprehensive security audit and remediation. Key 
 - **Fixed Z-Index Overflow**: Added bounds checking to prevent focus stacking issues in long sessions.
 - **Resolved Fragile Reduce Logic**: Fixed window state restoration logic to prevent crashes when minimizing all windows.
 - **Eliminated 43 Build Errors from Dead Code**: Fixed all `TS6133` errors (unused locals/parameters) across 16 files, ensuring clean production builds.
+- **Fixed ReDoS in RegexTester**: Added execution iteration limit (1000) to prevent catastrophic backtracking from freezing the browser tab.
+- **Fixed Calculator Factorial Memory Crash**: Added input cap at 170 to prevent `Array.from({length: v})` from allocating massive arrays.
+- **Refactored RegexTester Rendering**: Replaced `dangerouslySetInnerHTML` with React component-based match highlighting to eliminate XSS risk.
+- **Fixed Misleading Recording Extensions**: Changed `.webm` to `.txt` for ScreenRecorder and VoiceRecorder simulated downloads.
+- **Fixed Calculator Keyboard Stale Closures**: Added all handler functions to `useEffect` dependency array to prevent stale closure bugs.
+- **Fixed z-Index Overflow in CASCADE_WINDOWS**: Added `Math.min(z, MAX_Z)` cap to prevent z-index exceeding CSS maximum.
 
-See [REMEDIATION.md](REMEDIATION.md) for the full security audit report and [REMEDIATION_MIMO2.md](REMEDIATION_MIMO2.md) for the code review audit remediation.
+See [REMEDIATION.md](REMEDIATION.md) for the full security audit report, [REMEDIATION_MIMO2.md](REMEDIATION_MIMO2.md) for the prior code review audit remediation, and [REMEDIATION_KIMI2.md](REMEDIATION_KIMI2.md) for the latest code review audit.
 
 ## 🏗️ Architecture
 
@@ -105,6 +111,8 @@ After running `npm run dev`, open your browser at the provided port (usually `ht
 | `GEMINI.md` | Project context for Gemini AI interactions |
 | `REMEDIATION.md` | Full security audit and remediation report |
 | `plan.md` | Original project roadmap and feature checklist |
+| `REMEDIATION_MIMO2.md` | Prior code review audit remediation |
+| `REMEDIATION_KIMI2.md` | Latest code review audit remediation (2026-06-02) |
 
 ## ⚠️ Known Issues & Recommendations
 
@@ -114,6 +122,8 @@ After running `npm run dev`, open your browser at the provided port (usually `ht
 4. **Split osReducer**: The 500-line `osReducer` handles window, dock, notification, context menu, icon, theme, and alt-tab logic. Now `export`ed for testing (see `src/hooks/__tests__/osReducer-zindex.test.tsx`). Consider splitting into domain-specific reducers.
 5. **CI/CD Pipeline**: Automated build + lint + test gates are not yet implemented.
 6. **Unused Local / Import Hygiene**: The `tsconfig.app.json` enforces `"noUnusedLocals": true` and `"noUnusedParameters": true`. Prior build broke with 43 `TS6133` errors across 16 files. Keep imports lean and remove dead code promptly to prevent build regressions.
+7. **ReDoS from User-Crafted Regex**: RegexTester now limits iterations, but apps accepting user regex (e.g., Notes search, Email filters) should also guard against catastrophic backtracking.
+8. **Simulated vs Real Recordings**: ScreenRecorder and VoiceRecorder create placeholder text downloads. Production builds should implement actual `MediaRecorder` API recording or clearly mark as simulated.
 
 ## 📜 License
 

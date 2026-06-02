@@ -181,7 +181,7 @@ export default function ScreenRecorder() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${recording.name}.webm`;
+    a.download = `${recording.name}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   };

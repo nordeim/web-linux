@@ -8,4 +8,4 @@ please meticulously re-evaluate and re-validate the identified gaps and issues a
 
 ---
 
-please meticulously re-evaluate and re-validate the identified gaps and issues captured in @Code_Review_Audit_mimo-2.md against the codebase and the @CLAUDE.md , @README.md and @plan.md to check for alignment and to confirm the findings and identify the root causes and the optimal fixes, then meticulously plan to create a detailed remediation plan with ToDo list to apply the optimal fixes. review and validate the remediation plan before proceeding to execute it meticulously. use TDD approach to make code changes. 
+please meticulously re-evaluate and re-validate the identified gaps and issues captured in @Code_Review_Audit_kimi-2.md against the codebase and the @CLAUDE.md , @README.md and @plan.md to check for alignment and to confirm the findings and identify the root causes and the optimal fixes, then meticulously plan to create a detailed remediation plan with ToDo list to apply the optimal fixes. review and validate the remediation plan before proceeding to execute it meticulously. use TDD approach to make code changes. 

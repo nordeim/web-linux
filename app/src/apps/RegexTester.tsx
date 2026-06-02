@@ -7,7 +7,9 @@ import {
   Copy, BookOpen,
   Replace, Flag, X,
 } from 'lucide-react';
-import { sanitizeHtml } from '@/utils/sanitizeHtml';
+
+
+const MAX_EXEC_ITERATIONS = 1000; // Prevent ReDoS attacks
 
 const FLAG_OPTIONS = [
   { key: 'g', label: 'g', desc: 'Global' },
@@ -133,7 +135,9 @@ export default function RegexTester() {
       if (flags.has('g')) {
         let m: RegExpExecArray | null;
         const localRegex = new RegExp(pattern, flagString);
-        while ((m = localRegex.exec(testString)) !== null) {
+        let iterations = 0;
+        while ((m = localRegex.exec(testString)) !== null && iterations < MAX_EXEC_ITERATIONS) {
+          iterations++;
           if (m.index === localRegex.lastIndex) localRegex.lastIndex++;
           results.push({
             text: m[0],
@@ -160,9 +164,9 @@ export default function RegexTester() {
     }
   }, [pattern, testString, flags, flagString]);
 
-  const highlightedText = useMemo(() => {
-    if (!pattern || !testString || error) return testString;
-    if (matches.length === 0) return testString;
+  const highlightedParts = useMemo(() => {
+    if (!pattern || !testString || error) return [] as { text: string; color?: string }[];
+    if (matches.length === 0) return [{ text: testString }] as { text: string; color?: string }[];
 
     const parts: { text: string; color?: string }[] = [];
     let lastIndex = 0;
@@ -180,11 +184,7 @@ export default function RegexTester() {
       parts.push({ text: testString.slice(lastIndex) });
     }
 
-    return parts.map((p, i) =>
-      p.color
-        ? `<mark key=${i} style="background:${p.color};border-radius:2px;padding:0 1px">${p.text}</mark>`
-        : p.text
-    ).join('');
+    return parts;
   }, [pattern, testString, matches, error]);
 
   const replacementResult = useMemo(() => {
@@ -280,8 +280,28 @@ export default function RegexTester() {
                   background: 'var(--bg-input)', color: 'var(--text-primary)',
                   border: '1px solid var(--border-default)', fontFamily: "'JetBrains Mono', monospace", fontSize: 13,
                 }}
-                dangerouslySetInnerHTML={{ __html: highlightedText ? sanitizeHtml(highlightedText, { ADD_ATTR: ['key'], ADD_TAGS: ['mark'] }) : '<span style="color:var(--text-disabled)">Enter text to test against...</span>' }}
-              />
+              >
+                {testString ? (
+                  highlightedParts.map((part, i) => (
+                    part.color ? (
+                      <mark
+                        key={i}
+                        style={{
+                          background: part.color,
+                          borderRadius: '2px',
+                          padding: '0 1px',
+                        }}
+                      >
+                        {part.text}
+                      </mark>
+                    ) : (
+                      <span key={i}>{part.text}</span>
+                    )
+                  ))
+                ) : (
+                  <span style={{ color: 'var(--text-disabled)' }}>Enter text to test against...</span>
+                )}
+              </div>
               <textarea
                 value={testString}
                 onChange={(e) => setTestString(e.target.value)}

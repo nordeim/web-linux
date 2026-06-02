@@ -227,13 +227,15 @@ Run from the `app/` directory:
 ## ⚠️ Anti-Patterns to Avoid
 
 - **`eval()` / `new Function()`**: These are **forbidden** for any math evaluation. Use `safeEval()` from `@/utils/safeEval` instead.
-- **Raw `dangerouslySetInnerHTML`**: Always wrap user-generated HTML with `sanitizeHtml()` from `@/utils/sanitizeHtml`. Never inject raw strings.
+- **Raw `dangerouslySetInnerHTML`**: Always wrap user-generated HTML with `sanitizeHtml()` from `@/utils/sanitizeHtml`. Never inject raw strings. **Prefer React components over raw HTML strings** when possible (e.g., RegexTester match highlighting now uses `<mark>` components instead of string concatenation).
 - **Unvalidated localStorage**: Always validate schema with `zod` or `@/utils/storageValidation` before trusting `JSON.parse()` output.
 - **Direct DOM Manipulation**: Avoid `document.getElementById` for window operations. Use the `OSAction` dispatches.
 - **Path-Based VFS Calls**: Do not assume a file's path is its unique identifier. Always use the node `id`.
 - **Custom Window Chrome**: Do not build custom title bars or resize handles in individual apps. `WindowFrame.tsx` provides the standardized shell.
 - **Bypassing the Store**: App-to-app communication should go through the `useOS` hook or the File System, not local props.
 - **Leaving Dead Code / Unused Imports**: `tsconfig.app.json` enforces `"noUnusedLocals": true` and `"noUnusedParameters": true`. A single unused import, variable, or parameter will break the production build. Clean up immediately when removing features. Root cause of 43 `TS6133` build errors fixed on 2026-06-02.
+- **User-Crafted Regex Without Limits**: Any app that accepts user-supplied regex patterns (e.g., search, filters) must guard against ReDoS (catastrophic backtracking). Limit `exec()` iterations or use a timeout. RegexTester now limits to 1000 iterations per execution.
+- **Unbounded Array Creation**: Functions that create arrays from user input (e.g., factorial) must cap the input size before allocation. Calculator now caps factorial at 170 (JavaScript's `Infinity` threshold).
 
 ## 🔗 Key Entry Points
 - `src/hooks/useOSStore.tsx`: Global OS state and reducer.
@@ -277,12 +279,26 @@ Run from the `app/` directory:
 **Fix**: Remove the unused import/variable, or prefix with `_` if it's an intentionally ignored destructuring parameter (e.g., `const [, setX] = useState()`). Run `npx tsc -b --noEmit` before committing to catch these early.
 **Context**: 43 `TS6133` errors were fixed on 2026-06-02 across 16 files. Common culprits: unused Lucide icon imports, React hook imports (`useCallback`), state variables that were set but never read, and forEach/index callback parameters that shadowed outer scope variables.
 
+### ReDoS (Catastrophic Backtracking) from User Regex
+**Symptom**: Browser tab freezes when using regex matching with certain patterns like `(a+)+$` against long strings.  
+**Root Cause**: `RegExp.prototype.exec()` can enter infinite loops with patterns that cause catastrophic backtracking.  
+**Fix**: RegexTester now limits `exec()` iterations to 1000 per execution. Any app that accepts user-supplied regex should implement similar limits. Use a counter in the `while ((m = regex.exec(str)) !== null)` loop and bail out early if it exceeds a safe threshold.
+**Context**: This was a critical finding in the 2026-06-02 audit. The `MAX_EXEC_ITERATIONS = 1000` constant prevents the browser tab from freezing entirely. The user sees partial matches (up to 1000) instead of a frozen tab.
+
+### z-Index Overflow in CASCADE_WINDOWS
+**Symptom**: Window stacking order becomes erratic after cascading windows many times.  
+**Root Cause**: The `CASCADE_WINDOWS` action incremented `nextZIndex` in a loop without capping at the CSS max (`2147483647`).  
+**Fix**: Bounds check `Math.min(z++, MAX_Z)` and `Math.min(z, MAX_Z)` were added to the `CASCADE_WINDOWS` reducer case. If you implement a similar loop for z-index management, always cap the value.
+**Context**: This was a high-severity finding in the 2026-06-02 audit. The fix ensures z-index never exceeds the CSS maximum even when cascading 100+ windows.
+
 ## 🔒 Security Reminders
 
 1. Any new app that evaluates math must use `safeEval()`.
-2. Any new app that renders user HTML must use `sanitizeHtml()`.
+2. Any new app that renders user HTML must use `sanitizeHtml()`. **Prefer React components over `dangerouslySetInnerHTML` wherever possible.**
 3. Any new feature that persists to `localStorage` must validate with `zod`.
 4. Never add `eval()`, `new Function()`, or `Function()` to any app unless it is the `safeEval` implementation itself.
+5. **Any app accepting user-supplied regex must limit `exec()` iterations** to prevent ReDoS (catastrophic backtracking). Use a max iteration counter (e.g., 1000) and bail out early.
+6. **Any function creating arrays from user input must cap the size** before allocation to prevent memory exhaustion crashes.
 
 ## 📋 Outstanding Issues (As of 2026-06-02)
 
@@ -291,6 +307,8 @@ Run from the `app/` directory:
 3. **Accessibility**: Some games and media apps lack full keyboard navigation and ARIA labels.
 4. **CI/CD Pipeline**: Automated build + lint + test gates are not yet implemented.
 5. **Build Hygiene Monitoring**: While the 43 `TS6133` errors have been fixed, the project uses `"noUnusedLocals": true` and `"noUnusedParameters": true`. A single unused import or dead variable will break the build. Ensure all new code is checked with `npx tsc -b --noEmit` before committing.
+6. **ReDoS from User-Crafted Regex**: RegexTester now limits iterations, but apps accepting user regex (e.g., Notes search, Email filters) should also guard against catastrophic backtracking.
+7. **Simulated vs Real Recordings**: ScreenRecorder and VoiceRecorder create placeholder text downloads. Production builds should implement actual `MediaRecorder` API recording or clearly mark as simulated.
 
 ## 📐 Performance Patterns
 
@@ -321,3 +339,7 @@ Run from the `app/` directory:
 - **Window state transitions are surprisingly complex**. The interaction of z-index, focus, minimize, maximize, and close requires careful handling of edge cases.
 - **Dead import (Icons) can crash an entire app**. `NotImplemented.tsx` was missing `import * as Icons from 'lucide-react'`, causing a `ReferenceError` whenever any unbuilt app opened. Always verify imports manually.
 - **Dead code breaks builds, not just aesthetics**. `tsconfig.app.json` enforces `noUnusedLocals` and `noUnusedParameters`. A single unused import (e.g., a stolen from `lucide-react`) or unread state variable will cause `npm run build` to fail with `TS6133`. Clean up dead code immediately when removing features.
+- **`dangerouslySetInnerHTML` is a persistent XSS vector**. Even with DOMPurify, custom tag/attribute allowlists create attack surface. Prefer React components for highlighting (e.g., `<mark>`) over concatenated HTML strings. The RegexTester refactoring eliminated all `dangerouslySetInnerHTML` usage in favor of React component rendering.
+- **ReDoS (catastrophic backtracking) from user regex is real**. A pattern like `(a+)+$` against a long string can freeze the browser tab entirely. Always limit `exec()` iterations (e.g., 1000) and bail out early. Never trust user-supplied regex without guards.
+- **Unbounded array creation from user input crashes browsers**. The Calculator factorial function previously created an array of size `Math.floor(v)` without a cap, allowing input like `1e8` to crash the tab. Always cap input-dependent allocations (factorial capped at 170, where JavaScript `Number` overflows to `Infinity`).
+- **Stale closures in keyboard handlers are subtle bugs**. The Calculator keyboard handler's `useEffect` dependency array didn't include the handler functions (`inputDigit`, `performOp`, etc.), capturing the first render's versions. Always include all referenced values in `useEffect` dependency arrays, or use refs for values that change frequently.

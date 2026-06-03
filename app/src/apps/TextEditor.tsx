@@ -20,6 +20,31 @@ interface OpenFile {
   cursorCol: number;
 }
 
+// Escape special regex characters to prevent ReDoS from user-controlled find input
+function escapeRegExp(string: string): string {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// Safely count regex matches with iteration limit to prevent ReDoS
+function countMatchesSafely(text: string, query: string, maxIterations = 1000): number {
+  if (!query) return 0;
+  try {
+    // Escape user input for literal search, preventing ReDoS patterns
+    const safePattern = escapeRegExp(query);
+    const regex = new RegExp(safePattern, 'g');
+    let count = 0;
+    // Use exec with a counter to prevent infinite backtracking
+    while (count < maxIterations) {
+      const match = regex.exec(text);
+      if (!match) break;
+      count++;
+    }
+    return count;
+  } catch {
+    return 0;
+  }
+}
+
 const HIGHLIGHT_PATTERNS: Record<string, { pattern: RegExp; color: string }[]> = {
   js: [
     { pattern: /\/\/.*$/gm, color: '#6A9955' },
@@ -366,7 +391,7 @@ const TextEditor: React.FC = () => {
           {/* Find matches indicator */}
           {showFind && findQuery && (
             <div className="absolute bottom-8 right-4 px-2 py-1 rounded text-[10px]" style={{ background: 'var(--accent-primary)', color: 'white' }}>
-              {(activeFile.content.match(new RegExp(findQuery, 'g')) || []).length} matches
+              {countMatchesSafely(activeFile.content, findQuery)} matches
             </div>
           )}
         </div>

@@ -74,12 +74,12 @@ describe('ContextMenu > handleMenuAction', () => {
     );
   });
 
-  it('ARRANGE_ICONS dispatches CASCADE_WINDOWS', () => {
+  it('ARRANGE_ICONS dispatches ARRANGE_ICONS', () => {
     const dispatch = makeMockDispatch();
     handleMenuAction('ARRANGE_ICONS', baseState, dispatch);
     expect(dispatch).toHaveBeenCalledTimes(1);
     expect(dispatch).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'CASCADE_WINDOWS' })
+      expect.objectContaining({ type: 'ARRANGE_ICONS' })
     );
   });
 });

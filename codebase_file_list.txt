@@ -12,7 +12,6 @@ app/eslint.config.js
 app/postcss.config.js
 app/tsconfig.app.json
 app/vitest.setup.ts
-app/tailwind.config.js
 app/src/App.tsx
 app/src/main.tsx
 app/src/components
@@ -80,6 +79,7 @@ app/src/components/WindowManager.tsx
 app/src/components/TopPanel.tsx
 app/src/components/WindowFrame.tsx
 app/src/components/GlobalErrorBoundary.tsx
+app/src/components/__tests__/aria-attributes.test.ts
 app/src/components/__tests__/ContextMenu-actions.test.tsx
 app/src/components/__tests__/NotImplemented.test.tsx
 app/src/components/BootSequence.tsx
@@ -120,6 +120,7 @@ app/src/apps/FtpClient.tsx
 app/src/apps/FileManager.tsx
 app/src/apps/Game2048.tsx
 app/src/apps/MediaConverter.tsx
+app/src/apps/__tests__/TextEditor-localStorage.test.ts
 app/src/apps/JsonFormatter.tsx
 app/src/apps/Chat.tsx
 app/src/apps/NetworkTools.tsx
@@ -155,3 +156,4 @@ app/src/utils/__tests__/safeJsonParse-integration.test.ts
 app/src/utils/__tests__/safeJsonParse.test.ts
 app/src/lib/utils.ts
 app/src/types/index.ts
+app/tailwind.config.mjs

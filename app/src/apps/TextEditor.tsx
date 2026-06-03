@@ -3,11 +3,13 @@
 // ============================================================
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { z } from 'zod';
 import {
   FileText, FolderOpen, Save, Search, X, Plus, WrapText,
   Hash, ZoomIn, ZoomOut,
 } from 'lucide-react';
 import { useFileSystem } from '@/hooks/useFileSystem';
+import { safeJsonParse } from '@/utils/safeJsonParse';
 
 interface OpenFile {
   id: string;
@@ -70,7 +72,8 @@ const TextEditor: React.FC = () => {
   const [wordWrap, setWordWrap] = useState(true);
   const [showLineNumbers, setShowLineNumbers] = useState(true);
   const [recentFiles, setRecentFiles] = useState<string[]>(() => {
-    try { return JSON.parse(localStorage.getItem('texteditor_recent') || '[]'); } catch { return []; }
+    const raw = localStorage.getItem('texteditor_recent');
+    return safeJsonParse(raw ?? '[]', z.array(z.string()), []);
   });
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 

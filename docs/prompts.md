@@ -52,3 +52,8 @@ please meticulously review @CLAUDE.md , @README.md , @AGENTS.md and @plan.md to 
  - For clear communication, avoid using emojis  
  - Do not create any files, or run bash commands that modify the user's system state in any way
 
+---
+
+Awesome meticulous job so far. Please keep up the good work. now, please meticulously plan to create a detailed remediation plan with ToDo list to resolve and fix the identified/outstanding issues and gaps. Review and validate the remediation plan against the codebase again to check for accurate alignment before proceeding to execute it meticulously. use TDD approach to make code changes.
+You will now meticulously plan, validate, and execute a Targeted remediation using TDD. You will analyze the outstanding issues, create a comprehensive plan with a todo list, validate it against the codebase, and then execute. 
+

@@ -5,6 +5,7 @@
 import { useState, useCallback, memo } from 'react';
 import { LogOut, Moon, Power, User } from 'lucide-react';
 import { useOS } from '@/hooks/useOSStore';
+import { useAuthToken } from '@/hooks/useAuthToken';
 
 const LoginScreen = memo(function LoginScreen() {
   const { dispatch } = useOS();
@@ -12,17 +13,19 @@ const LoginScreen = memo(function LoginScreen() {
   const [isUnlocking, setIsUnlocking] = useState(false);
   const [error, setError] = useState(false);
 
-  const handleUnlock = useCallback(() => {
+  const { generateToken } = useAuthToken();
+
+  const handleUnlock = useCallback(async () => {
     setIsUnlocking(true);
     setError(false);
-    setTimeout(() => {
-      dispatch({ type: 'LOGIN', isGuest: false });
-    }, 800);
-  }, [dispatch]);
+    await generateToken('User');
+    dispatch({ type: 'LOGIN', isGuest: false });
+  }, [dispatch, generateToken]);
 
-  const handleGuest = useCallback(() => {
+  const handleGuest = useCallback(async () => {
+    await generateToken('Guest');
     dispatch({ type: 'LOGIN', isGuest: true });
-  }, [dispatch]);
+  }, [dispatch, generateToken]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {

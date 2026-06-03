@@ -64,7 +64,7 @@ const MatrixRain = lazy(() => import('./MatrixRain'));
 
 interface AppRouterProps {
   appId: string;
-  windowId: string;
+  windowId?: string;
 }
 
 const AppSkeleton = () => (
@@ -79,7 +79,7 @@ const AppSkeleton = () => (
   </div>
 );
 
-export default function AppRouter({ appId, windowId }: AppRouterProps) {
+export default function AppRouter({ appId, windowId: _windowId }: AppRouterProps) {
   const renderApp = () => {
     switch (appId) {
       case 'filemanager': return <FileManager />;

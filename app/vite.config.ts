@@ -8,6 +8,12 @@ export default defineConfig({
   plugins: [inspectAttr(), react()],
   server: {
     port: 3000,
+    proxy: {
+      '/ws': {
+        target: 'ws://localhost:3001',
+        ws: true,
+      },
+    },
   },
   resolve: {
     alias: {

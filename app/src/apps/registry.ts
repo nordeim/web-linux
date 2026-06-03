@@ -69,6 +69,15 @@ export const APP_REGISTRY: AppDefinition[] = [
     defaultSize: { width: 560, height: 420 },
     minSize: { width: 360, height: 280 },
   },
+  {
+    id: 'real-terminal',
+    name: 'Real Terminal',
+    icon: 'Terminal',
+    category: 'System',
+    description: 'Full bash terminal with PTY support via Docker',
+    defaultSize: { width: 800, height: 500 },
+    minSize: { width: 400, height: 250 },
+  },
 
   // ======== PRODUCTIVITY (10) ========
   {

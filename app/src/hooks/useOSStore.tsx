@@ -98,10 +98,17 @@ export function osReducer(state: OSState, action: OSAction): OSState {
       return { ...state, bootPhase: action.phase };
     }
 
+    case 'SET_AUTH_TOKEN': {
+      return {
+        ...state,
+        auth: { ...state.auth, authToken: action.token },
+      };
+    }
+
     case 'LOGIN': {
       return {
         ...state,
-        auth: { isAuthenticated: true, isGuest: action.isGuest, userName: action.isGuest ? 'Guest' : 'User' },
+        auth: { ...state.auth, isAuthenticated: true, isGuest: action.isGuest, userName: action.isGuest ? 'Guest' : 'User' },
         bootPhase: 'desktop',
       };
     }
@@ -109,7 +116,7 @@ export function osReducer(state: OSState, action: OSAction): OSState {
     case 'LOGOUT': {
       return {
         ...state,
-        auth: { isAuthenticated: false, isGuest: false, userName: 'User' },
+        auth: { isAuthenticated: false, isGuest: false, userName: 'User', authToken: undefined },
         windows: [],
         bootPhase: 'login',
         activeWindowId: null,

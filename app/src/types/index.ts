@@ -174,6 +174,7 @@ export interface AuthState {
   isAuthenticated: boolean;
   isGuest: boolean;
   userName: string;
+  authToken?: string;
 }
 
 // --------------------------------------------------------
@@ -204,6 +205,7 @@ export interface OSState {
 
 export type OSAction =
   | { type: 'SET_BOOT_PHASE'; phase: BootPhase }
+  | { type: 'SET_AUTH_TOKEN'; token: string }
   | { type: 'LOGIN'; isGuest: boolean }
   | { type: 'LOGOUT' }
   | { type: 'OPEN_WINDOW'; appId: string; title?: string }

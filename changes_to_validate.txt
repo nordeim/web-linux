@@ -1,0 +1,296 @@
+$ git diff app/src/apps/ArchiveManager.tsx
+diff --git a/app/src/apps/ArchiveManager.tsx b/app/src/apps/ArchiveManager.tsx
+index 98d6c1b..704b3bc 100644
+--- a/app/src/apps/ArchiveManager.tsx
++++ b/app/src/apps/ArchiveManager.tsx
+@@ -2,6 +2,8 @@
+ // Archive Manager — Create and extract ZIP/TAR archives
+ // ============================================================
+ 
++import { z } from 'zod';
++import { safeJsonParse } from '@/utils/safeJsonParse';
+ import { useState, useEffect } from 'react';
+ import {
+   Package, Plus, FileText, ChevronRight, ChevronDown,
+@@ -30,12 +32,25 @@ interface ArchiveFile {
+ const generateId = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+ 
+ const loadArchives = (): ArchiveFile[] => {
+-  try {
+-    const saved = localStorage.getItem('ubuntuos_archives');
+-    if (saved) return JSON.parse(saved);
+-  } catch { /* ignore */ }
+-  // Sample archive
+-  return [{
++  const raw = localStorage.getItem('ubuntuos_archives');
++  const ArchiveEntrySchema: z.ZodType<ArchiveEntry> = z.lazy(() => z.object({
++    id: z.string(),
++    name: z.string(),
++    type: z.enum(['file', 'folder']),
++    size: z.string(),
++    children: z.array(ArchiveEntrySchema).optional()
++  }));
++
++  const ArchiveFileSchema = z.object({
++    id: z.string(),
++    name: z.string(),
++    format: z.enum(['zip', 'tar']),
++    createdAt: z.number(),
++    entries: z.array(ArchiveEntrySchema),
++    isPasswordProtected: z.boolean().optional()
++  });
++
++  return safeJsonParse(raw ?? '[]', z.array(ArchiveFileSchema), [{
+     id: generateId(),
+     name: 'documents.zip',
+     format: 'zip',
+@@ -50,7 +65,7 @@ const loadArchives = (): ArchiveFile[] => {
+         { id: generateId(), name: 'logo.png', type: 'file', size: '45 KB' },
+       ]},
+     ],
+-  }];
++  }]);
+ };
+ 
+ const TreeEntry: React.FC<{
+(venv) pete@pop-os:/home/project/web-linux
+$ git diff app/src/apps/Memory.tsx
+diff --git a/app/src/apps/Memory.tsx b/app/src/apps/Memory.tsx
+index 5a4ffac..5b2e398 100644
+--- a/app/src/apps/Memory.tsx
++++ b/app/src/apps/Memory.tsx
+@@ -1,3 +1,5 @@
++import { z } from 'zod';
++import { safeJsonParse } from '@/utils/safeJsonParse';
+ import { useState, useEffect, useCallback } from 'react';
+ import { Brain, Star, Clock, MousePointer } from 'lucide-react';
+ 
+@@ -31,7 +33,8 @@ const DIFFICULTIES: Record<Difficulty, { rows: number; cols: number; name: strin
+ 
+ function getHighScore(diff: Difficulty): { moves: number; time: number } | null {
+   const val = localStorage.getItem(`memory_best_${diff}`);
+-  return val ? JSON.parse(val) : null;
++  if (!val) return null;
++  return safeJsonParse(val, z.object({ moves: z.number(), time: z.number() }), null);
+ }
+ function setHighScore(diff: Difficulty, moves: number, time: number) {
+   const current = getHighScore(diff);
+(venv) pete@pop-os:/home/project/web-linux
+$ git diff app/src/apps/Notes.tsx
+diff --git a/app/src/apps/Notes.tsx b/app/src/apps/Notes.tsx
+index 7cfd2f3..fb183dd 100644
+--- a/app/src/apps/Notes.tsx
++++ b/app/src/apps/Notes.tsx
+@@ -2,6 +2,8 @@
+ // Notes — Three-pane note-taking app with folders
+ // ============================================================
+ 
++import { z } from 'zod';
++import { safeJsonParse } from '@/utils/safeJsonParse';
+ import { useState, useEffect, useMemo } from 'react';
+ import {
+   Folder, FileText, Plus, Search, Trash2, Bold, Italic,
+@@ -39,22 +41,19 @@ const DEFAULT_FOLDERS: FolderItem[] = [
+ const generateId = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+ 
+ const loadNotes = (): Note[] => {
+-  try {
+-    const saved = localStorage.getItem('ubuntuos_notes');
+-    if (saved) return JSON.parse(saved);
+-  } catch { /* ignore */ }
+-  return [
++  const raw = localStorage.getItem('ubuntuos_notes');
++  return safeJsonParse(raw ?? '[]', z.array(z.object({
++    id: z.string(), title: z.string(), content: z.string(), folderId: z.string(),
++    isFavorite: z.boolean(), isPinned: z.boolean(), createdAt: z.number(), updatedAt: z.number()
++  })), [
+     { id: generateId(), title: 'Welcome to Notes', content: '<p>This is your personal notes app. Create folders, organize your thoughts, and keep everything in one place.</p><p><b>Bold</b>, <i>italic</i>, and lists are supported.</p>', folderId: 'inbox', isFavorite: false, isPinned: true, createdAt: Date.now(), updatedAt: Date.now() },
+     { id: generateId(), title: 'Meeting Notes', content: '<p>Discuss project timeline and deliverables.</p><ul><li>Action item 1</li><li>Action item 2</li></ul>', folderId: 'work', isFavorite: true, isPinned: false, createdAt: Date.now() - 86400000, updatedAt: Date.now() - 3600000 },
+-  ];
++  ]);
+ };
+ 
+ const loadFolders = (): FolderItem[] => {
+-  try {
+-    const saved = localStorage.getItem('ubuntuos_note_folders');
+-    if (saved) return JSON.parse(saved);
+-  } catch { /* ignore */ }
+-  return DEFAULT_FOLDERS;
++  const raw = localStorage.getItem('ubuntuos_note_folders');
++  return safeJsonParse(raw ?? '[]', z.array(z.object({ id: z.string(), name: z.string(), isSystem: z.boolean() })), DEFAULT_FOLDERS);
+ };
+ 
+ const Notes: React.FC = () => {
+(venv) pete@pop-os:/home/project/web-linux
+$ git diff app/src/apps/Reminders.tsx
+diff --git a/app/src/apps/Reminders.tsx b/app/src/apps/Reminders.tsx
+index d438a24..06864ac 100644
+--- a/app/src/apps/Reminders.tsx
++++ b/app/src/apps/Reminders.tsx
+@@ -1,3 +1,5 @@
++import { z } from 'zod';
++import { safeJsonParse } from '@/utils/safeJsonParse';
+ import { useState, useEffect, useMemo } from 'react';
+ import {
+   Bell, Plus, X, Check, Calendar, Clock, Trash2, Edit2,
+@@ -19,11 +21,11 @@ type FilterType = 'all' | 'today' | 'upcoming' | 'overdue' | 'completed';
+ const STORAGE_KEY = 'ubuntuos_reminders';
+ 
+ const loadReminders = (): Reminder[] => {
+-  try {
+-    const saved = localStorage.getItem(STORAGE_KEY);
+-    if (saved) return JSON.parse(saved);
+-  } catch { /* ignore */ }
+-  return [];
++  const raw = localStorage.getItem(STORAGE_KEY);
++  return safeJsonParse(raw ?? '[]', z.array(z.object({
++    id: z.string(), title: z.string(), date: z.string(), time: z.string(),
++    priority: z.enum(['low', 'medium', 'high']), completed: z.boolean(), createdAt: z.number()
++  })), []);
+ };
+ 
+ const saveReminders = (reminders: Reminder[]) => {
+(venv) pete@pop-os:/home/project/web-linux
+$ git diff app/src/apps/RssReader.tsx
+diff --git a/app/src/apps/RssReader.tsx b/app/src/apps/RssReader.tsx
+index c56820d..014d10b 100644
+--- a/app/src/apps/RssReader.tsx
++++ b/app/src/apps/RssReader.tsx
+@@ -1,3 +1,5 @@
++import { z } from 'zod';
++import { safeJsonParse } from '@/utils/safeJsonParse';
+ import { useState, useEffect, useMemo } from 'react';
+ import {
+   Rss, RefreshCw, Check, CheckCheck, Plus, X, ChevronLeft,
+@@ -73,11 +75,9 @@ const MOCK_FEEDS: Feed[] = [
+ ];
+ 
+ const loadReadState = (): Set<string> => {
+-  try {
+-    const saved = localStorage.getItem(STORAGE_KEY);
+-    if (saved) return new Set(JSON.parse(saved));
+-  } catch { /* ignore */ }
+-  return new Set();
++  const raw = localStorage.getItem(STORAGE_KEY);
++  const parsed = safeJsonParse(raw ?? '[]', z.array(z.string()), []);
++  return new Set(parsed);
+ };
+ 
+ const saveReadState = (readIds: Set<string>) => {
+(venv) pete@pop-os:/home/project/web-linux
+$ git diff app/src/apps/ScreenRecorder.tsx
+diff --git a/app/src/apps/ScreenRecorder.tsx b/app/src/apps/ScreenRecorder.tsx
+index a9043f1..7a2cbc7 100644
+--- a/app/src/apps/ScreenRecorder.tsx
++++ b/app/src/apps/ScreenRecorder.tsx
+@@ -2,6 +2,8 @@
+ // Screen Recorder — Record screen with preview and controls
+ // ============================================================
+ 
++import { z } from 'zod';
++import { safeJsonParse } from '@/utils/safeJsonParse';
+ import { useState, useRef, useEffect, memo } from 'react';
+ import {
+   Monitor, AppWindow, Square, Play, Pause, Video, Download, Trash2, Circle
+@@ -109,10 +111,11 @@ export default function ScreenRecorder() {
+   const [elapsed, setElapsed] = useState(0);
+   const [showCountdown, setShowCountdown] = useState(false);
+   const [recordings, setRecordings] = useState<ScreenRecording[]>(() => {
+-    try {
+-      const saved = localStorage.getItem('ubuntuos_screenrecordings');
+-      return saved ? JSON.parse(saved) : [];
+-    } catch { return []; }
++    const raw = localStorage.getItem('ubuntuos_screenrecordings');
++    return safeJsonParse(raw ?? '[]', z.array(z.object({
++      id: z.string(), name: z.string(), duration: z.number(), size: z.string(),
++      date: z.number(), mode: z.enum(['screen', 'window', 'area'])
++    })), []);
+   });
+   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+ 
+(venv) pete@pop-os:/home/project/web-linux
+$ git diff app/src/apps/Settings.tsx
+diff --git a/app/src/apps/Settings.tsx b/app/src/apps/Settings.tsx
+index b561eec..5453ec6 100644
+--- a/app/src/apps/Settings.tsx
++++ b/app/src/apps/Settings.tsx
+@@ -2,6 +2,8 @@
+ // System Settings — Full system preferences panel
+ // ============================================================
+ 
++import { z } from 'zod';
++import { safeJsonParse } from '@/utils/safeJsonParse';
+ import { useState, useCallback } from 'react';
+ import {
+   Wifi, Bluetooth, Image, Palette, Bell, Volume2, Battery,
+@@ -91,7 +93,8 @@ const Settings: React.FC = () => {
+ 
+   // Settings state (loaded from localStorage)
+   const [settings, setSettings] = useState<Record<string, unknown>>(() => {
+-    try { return JSON.parse(localStorage.getItem('ubuntuos_settings') || '{}'); } catch { return {}; }
++    const raw = localStorage.getItem('ubuntuos_settings');
++    return safeJsonParse(raw ?? '{}', z.record(z.string(), z.any()), {});
+   });
+ 
+   const updateSetting = useCallback((key: string, value: unknown) => {
+(venv) pete@pop-os:/home/project/web-linux
+$ git diff app/src/apps/Spreadsheet.tsx
+diff --git a/app/src/apps/Spreadsheet.tsx b/app/src/apps/Spreadsheet.tsx
+index ae5f58d..355bec5 100644
+--- a/app/src/apps/Spreadsheet.tsx
++++ b/app/src/apps/Spreadsheet.tsx
+@@ -2,6 +2,8 @@
+ // Spreadsheet — Grid with formulas, formatting, CSV export
+ // ============================================================
+ 
++import { z } from 'zod';
++import { safeJsonParse } from '@/utils/safeJsonParse';
+ import { useState, useEffect, useCallback, useRef } from 'react';
+ import {
+   Bold, Italic, Paintbrush, Download, Plus,
+@@ -39,10 +41,14 @@ interface Sheet {
+ const generateId = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+ 
+ const loadSheets = (): Sheet[] => {
+-  try {
+-    const saved = localStorage.getItem('ubuntuos_spreadsheet');
+-    if (saved) return JSON.parse(saved);
+-  } catch { /* ignore */ }
++  const raw = localStorage.getItem('ubuntuos_spreadsheet');
++  const parsed = safeJsonParse(raw ?? '[]', z.array(z.object({
++    id: z.string(), name: z.string(), cells: z.record(z.string(), z.object({
++      value: z.string(),
++      style: z.object({ bold: z.boolean().optional(), italic: z.boolean().optional(), fontSize: z.number().optional(), bgColor: z.string().optional(), textColor: z.string().optional() }).optional()
++    }))
++  })), null);
++  if (parsed && parsed.length > 0) return parsed;
+   const sampleCells: Record<string, CellData> = {
+     'A1': { value: 'Item' },
+     'B1': { value: 'Q1' },
+(venv) pete@pop-os:/home/project/web-linux
+$ git diff app/src/components/Desktop.tsx
+diff --git a/app/src/components/Desktop.tsx b/app/src/components/Desktop.tsx
+index 9864a0d..c4f57f0 100644
+--- a/app/src/components/Desktop.tsx
++++ b/app/src/components/Desktop.tsx
+@@ -92,6 +92,8 @@ const Desktop = memo(function Desktop() {
+     <div
+       ref={desktopRef}
+       className="fixed inset-0 z-10"
++      role="list"
++      aria-label="Desktop"
+       style={{
+         backgroundImage: `url(${theme.wallpaper})`,
+         backgroundSize: 'cover',
+@@ -109,6 +111,10 @@ const Desktop = memo(function Desktop() {
+         <div
+           key={icon.id}
+           className="absolute flex flex-col items-center gap-1 cursor-pointer group"
++          role="listitem"
++          tabIndex={0}
++          aria-label={icon.name}
++          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleIconDoubleClick(icon); } }}
+           style={{
+             left: icon.position.x,
+             top: icon.position.y,
+

@@ -2,6 +2,8 @@
 // Screen Recorder — Record screen with preview and controls
 // ============================================================
 
+import { z } from 'zod';
+import { safeJsonParse } from '@/utils/safeJsonParse';
 import { useState, useRef, useEffect, memo } from 'react';
 import {
   Monitor, AppWindow, Square, Play, Pause, Video, Download, Trash2, Circle
@@ -109,10 +111,11 @@ export default function ScreenRecorder() {
   const [elapsed, setElapsed] = useState(0);
   const [showCountdown, setShowCountdown] = useState(false);
   const [recordings, setRecordings] = useState<ScreenRecording[]>(() => {
-    try {
-      const saved = localStorage.getItem('ubuntuos_screenrecordings');
-      return saved ? JSON.parse(saved) : [];
-    } catch { return []; }
+    const raw = localStorage.getItem('ubuntuos_screenrecordings');
+    return safeJsonParse(raw ?? '[]', z.array(z.object({
+      id: z.string(), name: z.string(), duration: z.number(), size: z.string(),
+      date: z.number(), mode: z.enum(['screen', 'window', 'area'])
+    })), []);
   });
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 

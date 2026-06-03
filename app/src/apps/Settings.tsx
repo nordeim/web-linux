@@ -2,6 +2,8 @@
 // System Settings — Full system preferences panel
 // ============================================================
 
+import { z } from 'zod';
+import { safeJsonParse } from '@/utils/safeJsonParse';
 import { useState, useCallback } from 'react';
 import {
   Wifi, Bluetooth, Image, Palette, Bell, Volume2, Battery,
@@ -91,7 +93,8 @@ const Settings: React.FC = () => {
 
   // Settings state (loaded from localStorage)
   const [settings, setSettings] = useState<Record<string, unknown>>(() => {
-    try { return JSON.parse(localStorage.getItem('ubuntuos_settings') || '{}'); } catch { return {}; }
+    const raw = localStorage.getItem('ubuntuos_settings');
+    return safeJsonParse(raw ?? '{}', z.record(z.string(), z.any()), {});
   });
 
   const updateSetting = useCallback((key: string, value: unknown) => {

@@ -1,3 +1,5 @@
+import { z } from 'zod';
+import { safeJsonParse } from '@/utils/safeJsonParse';
 import { useState, useEffect, useCallback } from 'react';
 import { Brain, Star, Clock, MousePointer } from 'lucide-react';
 
@@ -31,7 +33,8 @@ const DIFFICULTIES: Record<Difficulty, { rows: number; cols: number; name: strin
 
 function getHighScore(diff: Difficulty): { moves: number; time: number } | null {
   const val = localStorage.getItem(`memory_best_${diff}`);
-  return val ? JSON.parse(val) : null;
+  if (!val) return null;
+  return safeJsonParse(val, z.object({ moves: z.number(), time: z.number() }), null);
 }
 function setHighScore(diff: Difficulty, moves: number, time: number) {
   const current = getHighScore(diff);

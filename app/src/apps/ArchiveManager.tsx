@@ -2,6 +2,8 @@
 // Archive Manager — Create and extract ZIP/TAR archives
 // ============================================================
 
+import { z } from 'zod';
+import { safeJsonParse } from '@/utils/safeJsonParse';
 import { useState, useEffect } from 'react';
 import {
   Package, Plus, FileText, ChevronRight, ChevronDown,
@@ -30,12 +32,25 @@ interface ArchiveFile {
 const generateId = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
 
 const loadArchives = (): ArchiveFile[] => {
-  try {
-    const saved = localStorage.getItem('ubuntuos_archives');
-    if (saved) return JSON.parse(saved);
-  } catch { /* ignore */ }
-  // Sample archive
-  return [{
+  const raw = localStorage.getItem('ubuntuos_archives');
+  const ArchiveEntrySchema: z.ZodType<ArchiveEntry> = z.lazy(() => z.object({
+    id: z.string(),
+    name: z.string(),
+    type: z.enum(['file', 'folder']),
+    size: z.string(),
+    children: z.array(ArchiveEntrySchema).optional()
+  }));
+
+  const ArchiveFileSchema = z.object({
+    id: z.string(),
+    name: z.string(),
+    format: z.enum(['zip', 'tar']),
+    createdAt: z.number(),
+    entries: z.array(ArchiveEntrySchema),
+    isPasswordProtected: z.boolean().optional()
+  });
+
+  return safeJsonParse(raw ?? '[]', z.array(ArchiveFileSchema), [{
     id: generateId(),
     name: 'documents.zip',
     format: 'zip',
@@ -50,7 +65,7 @@ const loadArchives = (): ArchiveFile[] => {
         { id: generateId(), name: 'logo.png', type: 'file', size: '45 KB' },
       ]},
     ],
-  }];
+  }]);
 };
 
 const TreeEntry: React.FC<{

@@ -2,6 +2,8 @@
 // Notes — Three-pane note-taking app with folders
 // ============================================================
 
+import { z } from 'zod';
+import { safeJsonParse } from '@/utils/safeJsonParse';
 import { useState, useEffect, useMemo } from 'react';
 import {
   Folder, FileText, Plus, Search, Trash2, Bold, Italic,
@@ -39,22 +41,19 @@ const DEFAULT_FOLDERS: FolderItem[] = [
 const generateId = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
 
 const loadNotes = (): Note[] => {
-  try {
-    const saved = localStorage.getItem('ubuntuos_notes');
-    if (saved) return JSON.parse(saved);
-  } catch { /* ignore */ }
-  return [
+  const raw = localStorage.getItem('ubuntuos_notes');
+  return safeJsonParse(raw ?? '[]', z.array(z.object({
+    id: z.string(), title: z.string(), content: z.string(), folderId: z.string(),
+    isFavorite: z.boolean(), isPinned: z.boolean(), createdAt: z.number(), updatedAt: z.number()
+  })), [
     { id: generateId(), title: 'Welcome to Notes', content: '<p>This is your personal notes app. Create folders, organize your thoughts, and keep everything in one place.</p><p><b>Bold</b>, <i>italic</i>, and lists are supported.</p>', folderId: 'inbox', isFavorite: false, isPinned: true, createdAt: Date.now(), updatedAt: Date.now() },
     { id: generateId(), title: 'Meeting Notes', content: '<p>Discuss project timeline and deliverables.</p><ul><li>Action item 1</li><li>Action item 2</li></ul>', folderId: 'work', isFavorite: true, isPinned: false, createdAt: Date.now() - 86400000, updatedAt: Date.now() - 3600000 },
-  ];
+  ]);
 };
 
 const loadFolders = (): FolderItem[] => {
-  try {
-    const saved = localStorage.getItem('ubuntuos_note_folders');
-    if (saved) return JSON.parse(saved);
-  } catch { /* ignore */ }
-  return DEFAULT_FOLDERS;
+  const raw = localStorage.getItem('ubuntuos_note_folders');
+  return safeJsonParse(raw ?? '[]', z.array(z.object({ id: z.string(), name: z.string(), isSystem: z.boolean() })), DEFAULT_FOLDERS);
 };
 
 const Notes: React.FC = () => {

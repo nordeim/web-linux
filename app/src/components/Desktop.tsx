@@ -92,6 +92,8 @@ const Desktop = memo(function Desktop() {
     <div
       ref={desktopRef}
       className="fixed inset-0 z-10"
+      role="list"
+      aria-label="Desktop"
       style={{
         backgroundImage: `url(${theme.wallpaper})`,
         backgroundSize: 'cover',
@@ -109,6 +111,10 @@ const Desktop = memo(function Desktop() {
         <div
           key={icon.id}
           className="absolute flex flex-col items-center gap-1 cursor-pointer group"
+          role="listitem"
+          tabIndex={0}
+          aria-label={icon.name}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleIconDoubleClick(icon); } }}
           style={{
             left: icon.position.x,
             top: icon.position.y,

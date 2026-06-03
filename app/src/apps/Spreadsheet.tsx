@@ -2,6 +2,8 @@
 // Spreadsheet — Grid with formulas, formatting, CSV export
 // ============================================================
 
+import { z } from 'zod';
+import { safeJsonParse } from '@/utils/safeJsonParse';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Bold, Italic, Paintbrush, Download, Plus,
@@ -39,10 +41,14 @@ interface Sheet {
 const generateId = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
 
 const loadSheets = (): Sheet[] => {
-  try {
-    const saved = localStorage.getItem('ubuntuos_spreadsheet');
-    if (saved) return JSON.parse(saved);
-  } catch { /* ignore */ }
+  const raw = localStorage.getItem('ubuntuos_spreadsheet');
+  const parsed = safeJsonParse(raw ?? '[]', z.array(z.object({
+    id: z.string(), name: z.string(), cells: z.record(z.string(), z.object({
+      value: z.string(),
+      style: z.object({ bold: z.boolean().optional(), italic: z.boolean().optional(), fontSize: z.number().optional(), bgColor: z.string().optional(), textColor: z.string().optional() }).optional()
+    }))
+  })), null);
+  if (parsed && parsed.length > 0) return parsed;
   const sampleCells: Record<string, CellData> = {
     'A1': { value: 'Item' },
     'B1': { value: 'Q1' },

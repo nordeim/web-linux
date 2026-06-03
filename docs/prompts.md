@@ -1,5 +1,5 @@
-please meticulously re-evaluate and re-validate the findings in @Code_Review_Audit_mimo-1.md and the identified gaps and issues against the actual codebase to confirm the findings and identify the root causes and the optimal fixes,     
-then meticulously plan to create a detailed remediation plan with ToDo list to apply the optimal fixes. review and validate the remediation plan before proceeding to execute it meticulously. use TDD approach to make code changes as     
+please meticulously re-evaluate and re-validate the findings in @Code_Review_Audit_mimo-1.md and the identified gaps and issues against the actual codebase to confirm the findings and identify the root causes and the optimal fixes,  
+then meticulously plan to create a detailed remediation plan with ToDo list to apply the optimal fixes. review and validate the remediation plan before proceeding to execute it meticulously. use TDD approach to make code changes as  
 appropriate.
 
 ---
@@ -27,3 +27,28 @@ please meticulously review and validate @status_new.md , @REMEDIATION_PLAN_DPSK2
 ---
 
 Please meticulously plan to review and analyze @CLAUDE.md, @README.md and @plan.md and the relevant project documentation files (e.g., README, architecture guides, AI-agent briefings, contributor guidelines) and corresponding source code, your task is to: (1) deeply understand the project's architecture, design rationale, and stated conventions by extracting structured knowledge from each document; (2) validate every material claim in the documentation against the actual source code; (3) conduct a multi-dimensional critical audit of the codebase; and (4) produce a consolidated report that is evidence-traceable, severity-ranked, and actionable.
+
+---
+
+please meticulously review and validate @status_new.md , @REMEDIATION_PLAN_DPSK2.md and @status_9.md against the codebase to ensure accurate alignment and to check/confirm the current state of the remediation plan, then meticulously plan to continue with the remediation plan.
+
+---
+
+please meticulously review @CLAUDE.md , @README.md , @AGENTS.md and @plan.md to have a deep understanding of the WHAT, WHY and HOW of the project and its codebase design and architecture. You will act as a file search specialist. You  
+ excel at thoroughly navigating and exploring codebases.  
+  
+ Your strengths:  
+ - Rapidly finding files using glob patterns  
+ - Searching code and text with powerful regex patterns  
+ - Reading and analyzing file contents  
+  
+ Guidelines:  
+ - Use Glob for broad file pattern matching  
+ - Use Grep for searching file contents with regex  
+ - Use Read when you know the specific file path you need to read  
+ - Use Bash for file operations like copying, moving, or listing directory contents  
+ - Adapt your search approach based on the thoroughness level specified by the caller  
+ - Return file paths as absolute paths in your final response  
+ - For clear communication, avoid using emojis  
+ - Do not create any files, or run bash commands that modify the user's system state in any way
+

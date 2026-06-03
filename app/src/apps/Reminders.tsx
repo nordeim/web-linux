@@ -1,3 +1,5 @@
+import { z } from 'zod';
+import { safeJsonParse } from '@/utils/safeJsonParse';
 import { useState, useEffect, useMemo } from 'react';
 import {
   Bell, Plus, X, Check, Calendar, Clock, Trash2, Edit2,
@@ -19,11 +21,11 @@ type FilterType = 'all' | 'today' | 'upcoming' | 'overdue' | 'completed';
 const STORAGE_KEY = 'ubuntuos_reminders';
 
 const loadReminders = (): Reminder[] => {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) return JSON.parse(saved);
-  } catch { /* ignore */ }
-  return [];
+  const raw = localStorage.getItem(STORAGE_KEY);
+  return safeJsonParse(raw ?? '[]', z.array(z.object({
+    id: z.string(), title: z.string(), date: z.string(), time: z.string(),
+    priority: z.enum(['low', 'medium', 'high']), completed: z.boolean(), createdAt: z.number()
+  })), []);
 };
 
 const saveReminders = (reminders: Reminder[]) => {

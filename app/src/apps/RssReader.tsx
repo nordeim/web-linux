@@ -1,3 +1,5 @@
+import { z } from 'zod';
+import { safeJsonParse } from '@/utils/safeJsonParse';
 import { useState, useEffect, useMemo } from 'react';
 import {
   Rss, RefreshCw, Check, CheckCheck, Plus, X, ChevronLeft,
@@ -73,11 +75,9 @@ const MOCK_FEEDS: Feed[] = [
 ];
 
 const loadReadState = (): Set<string> => {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) return new Set(JSON.parse(saved));
-  } catch { /* ignore */ }
-  return new Set();
+  const raw = localStorage.getItem(STORAGE_KEY);
+  const parsed = safeJsonParse(raw ?? '[]', z.array(z.string()), []);
+  return new Set(parsed);
 };
 
 const saveReadState = (readIds: Set<string>) => {

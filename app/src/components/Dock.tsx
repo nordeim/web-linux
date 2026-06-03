@@ -89,6 +89,7 @@ const Dock = memo(function Dock() {
         {/* Icon */}
         <button
           onClick={() => isTrash ? handleTrashClick() : handleAppClick(appId)}
+          aria-label={isTrash ? 'Trash' : app?.name || appId}
           className="w-10 h-10 rounded-[10px] flex items-center justify-center transition-all"
           style={{
             background: isHovered ? 'var(--bg-hover)' : 'transparent',
@@ -98,9 +99,9 @@ const Dock = memo(function Dock() {
           }}
         >
           {isTrash ? (
-            <Trash2 size={22} className="text-[var(--text-primary)]" />
+            <Trash2 size={22} className="text-[var(--text-primary)]" aria-hidden="true" />
           ) : (
-            <DynamicIcon name={app?.icon || 'HelpCircle'} size={22} className="text-[var(--text-primary)]" />
+            <DynamicIcon name={app?.icon || 'HelpCircle'} size={22} className="text-[var(--text-primary)]" aria-hidden="true" />
           )}
         </button>
 
@@ -135,12 +136,14 @@ const Dock = memo(function Dock() {
       {/* Show Applications button */}
       <button
         onClick={handleShowApps}
+        aria-label="Show Applications"
+        aria-pressed={state.appLauncherOpen}
         className="w-10 h-10 rounded-[10px] flex items-center justify-center hover:bg-[var(--bg-hover)] transition-all"
         style={{
           background: state.appLauncherOpen ? 'var(--bg-active)' : 'transparent',
         }}
       >
-        <LayoutGrid size={20} className="text-[var(--text-primary)]" />
+        <LayoutGrid size={20} className="text-[var(--text-primary)]" aria-hidden="true" />
       </button>
 
       {/* Separator */}

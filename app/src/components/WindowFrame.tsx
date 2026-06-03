@@ -257,6 +257,7 @@ const WindowFrame = memo(function WindowFrame({ window: win, children }: WindowF
         <div className="flex items-center shrink-0">
           <button
             onClick={handleMinimize}
+            aria-label="Minimize"
             className="w-9 h-9 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
             style={{ borderRadius: isMaximized ? 0 : '0 0 0 0' }}
             title="Minimize"
@@ -265,6 +266,7 @@ const WindowFrame = memo(function WindowFrame({ window: win, children }: WindowF
           </button>
           <button
             onClick={handleMaximize}
+            aria-label={isMaximized ? 'Restore' : 'Maximize'}
             className="w-9 h-9 flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
             title={isMaximized ? 'Restore' : 'Maximize'}
           >
@@ -272,6 +274,7 @@ const WindowFrame = memo(function WindowFrame({ window: win, children }: WindowF
           </button>
           <button
             onClick={handleClose}
+            aria-label="Close"
             className="w-9 h-9 flex items-center justify-center text-[var(--text-secondary)] transition-colors"
             style={{ borderRadius: isMaximized ? 0 : '0 12px 0 0' }}
             onMouseEnter={(e) => {

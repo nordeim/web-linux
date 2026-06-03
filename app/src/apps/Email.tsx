@@ -23,6 +23,7 @@ interface Email {
   labels: string[];
 }
 
+// Note: Data is simulated for demo purposes. No network calls are made.
 // ---- Mock Data ----
 const INITIAL_EMAILS: Email[] = [
   {

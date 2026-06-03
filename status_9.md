@@ -407,3 +407,29 @@ For Clock.tsx, the types are:
 - alarms: Alarm[] (complex object with id, hour, minute, label, repeat, enabled)
 I'll need to create zod schemas for these and use safeJsonParse.
 Let me write the implementation:  Let me implement zod validation for Clock.tsx as the reference pattern:
+
+I'll meticulously review and update all three documentation files to reflect the latest code changes, fixes, and lessons learned. Let me start by reading the current versions of these files and then make targeted updates.
+→Read README.md 
+Let me also read the AGENTS.md and CLAUDE.md files to understand their current state before making updates.
+→Read AGENTS.md [offset=168, limit=205]
+美好生活的正确打开方式在理解了。
+这三份文件的状态：
+README.md 需要更新：
+1. 测试套件数量从 41 更新为 52+（现有）
+2. localStorage 解析问题已从“~17 Apps”修复到 0 个
+3. Accessibility 问题状态更新
+4. REMEDIATION_PLAN_DPSK2.md 需要添加到文档列表
+5. 已知问题部分需要更新
+AGENTS.md 需要更新：
+1. 在 Anti-Patterns 中添加 ARIA 开发指南
+2. 在 Troubleshooting 中添加测试基础设施问题
+3. 在 Lessons Learned 中增加关于 TDD 和源代码验证的要点
+4. 在 Security Reminders 中补充关于 safeJsonParse 覆盖所有 15 个应用的信息
+CLAUDE.md 需要更新：
+1. 添加 ARIA/无障碍开发标准
+2. 更新测试策略（源代码验证作为组件渲染测试的替代方案）
+3. 更新关于 @/ 别名在测试环境中的已知问题
+4. 添加关于焦点可见性样式的要求
+我将逐个文件更新，首先从 README.md 开始。 </think>  I'll systematically update all three documentation files. Let me start with README.md, then move to AGENTS.md and CLAUDE.md.
+← Edit README.md
+

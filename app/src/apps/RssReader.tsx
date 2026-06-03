@@ -26,6 +26,7 @@ interface Feed {
 
 const STORAGE_KEY = 'ubuntuos_rss_read';
 
+// Note: Data is simulated for demo purposes. No network calls are made.
 const MOCK_FEEDS: Feed[] = [
   {
     id: 'tc', name: 'TechCrunch', url: 'https://techcrunch.com/feed/', icon: 'TC',

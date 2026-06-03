@@ -62,6 +62,10 @@ This codebase has undergone multiple comprehensive security audits and remediati
 - **Added mock data documentation**: Added "simulated data" comments to `Email.tsx` and `RssReader.tsx` to clarify that data is for demo purposes only.
 - **Fixed TextEditor.tsx raw JSON.parse**: Was missed in original audit due to `try/catch` wrapper; now uses `safeJsonParse` with zod schema validation.
 
+### kilo-1 Code Review Validation (2026-06-04)
+- **Fixed ReDoS in TextEditor find bar**: Added `escapeRegExp()` and `countMatchesSafely()` utilities to prevent catastrophic backtracking from user-controlled search input. Escapes regex special characters and caps iterations at 1000.
+- **Fixed stale ContextMenu test**: Updated `ContextMenu-actions.test.tsx` to expect `ARRANGE_ICONS` (not `CASCADE_WINDOWS`), matching the actual source dispatch.
+
 See [REMEDIATION.md](REMEDIATION.md) for the full security audit report, [REMEDIATION_MIMO2.md](REMEDIATION_MIMO2.md) for the prior code review audit remediation, and [REMEDIATION_KIMI2.md](REMEDIATION_KIMI2.md) for the latest code review audit.
 
 ## 🏗️ Architecture
@@ -144,7 +148,7 @@ After running `npm run dev`, open your browser at the provided port (usually `ht
 5. **Unused Local / Import Hygiene**: The `tsconfig.app.json` enforces `"noUnusedLocals": true` and `"noUnusedParameters": true`. Prior build broke with 43 `TS6133` errors across 16 files. Keep imports lean and remove dead code promptly to prevent build regressions.
 6. **ReDoS from User-Crafted Regex**: RegexTester now limits iterations, but apps accepting user regex (e.g., Notes search, Email filters) should also guard against catastrophic backtracking.
 7. **Simulated vs Real Recordings**: ScreenRecorder and VoiceRecorder create placeholder text downloads. Production builds should implement actual `MediaRecorder` API recording or clearly mark as simulated.
-8. **Vitest @/ Alias Resolution**: Component tests using `@/` aliases fail in vitest due to module resolution issues. Currently, only utility tests (relative imports) pass consistently. Component-level tests use source-level validation (reading file source strings) as a workaround. The `ContextMenu-actions.test.tsx` has a pre-existing bug expecting `CASCADE_WINDOWS` but code dispatches `ARRANGE_ICONS`.
+8. **Vitest @/ Alias Resolution**: Component tests using `@/` aliases fail in vitest due to module resolution issues. Currently, only utility tests (relative imports) pass consistently. Source-level tests (reading file source strings) are used as a workaround for component validation.
 
 ## 📜 License
 

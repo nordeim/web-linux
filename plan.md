@@ -92,13 +92,22 @@ Build a comprehensive web-based Linux desktop environment replica featuring a fu
 55. Emoji Picker - browse and copy emojis
 
 ## Tech Stack
+
+**Original spec (planning intent).** Items in *italics* were not used in the delivered build.
+
 - React 18 + TypeScript
 - Tailwind CSS
 - HTML5 Canvas (for games and drawing)
 - localStorage (for persistence)
-- Framer Motion (for animations)
+- ~~Framer Motion (for animations)~~ *not adopted — CSS animations + Tailwind transitions used instead*
 - Lucide React (for icons)
 - date-fns (for date/time handling)
+
+**Delivered stack** (see [README.md §Tech Stack](README.md#tech-stack) for authoritative versions):
+- React 19.2.0 + TypeScript 5.9.3, Vite 7.2, Tailwind CSS 3.4.19
+- Radix UI / Shadcn primitives, Zod 4.3.5, DOMPurify 3.4.7
+- Vitest 4.x for tests; 54 apps delivered (vs. 50+ target)
+- The 9 originally-listed items above are otherwise intact
 
 ## Execution Stages
 

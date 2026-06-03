@@ -518,3 +518,36 @@ Third-party audits must be independently validated. This audit had approximately
 3. H-6 was a misinterpretation —混淆了文件总行数（520）和 reducer 函数行数（~366）
 Always verify audit claims before acting. Independent source code inspection prevented wasting effort on nonexistent issues.
 
+---
+
+Key changes made since last documentation update:
+1. ContextMenu test fixed - test was stale, now expects ARRANGE_ICONS
+2. TextEditor ReDoS fixed - added countMatchesSafely() with regex escaping and iteration cap
+3. Calendar.tsx still fine - imports are used (audit was wrong)
+4. localStorage validation all done - 0 raw JSON.parse on localStorage remaining
+Issues to update in docs:
+1. README Known Issues section still mentions ContextMenu "pre-existing bug" - this is now fixed
+2. README test count says "62 tests" but we now know it's 52 passing + 3 pre-existing alias failures = 52/62
+3. AGENTS.md "NotImplemented 'Icons is not defined'" troubleshooting is stale - the fix is now using named imports, not wildcard import
+4. CLAUDE.md Recommendation #8 about "Notes search" and "Email filters" ReDoS - these use .includes(), not regex, so this recommendation is moot
+5. AUDIT.md validations show that the "Notes search needs ReDoS guard" and "Email filters" recommendations are wrong
+Let me make the precise edits. </think>
+# Todos
+[•] Update README.md: fix ContextMenu note, update test count accuracy
+[ ] Update AGENTS.md: fix NotImplemented troubleshooting (stale advice)
+[ ] Update CLAUDE.md: fix ReDoS recommendation (Notes/Email are safe)
+[ ] Add kilo-1 remediation section to all three docs
+[ ] Run verification: TypeScript check + test suite
+Let me make the edits. I'll start with README.md:
+1. Update the dpsk-2 Phase 2 section to include the ReDoS fix
+2. Update Known Issues to reflect the ContextMenu fix and test count
+3. Add a note about the kilo-1 audit findings
+Then AGENTS.md:
+4. Fix the NotImplemented troubleshooting (it says to use import * as Icons but the code now uses named imports)
+Then CLAUDE.md:
+5. Fix Recommendation #8 about ReDoS (Notes/Email use .includes(), not regex) </think>  I'll now make targeted edits to all three files. Let me proceed systematically:
+
+Now update AGENTS.md to fix the NotImplemented troubleshooting (it gives stale advice about using import * as Icons):
+
+Now update CLAUDE.md to fix the ReDoS recommendation. The current Recommendation #8 says "Add ReDoS guards to all regex-accepting apps: Notes search, Email filters..." but Notes and Email actually use .includes(), not regex. I need to update this to reflect that the real ReDoS sinks are different.
+

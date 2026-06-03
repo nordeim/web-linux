@@ -265,10 +265,10 @@ Run from the `app/` directory:
 **Root Cause**: `localStorage` data was modified by the user or corrupted.  
 **Fix**: The app now validates all stored state with `zod` and falls back to defaults if validation fails. Check browser DevTools → Application → Local Storage to inspect the data.
 
-### NotImplemented "Icons is not defined" ReferenceError
-**Symptom**: Opening an unbuilt/unsupported app causes a white screen with `ReferenceError: Icons is not defined`.  
-**Root Cause**: `NotImplemented.tsx` referenced `Icons.HelpCircle` and `Icons.Hammer` without importing `lucide-react`.  
-**Fix**: Ensure `NotImplemented.tsx` imports `* as Icons from 'lucide-react'`. This also enables any Lucide icon to be used as a fallback icon.
+### NotImplemented — pattern for icons in fallback views
+**Pattern**: `NotImplemented.tsx` lives at `src/components/NotImplemented.tsx` (not under `src/apps/`) and uses named Lucide imports (`HelpCircle`, `Hammer`) plus `<DynamicIcon />` for runtime icon resolution by string name.
+**Why named imports only**: A wildcard `import * as Icons from 'lucide-react'` reintroduces the ~587 KB bundle bloat the `DynamicIcon.tsx` refactor eliminated. Only `DynamicIcon.tsx` is authorised to use the wildcard form because it resolves icons by string at runtime; everything else (including `NotImplemented.tsx`) must use named imports. The ESLint config (`app/eslint.config.js`) enforces this.
+**Historical note**: An earlier version of `NotImplemented.tsx` referenced `Icons.HelpCircle` / `Icons.Hammer` without importing `lucide-react`, causing `ReferenceError: Icons is not defined` whenever an unbuilt app opened. That bug is fixed; this section is preserved as a pattern reference, not a troubleshooting entry.
 
 ### Math Evaluation Failures
 **Symptom**: Spreadsheet formulas or terminal `calc` always returns `#VALUE!` or "invalid expression".  
@@ -366,3 +366,4 @@ Run from the `app/` directory:
 - **Internal CSS injection via `dangerouslySetInnerHTML` still needs validation**. The `chart.tsx` UI component generates CSS variables from `ChartConfig` color values. Even though these come from application-level config (not user input), always validate dynamic content before injection. If chart colors are ever sourced from user input, add hex/rgb/hsl color value validation.
 - **Vitest `@/` alias resolution blocks component tests**. Tests importing components via `@/` aliases fail due to vitest module resolution. Solution: Use source-level tests (reading file source strings) for component validation, or fix the alias configuration to support component rendering tests.
 - **Source-level tests as valid alternative**: When component rendering is blocked by infrastructure, validate by reading component source files and asserting on attribute presence (e.g., `aria-label`, `role`, `tabIndex`). This catches ARIA regressions without requiring full rendering.
+- **Third-party audit findings must be independently validated**: The kilo-1 audit had a ~33% error rate on CRITICAL/HIGH findings. C-1 (Calendar unused imports) was completely wrong; H-1 (17 apps using raw JSON.parse) was stale/post-fix; H-6 (osReducer line count) misinterpreted file lines vs. function lines. Always grep the actual source before acting on audit findings.

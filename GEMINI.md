@@ -1,78 +1,65 @@
-# UbuntuOS Web - Project Context
+# UbuntuOS Web — Gemini CLI Context
 
-This document serves as the primary instructional context for Gemini when interacting with this codebase.
+Comprehensive, high-fidelity web-based replica of the Ubuntu Linux desktop environment.
 
 ## Project Overview
 
-UbuntuOS Web is a high-fidelity, interactive replica of the Ubuntu Linux desktop environment. It is built as a Single Page Application (SPA) that runs entirely in the browser. A comprehensive security audit and remediation was completed on **2026-05-31**, eliminating `eval()`, `new Function()`, and XSS vulnerabilities.
+**UbuntuOS Web** is a multi-windowed desktop experience built for the browser. It implements a custom window manager, a virtual file system (VFS), and 54 functional applications.
 
-### Main Technologies
-- **Framework**: React 19 (Functional components, Hooks)
+### Core Technologies
+- **Framework**: React 19.2 (Functional Components, Hooks, Context API)
 - **Language**: TypeScript 5.9 (Strict mode enabled)
 - **Build Tool**: Vite 7.2
-- **Styling**: Tailwind CSS 3.4 (Utility-first with CSS variable design tokens)
-- **UI Components**: Radix UI primitives & Shadcn UI
-- **Icons**: Lucide React
-- **State Management**: Centralized React Context (`useOSStore.tsx`)
-- **Persistence**: LocalStorage-backed Virtual File System (VFS) with `zod` schema validation
-- **Security**: DOMPurify for XSS sanitization
+- **Styling**: Tailwind CSS 3.4 + Shadcn UI (Radix UI primitives)
+- **Icons**: Lucide React (Named imports mandatory for performance)
+- **Security**: DOMPurify (XSS protection), Custom Shunting-Yard Parser (Math evaluation)
+- **Validation**: Zod (Runtime schema validation for persistence)
+- **Testing**: Vitest 4.x
 
-### Core Architecture
-- **Shell**: The main UI (`App.tsx`) manages the boot sequence, login screen, and the desktop environment (Dock, TopPanel, Desktop).
-- **Window Manager**: Handles window lifecycle (open, close, minimize, maximize), focus (z-index stacking), and positioning (cascading).
-- **Virtual File System (VFS)**: A custom hook-based system (`useFileSystem.ts`) that manages a hierarchical node structure (files and folders) with local persistence. Data is validated with `zod` at runtime.
-- **App Ecosystem**: 54 functional applications located in `src/apps/`, managed by a central `AppRouter.tsx` and `registry.ts`.
+### Architectural Pillars
+- **OS Store (`src/hooks/useOSStore.tsx`)**: Centralized state management using `useReducer` and React Context. Handles window stacking (z-index), focus, notifications, and desktop state.
+- **Virtual File System (`src/hooks/useFileSystem.ts`)**: ID-based file management with `localStorage` persistence. Supports associations, trash, and directory traversal.
+- **Application Routing (`src/apps/AppRouter.tsx`)**: Implements `React.lazy()` and `Suspense` to code-split 54 applications, significantly reducing initial bundle size (~360 KB initial).
+- **Security Utilities (`src/utils/`)**:
+  - `safeEval.ts`: Hardened math parser replacing `eval()` for Spreadsheet and Terminal.
+  - `sanitizeHtml.ts`: DOMPurify wrappers for safe HTML injection.
+  - `storageValidation.ts`: Zod-based schema validation for all `localStorage` reads.
+
+---
 
 ## Building and Running
 
 Commands must be executed from the `app/` directory.
 
-| Task | Command |
+| Command | Action |
 | :--- | :--- |
-| **Install Dependencies** | `npm install` |
-| **Start Dev Server** | `npm run dev` (Runs on `http://localhost:3000`) |
-| **Production Build** | `npm run build` (Runs `tsc` then `vite build`) |
-| **Linting** | `npm run lint` |
-| **Type Checking** | `tsc -b` |
-| **Tests** | `npx vitest run` |
+| `npm run dev` | Start Vite development server (usually at `localhost:3000`) |
+| `npm run build` | Run `tsc -b` and `vite build` for production |
+| `npm run lint` | Execute ESLint static analysis |
+| `npm run test` | Run Vitest unit tests |
+| `npm run preview` | Preview the production build locally |
 
-## Security Requirements
-
-These are **non-negotiable** rules derived from the security audit.
-
-### Math Evaluation
-- **`eval()` / `new Function()` FORBIDDEN`. Any math evaluation must use `safeEval()` from `@/utils/safeEval`.
-- **Guideline**: The `safeEval` utility uses a shunting-yard algorithm and only allows `0-9`, `.`, `+`, `-`, `*`, `/`, `^`, `(`, `)`, and whitespace.
-
-### HTML Sanitization
-- **`dangerouslySetInnerHTML` is restricted**. Any injection of user-generated HTML must pass through `sanitizeHtml()` from `@/utils/sanitizeHtml`.
-- **Markdown**: Use `sanitizeMarkdownHtml()` which has a whitelist for common markdown tags.
-- **Code Editor**: Use `sanitizeHtml(..., {ALLOWED_TAGS: ['span', 'br', 'div']})`.
-- **Regex Tester**: Use `sanitizeHtml(..., {ADD_TAGS: ['mark']})`.
-
-### localStorage Validation
-- **`JSON.parse()` without validation IS ANTI-PATTERN**. All localStorage reads must use `validateDesktopIcons()` or `validateFileSystem()` from `@/utils/storageValidation`.
-- **Migration**: The VFS uses the key `ubuntuos_filesystem_v2`. Legacy key `ubuntuos_filesystem` is supported but should not be used for new writes.
+---
 
 ## Development Conventions
 
-### Coding Style
-- **Strict Typing**: Strict TypeScript is enforced. Avoid `any`; use `unknown` for unpredictable data.
-- **Component Pattern**: Use functional components with `memo` for performance-critical UI (like Dock or Desktop).
-- **Hooks-First**: Business logic should reside in custom hooks (`hooks/`) or centralized in the OS/FS stores.
-- **Naming**: PascalCase for components and types; camelCase for utilities, hooks, and variables.
+### 🛡️ Security & Reliability
+- **No Arbitrary Execution**: `eval()` and `new Function()` are strictly **forbidden**. Use `safeEval()` for math evaluation.
+- **Mandatory Sanitization**: Always wrap `dangerouslySetInnerHTML` content in `sanitizeHtml()` or `sanitizeMarkdownHtml()`.
+- **Schema Validation**: Never use unvalidated `JSON.parse` on `localStorage` data. Use `safeJsonParse(raw, schema, fallback)` or the `validate*` utilities in `storageValidation.ts`.
+- **ReDoS Protection**: Any app accepting user-supplied regex must limit `exec()` iterations (cap at 1000).
 
-### State & Logic
-- **Global State**: Use the `useOS()` hook to access system state and dispatch actions.
-- **File Access**: Always use the `useFileSystem()` hook. Reference files by their unique node `id`, not by path, to ensure reliability across renames/moves.
-- **Theming**: Adhere to the design tokens defined in `src/index.css`. Use CSS variables (e.g., `var(--accent-primary)`) to ensure compatibility with Light/Dark mode.
+### 🏗️ Code Quality & Performance
+- **TypeScript Strictness**: Avoid `any`. Define explicit interfaces for all props and state.
+- **Import Hygiene**: Use named imports for Lucide icons (`import { Minus } from 'lucide-react'`). Wildcard imports are only permitted in `DynamicIcon.tsx`.
+- **Build Hygiene**: `noUnusedLocals` and `noUnusedParameters` are enforced. Unused imports or variables will cause hard build failures.
+- **Lazy Loading**: New applications must be added to `AppRouter.tsx` using `lazy()` to maintain performance.
 
-### Adding New Features
-- **New Apps**:
-    1. Create component in `src/apps/`.
-    2. Register metadata in `src/apps/registry.ts`.
-    3. Map the `appId` in `src/apps/AppRouter.tsx`.
-    4. If the app evaluates math, use `safeEval()`.
-    5. If the app shows user HTML, use `sanitizeHtml()`.
-    6. If the app persists to localStorage, use `zod` validation.
-- **UI Primitives**: Check `src/components/ui/` first before creating custom components.
+### 🔄 Workflow: The Meticulous Approach
+Adhere to this six-phase procedure for all implementation tasks:
+1. **ANALYZE**: Deep requirement mining.
+2. **PLAN**: Structured roadmap with verification criteria.
+3. **VALIDATE**: Explicit confirmation before coding.
+4. **IMPLEMENT**: Modular, tested builds following project patterns.
+5. **VERIFY**: Rigorous QA including edge cases and accessibility.
+6. **DELIVER**: Complete handoff with documentation.

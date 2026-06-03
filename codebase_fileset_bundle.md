@@ -267,10 +267,10 @@ Run from the `app/` directory:
 **Root Cause**: `localStorage` data was modified by the user or corrupted.  
 **Fix**: The app now validates all stored state with `zod` and falls back to defaults if validation fails. Check browser DevTools → Application → Local Storage to inspect the data.
 
-### NotImplemented "Icons is not defined" ReferenceError
-**Symptom**: Opening an unbuilt/unsupported app causes a white screen with `ReferenceError: Icons is not defined`.  
-**Root Cause**: `NotImplemented.tsx` referenced `Icons.HelpCircle` and `Icons.Hammer` without importing `lucide-react`.  
-**Fix**: Ensure `NotImplemented.tsx` imports `* as Icons from 'lucide-react'`. This also enables any Lucide icon to be used as a fallback icon.
+### NotImplemented — pattern for icons in fallback views
+**Pattern**: `NotImplemented.tsx` lives at `src/components/NotImplemented.tsx` (not under `src/apps/`) and uses named Lucide imports (`HelpCircle`, `Hammer`) plus `<DynamicIcon />` for runtime icon resolution by string name.
+**Why named imports only**: A wildcard `import * as Icons from 'lucide-react'` reintroduces the ~587 KB bundle bloat the `DynamicIcon.tsx` refactor eliminated. Only `DynamicIcon.tsx` is authorised to use the wildcard form because it resolves icons by string at runtime; everything else (including `NotImplemented.tsx`) must use named imports. The ESLint config (`app/eslint.config.js`) enforces this.
+**Historical note**: An earlier version of `NotImplemented.tsx` referenced `Icons.HelpCircle` / `Icons.Hammer` without importing `lucide-react`, causing `ReferenceError: Icons is not defined` whenever an unbuilt app opened. That bug is fixed; this section is preserved as a pattern reference, not a troubleshooting entry.
 
 ### Math Evaluation Failures
 **Symptom**: Spreadsheet formulas or terminal `calc` always returns `#VALUE!` or "invalid expression".  
@@ -368,6 +368,7 @@ Run from the `app/` directory:
 - **Internal CSS injection via `dangerouslySetInnerHTML` still needs validation**. The `chart.tsx` UI component generates CSS variables from `ChartConfig` color values. Even though these come from application-level config (not user input), always validate dynamic content before injection. If chart colors are ever sourced from user input, add hex/rgb/hsl color value validation.
 - **Vitest `@/` alias resolution blocks component tests**. Tests importing components via `@/` aliases fail due to vitest module resolution. Solution: Use source-level tests (reading file source strings) for component validation, or fix the alias configuration to support component rendering tests.
 - **Source-level tests as valid alternative**: When component rendering is blocked by infrastructure, validate by reading component source files and asserting on attribute presence (e.g., `aria-label`, `role`, `tabIndex`). This catches ARIA regressions without requiring full rendering.
+- **Third-party audit findings must be independently validated**: The kilo-1 audit had a ~33% error rate on CRITICAL/HIGH findings. C-1 (Calendar unused imports) was completely wrong; H-1 (17 apps using raw JSON.parse) was stale/post-fix; H-6 (osReducer line count) misinterpreted file lines vs. function lines. Always grep the actual source before acting on audit findings.
 
 ```
 
@@ -469,6 +470,7 @@ Follow this six-phase workflow for all implementation tasks:
 - **Prefer React components over `dangerouslySetInnerHTML`**. RegexTester was refactored to use `<mark>` React components instead of concatenated HTML strings, eliminating XSS risk entirely.
 - **Runtime schema validation is non-optional** for any persisted state. TypeScript types are erased at runtime; `zod` is the correct defense. The new `safeJsonParse(raw, schema, fallback)` utility in `src/utils/safeJsonParse.ts` provides a reusable pattern for ad-hoc localStorage reads.
 - **ReDoS (catastrophic backtracking) from user regex is real**. A pattern like `(a+)+$` against a long string can freeze the browser tab entirely. Always limit `exec()` iterations (e.g., 1000) and bail out early. Never trust user-supplied regex without guards.
+- **Third-party audit findings must be independently validated before acting**: The kilo-1 audit had a ~33% error rate on CRITICAL/HIGH findings. One finding claimed `Calendar.tsx` had unused imports that broke the build (imports were actually used — build passed). Another claimed 17 apps used raw `JSON.parse` (all had been fixed). Always verify audit claims against the actual source before prioritizing fixes.
 - **Unbounded array creation from user input crashes browsers**. The Calculator factorial function previously created an array of size `Math.floor(v)` without a cap, allowing input like `1e8` to crash the tab. Always cap input-dependent allocations (factorial capped at 170, where JavaScript `Number` overflows to `Infinity`).
 
 ### State Management
@@ -490,7 +492,7 @@ Follow this six-phase workflow for all implementation tasks:
 5. **Fix vitest `@/` alias resolution** to enable component-level rendering tests. Currently blocked by module resolution; only utility tests (relative imports) and source-level tests pass.
 6. **Enforce import hygiene during code review**: The `noUnusedLocals`/`noUnusedParameters` TypeScript checks catch dead code at build time, but IDE auto-imports can silently add unused imports. Add a pre-commit hook or lint rule to block commits with unused identifiers.
 7. **Replace all remaining `dangerouslySetInnerHTML` usage**: After RegexTester was refactored to use React components, audit all remaining `dangerouslySetInnerHTML` usage and replace with React component rendering where possible.
-8. **Add ReDoS guards to all regex-accepting apps**: Notes search, Email filters, and any other app that accepts user-supplied regex should implement iteration limits.
+8. **Add ReDoS guards to all regex-accepting apps**: TextEditor find bar (now fixed with `countMatchesSafely()`), RegexTester (already has `MAX_EXEC_ITERATIONS = 1000`). Notes search and Email filters use `String.includes()` and are not vulnerable. Audit any app with `new RegExp(userInput)` for missing guards.
 9. **Implement actual MediaRecorder for recorder apps**: ScreenRecorder and VoiceRecorder currently create placeholder text downloads. Production builds should implement the actual `MediaRecorder` API or clearly mark simulated behavior.
 10. **Validate chart color values before CSS injection**: The `chart.tsx` component generates CSS variables from `ChartConfig` color values. While currently from hardcoded config, add hex/rgb/hsl validation if colors ever come from user input.
 11. **Add ESLint rule to block wildcard lucide imports**: Prevent `import * as Icons from 'lucide-react'` everywhere except `DynamicIcon.tsx`. This enforces the named import convention at lint time.
@@ -500,84 +502,71 @@ Follow this six-phase workflow for all implementation tasks:
 
 # GEMINI.md
 ```md
-# UbuntuOS Web - Project Context
+# UbuntuOS Web — Gemini CLI Context
 
-This document serves as the primary instructional context for Gemini when interacting with this codebase.
+Comprehensive, high-fidelity web-based replica of the Ubuntu Linux desktop environment.
 
 ## Project Overview
 
-UbuntuOS Web is a high-fidelity, interactive replica of the Ubuntu Linux desktop environment. It is built as a Single Page Application (SPA) that runs entirely in the browser. A comprehensive security audit and remediation was completed on **2026-05-31**, eliminating `eval()`, `new Function()`, and XSS vulnerabilities.
+**UbuntuOS Web** is a multi-windowed desktop experience built for the browser. It implements a custom window manager, a virtual file system (VFS), and 54 functional applications.
 
-### Main Technologies
-- **Framework**: React 19 (Functional components, Hooks)
+### Core Technologies
+- **Framework**: React 19.2 (Functional Components, Hooks, Context API)
 - **Language**: TypeScript 5.9 (Strict mode enabled)
 - **Build Tool**: Vite 7.2
-- **Styling**: Tailwind CSS 3.4 (Utility-first with CSS variable design tokens)
-- **UI Components**: Radix UI primitives & Shadcn UI
-- **Icons**: Lucide React
-- **State Management**: Centralized React Context (`useOSStore.tsx`)
-- **Persistence**: LocalStorage-backed Virtual File System (VFS) with `zod` schema validation
-- **Security**: DOMPurify for XSS sanitization
+- **Styling**: Tailwind CSS 3.4 + Shadcn UI (Radix UI primitives)
+- **Icons**: Lucide React (Named imports mandatory for performance)
+- **Security**: DOMPurify (XSS protection), Custom Shunting-Yard Parser (Math evaluation)
+- **Validation**: Zod (Runtime schema validation for persistence)
+- **Testing**: Vitest 4.x
 
-### Core Architecture
-- **Shell**: The main UI (`App.tsx`) manages the boot sequence, login screen, and the desktop environment (Dock, TopPanel, Desktop).
-- **Window Manager**: Handles window lifecycle (open, close, minimize, maximize), focus (z-index stacking), and positioning (cascading).
-- **Virtual File System (VFS)**: A custom hook-based system (`useFileSystem.ts`) that manages a hierarchical node structure (files and folders) with local persistence. Data is validated with `zod` at runtime.
-- **App Ecosystem**: 54 functional applications located in `src/apps/`, managed by a central `AppRouter.tsx` and `registry.ts`.
+### Architectural Pillars
+- **OS Store (`src/hooks/useOSStore.tsx`)**: Centralized state management using `useReducer` and React Context. Handles window stacking (z-index), focus, notifications, and desktop state.
+- **Virtual File System (`src/hooks/useFileSystem.ts`)**: ID-based file management with `localStorage` persistence. Supports associations, trash, and directory traversal.
+- **Application Routing (`src/apps/AppRouter.tsx`)**: Implements `React.lazy()` and `Suspense` to code-split 54 applications, significantly reducing initial bundle size (~360 KB initial).
+- **Security Utilities (`src/utils/`)**:
+  - `safeEval.ts`: Hardened math parser replacing `eval()` for Spreadsheet and Terminal.
+  - `sanitizeHtml.ts`: DOMPurify wrappers for safe HTML injection.
+  - `storageValidation.ts`: Zod-based schema validation for all `localStorage` reads.
+
+---
 
 ## Building and Running
 
 Commands must be executed from the `app/` directory.
 
-| Task | Command |
+| Command | Action |
 | :--- | :--- |
-| **Install Dependencies** | `npm install` |
-| **Start Dev Server** | `npm run dev` (Runs on `http://localhost:3000`) |
-| **Production Build** | `npm run build` (Runs `tsc` then `vite build`) |
-| **Linting** | `npm run lint` |
-| **Type Checking** | `tsc -b` |
-| **Tests** | `npx vitest run` |
+| `npm run dev` | Start Vite development server (usually at `localhost:3000`) |
+| `npm run build` | Run `tsc -b` and `vite build` for production |
+| `npm run lint` | Execute ESLint static analysis |
+| `npm run test` | Run Vitest unit tests |
+| `npm run preview` | Preview the production build locally |
 
-## Security Requirements
-
-These are **non-negotiable** rules derived from the security audit.
-
-### Math Evaluation
-- **`eval()` / `new Function()` FORBIDDEN`. Any math evaluation must use `safeEval()` from `@/utils/safeEval`.
-- **Guideline**: The `safeEval` utility uses a shunting-yard algorithm and only allows `0-9`, `.`, `+`, `-`, `*`, `/`, `^`, `(`, `)`, and whitespace.
-
-### HTML Sanitization
-- **`dangerouslySetInnerHTML` is restricted**. Any injection of user-generated HTML must pass through `sanitizeHtml()` from `@/utils/sanitizeHtml`.
-- **Markdown**: Use `sanitizeMarkdownHtml()` which has a whitelist for common markdown tags.
-- **Code Editor**: Use `sanitizeHtml(..., {ALLOWED_TAGS: ['span', 'br', 'div']})`.
-- **Regex Tester**: Use `sanitizeHtml(..., {ADD_TAGS: ['mark']})`.
-
-### localStorage Validation
-- **`JSON.parse()` without validation IS ANTI-PATTERN**. All localStorage reads must use `validateDesktopIcons()` or `validateFileSystem()` from `@/utils/storageValidation`.
-- **Migration**: The VFS uses the key `ubuntuos_filesystem_v2`. Legacy key `ubuntuos_filesystem` is supported but should not be used for new writes.
+---
 
 ## Development Conventions
 
-### Coding Style
-- **Strict Typing**: Strict TypeScript is enforced. Avoid `any`; use `unknown` for unpredictable data.
-- **Component Pattern**: Use functional components with `memo` for performance-critical UI (like Dock or Desktop).
-- **Hooks-First**: Business logic should reside in custom hooks (`hooks/`) or centralized in the OS/FS stores.
-- **Naming**: PascalCase for components and types; camelCase for utilities, hooks, and variables.
+### 🛡️ Security & Reliability
+- **No Arbitrary Execution**: `eval()` and `new Function()` are strictly **forbidden**. Use `safeEval()` for math evaluation.
+- **Mandatory Sanitization**: Always wrap `dangerouslySetInnerHTML` content in `sanitizeHtml()` or `sanitizeMarkdownHtml()`.
+- **Schema Validation**: Never use unvalidated `JSON.parse` on `localStorage` data. Use `safeJsonParse(raw, schema, fallback)` or the `validate*` utilities in `storageValidation.ts`.
+- **ReDoS Protection**: Any app accepting user-supplied regex must limit `exec()` iterations (cap at 1000).
 
-### State & Logic
-- **Global State**: Use the `useOS()` hook to access system state and dispatch actions.
-- **File Access**: Always use the `useFileSystem()` hook. Reference files by their unique node `id`, not by path, to ensure reliability across renames/moves.
-- **Theming**: Adhere to the design tokens defined in `src/index.css`. Use CSS variables (e.g., `var(--accent-primary)`) to ensure compatibility with Light/Dark mode.
+### 🏗️ Code Quality & Performance
+- **TypeScript Strictness**: Avoid `any`. Define explicit interfaces for all props and state.
+- **Import Hygiene**: Use named imports for Lucide icons (`import { Minus } from 'lucide-react'`). Wildcard imports are only permitted in `DynamicIcon.tsx`.
+- **Build Hygiene**: `noUnusedLocals` and `noUnusedParameters` are enforced. Unused imports or variables will cause hard build failures.
+- **Lazy Loading**: New applications must be added to `AppRouter.tsx` using `lazy()` to maintain performance.
 
-### Adding New Features
-- **New Apps**:
-    1. Create component in `src/apps/`.
-    2. Register metadata in `src/apps/registry.ts`.
-    3. Map the `appId` in `src/apps/AppRouter.tsx`.
-    4. If the app evaluates math, use `safeEval()`.
-    5. If the app shows user HTML, use `sanitizeHtml()`.
-    6. If the app persists to localStorage, use `zod` validation.
-- **UI Primitives**: Check `src/components/ui/` first before creating custom components.
+### 🔄 Workflow: The Meticulous Approach
+Adhere to this six-phase procedure for all implementation tasks:
+1. **ANALYZE**: Deep requirement mining.
+2. **PLAN**: Structured roadmap with verification criteria.
+3. **VALIDATE**: Explicit confirmation before coding.
+4. **IMPLEMENT**: Modular, tested builds following project patterns.
+5. **VERIFY**: Rigorous QA including edge cases and accessibility.
+6. **DELIVER**: Complete handoff with documentation.
 
 ```
 
@@ -646,6 +635,10 @@ This codebase has undergone multiple comprehensive security audits and remediati
 - **Added automated accessibility source tests**: 14 source-level tests verify ARIA attribute presence in component source files.
 - **Added mock data documentation**: Added "simulated data" comments to `Email.tsx` and `RssReader.tsx` to clarify that data is for demo purposes only.
 - **Fixed TextEditor.tsx raw JSON.parse**: Was missed in original audit due to `try/catch` wrapper; now uses `safeJsonParse` with zod schema validation.
+
+### kilo-1 Code Review Validation (2026-06-04)
+- **Fixed ReDoS in TextEditor find bar**: Added `escapeRegExp()` and `countMatchesSafely()` utilities to prevent catastrophic backtracking from user-controlled search input. Escapes regex special characters and caps iterations at 1000.
+- **Fixed stale ContextMenu test**: Updated `ContextMenu-actions.test.tsx` to expect `ARRANGE_ICONS` (not `CASCADE_WINDOWS`), matching the actual source dispatch.
 
 See [REMEDIATION.md](REMEDIATION.md) for the full security audit report, [REMEDIATION_MIMO2.md](REMEDIATION_MIMO2.md) for the prior code review audit remediation, and [REMEDIATION_KIMI2.md](REMEDIATION_KIMI2.md) for the latest code review audit.
 
@@ -729,7 +722,7 @@ After running `npm run dev`, open your browser at the provided port (usually `ht
 5. **Unused Local / Import Hygiene**: The `tsconfig.app.json` enforces `"noUnusedLocals": true` and `"noUnusedParameters": true`. Prior build broke with 43 `TS6133` errors across 16 files. Keep imports lean and remove dead code promptly to prevent build regressions.
 6. **ReDoS from User-Crafted Regex**: RegexTester now limits iterations, but apps accepting user regex (e.g., Notes search, Email filters) should also guard against catastrophic backtracking.
 7. **Simulated vs Real Recordings**: ScreenRecorder and VoiceRecorder create placeholder text downloads. Production builds should implement actual `MediaRecorder` API recording or clearly mark as simulated.
-8. **Vitest @/ Alias Resolution**: Component tests using `@/` aliases fail in vitest due to module resolution issues. Currently, only utility tests (relative imports) pass consistently. Component-level tests use source-level validation (reading file source strings) as a workaround. The `ContextMenu-actions.test.tsx` has a pre-existing bug expecting `CASCADE_WINDOWS` but code dispatches `ARRANGE_ICONS`.
+8. **Vitest @/ Alias Resolution**: Component tests using `@/` aliases fail in vitest due to module resolution issues. Currently, only utility tests (relative imports) pass consistently. Source-level tests (reading file source strings) are used as a workaround for component validation.
 
 ## 📜 License
 
@@ -970,6 +963,20 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "ImportDeclaration[source.value='lucide-react']:has(ImportNamespaceSpecifier)",
+          message:
+            "Wildcard imports of 'lucide-react' (e.g. `import * as Icons from 'lucide-react'`) bloat the bundle by ~587 KB. Use named imports instead. The only authorised wildcard import of 'lucide-react' is in src/components/DynamicIcon.tsx, which resolves icon names dynamically at runtime.",
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/components/DynamicIcon.tsx'],
+    rules: { 'no-restricted-syntax': 'off' },
   },
 ])
 

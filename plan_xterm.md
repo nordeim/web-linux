@@ -563,6 +563,37 @@ Every finding is grounded in specific code evidence:
   
 Recommendation: Proceed with implementation using the validated plan after confirming the 6 pre-implementation decisions. 
 
+# Todos
+[✓] Phase 0: Validate all xterm plan claims against current codebase
+[✓] Phase 1: Create validation report (Code_Review_Audit_xterm_VALIDATED.md)
+[✓] Phase 2: Update README.md with xterm validation findings
+[✓] Phase 3: Update CLAUDE.md with Real Terminal feature guidance
+[✓] Phase 4: Update AGENTS.md with third-party plan validation lesson
+[✓] Phase 5: Run verification (TypeScript + test suite)
+All work is complete. Let me provide a comprehensive final summary. </think>    All validation, documentation updates, and verification are complete. Here's a comprehensive summary:
+✅ Xterm (Real Terminal) Plan — Validation & Documentation Complete
+What Was Done
+1. Independent Validation: Every material claim from both plan_xterm.md (draft) and Validated_Implementation_Plan_Real_Terminal.md was verified against the current codebase by reading the actual source code.
+2. New Document Created: Code_Review_Audit_xterm_VALIDATED.md — a comprehensive validation report with file references, evidence, and recommendations.
+3. Three Main Docs Updated with the latest findings.
+Validation Results Summary
+Finding	Status	Evidence
+V1 (CRITICAL): No JWT exists	CONFIRMED	AuthState has no token field; LOGIN reducer just sets isAuthenticated: true; LoginScreen.tsx accepts any password with no validation
+V2 (HIGH): Category must be PascalCase	CONFIRMED	AppCategory type uses 'System', not 'system'
+V3 (HIGH): xterm v5 scoped packages	CONFIRMED	Must use @xterm/xterm, not xterm (v4)
+V4 (HIGH): windowId not passed	CONFIRMED	AppRouterProps has windowId, but AppRouter({ appId }) only destructures appId
+V5 (MEDIUM): No vite proxy for /ws	CONFIRMED	vite.config.ts only has port: 3000, no proxy
+V6 (MEDIUM): erasableSyntaxOnly	CONFIRMED	Frontend tsconfig.app.json has it set to true; backend must match
+All 11 confirmed-correct assumptions (VC1–VC11) were also independently verified.
+Documents Updated
+File	Changes
+README.md	Added Real Terminal Feature section; added Code_Review_Audit_xterm_VALIDATED.md to documentation table
+CLAUDE.md	Added Real Terminal Implementation section (key findings, pre-implementation decisions, timeline)
+AGENTS.md	Added lesson: "Third-party implementation plans must also be independently validated"
+Key Takeaway
+"Third-party implementation plans must also be independently validated."
+The plan_xterm.md draft had the wrong xterm package names (v4 unscoped vs. v5 scoped), wrong category casing (lowercase vs. PascalCase), and assumed a JWT system existed (it did not). The AppRouterProps declared windowId but the component never destructured it. All four issues were caught by reading the actual source code, not the plan.
+
 # https://www.kimi.com/share/19e8b122-6382-8c93-8000-0000c32c3f0c , https://chat.z.ai/s/baf7e45b-4084-4a38-81f3-0aadbb4c0fb3 
 
 

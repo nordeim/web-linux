@@ -68,6 +68,15 @@ This codebase has undergone multiple comprehensive security audits and remediati
 
 See [REMEDIATION.md](REMEDIATION.md) for the full security audit report, [REMEDIATION_MIMO2.md](REMEDIATION_MIMO2.md) for the prior code review audit remediation, and [REMEDIATION_KIMI2.md](REMEDIATION_KIMI2.md) for the latest code review audit.
 
+## 🎯 Real Terminal Feature Plan
+
+A validated implementation plan exists for integrating a real bash terminal (`node-pty` + Docker) into UbuntuOS Web. The independent validation found **1 critical blocker** (no existing JWT auth system; must be built +2–3 days) and **3 high-severity discrepancies** (xterm package names, category casing, `windowId` propagation), all now corrected.
+
+- **Validated Plan**: [Validated_Implementation_Plan_Real_Terminal.md](Validated_Implementation_Plan_Real_Terminal.md)
+- **Validation Report**: [Code_Review_Audit_xterm_VALIDATED.md](Code_Review_Audit_xterm_VALIDATED.md)
+- **Status**: Ready to implement (13–19 days) after confirming 6 pre-implementation decisions
+- **Risk**: JWT issuance system must be built first (Approach B: backend `/auth/token` endpoint recommended)
+
 ## 🏗️ Architecture
 
 ### Tech Stack
@@ -137,7 +146,7 @@ After running `npm run dev`, open your browser at the provided port (usually `ht
 | `CONSISTENT.md` | Single source of truth for all audit findings and remediation status |
 | `REMEDIATION_PLAN.md` | Active remediation plan with todo list and execution tracking |
 | `REMEDIATION_PLAN_DPSK2.md` | dpsk-2 code review audit remediation plan and execution tracking |
-| `STATUS_AUDIT_REPORT.md` | Validation report for status_5.md and status_6.md accuracy |
+| `Code_Review_Audit_xterm_VALIDATED.md` | Validation report for Real Terminal feature plan |
 
 ## ⚠️ Known Issues & Recommendations
 

@@ -57,3 +57,11 @@ please meticulously review @CLAUDE.md , @README.md , @AGENTS.md and @plan.md to 
 Awesome meticulous job so far. Please keep up the good work. now, please meticulously plan to create a detailed remediation plan with ToDo list to resolve and fix the identified/outstanding issues and gaps. Review and validate the remediation plan against the codebase again to check for accurate alignment before proceeding to execute it meticulously. use TDD approach to make code changes.
 You will now meticulously plan, validate, and execute a Targeted remediation using TDD. You will analyze the outstanding issues, create a comprehensive plan with a todo list, validate it against the codebase, and then execute. 
 
+---
+
+awesome meticulous job so far. please keep up the good work. now, please meticulously review and validate @plan_xterm.md , @Validated_Implementation_Plan_Real_Terminal.md and @Code_Review_Audit_xterm_VALIDATED.md against the codebase to check for alignment and architecture integrity
+
+---
+
+please meticulously plan to create an implementation plan with a detailed ToDo list to complete the 6 pre-implementation. review and validate the implementation plan against the codebase to check for alignment before proceeding to execute it meticulously. use TDD approach to make code changes.
+

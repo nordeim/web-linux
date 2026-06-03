@@ -169,6 +169,72 @@ Before delivering the final report, perform these self-checks:
 
 This document provides high-signal technical context for AI coding agents. It focuses on non-obvious architectural patterns, state management quirks, security rules, and hard-earned lessons from the comprehensive security audit and remediation completed on 2026-05-31.
 
+🔍 Comprehensive Project Review
+📌 WHAT: The Project
+UbuntuOS Web is a comprehensive web-based replica of the Ubuntu Linux desktop environment. It is not a static mockup, but a fully interactive, single-page application (SPA) built on modern web technologies.
+- Product Type: Web application (Desktop Environment)
+- Core Functionality: A complete desktop environment with a custom window manager, a virtual file system (VFS), and 54 functional, interactive applications.
+- Key Features: 
+- Window Manager: Custom z-index stacking, drag-and-drop windows, minimize/maximize/restore functionality.
+- Desktop Environment: 
+- Virtual File System (VFS): A robust file management layer with unique ID-based references, trash handling, and localStorage persistence for data.
+- Application Ecosystem: 54 pre-installed apps across 7 categories (System, Productivity, Internet, Media, Games, DevTools, Creative).
+🎯 WHY: The Purpose and Rationale
+The project serves a dual purpose:
+1. Developer Showcase: It demonstrates advanced architectural patterns in React, such as complex state management without external libraries (using Context + useReducer), and creative solutions to SPA challenges like windowing systems and z-index stacking.
+2. User Toolset: It provides a portable, web-accessible collection of common productivity, utility, and entertainment applications (e.g., Calculator, Terminal, Games, Text Editor).
+The motivation for the architecture stemmed from the complexity of managing 54 individual applications. Eagerly loading all of them would create an unacceptable initial bundle size, and managing state across all these disparate components without a clear architecture would lead to a tangled, unmaintainable codebase.
+🛠️ HOW: Architecture, Tech Stack, and Design
+Core Tech Stack
+Layer	Technology	Purpose
+Frontend	React 19.2.0	Component-based UI & Hook-based logic
+Language	TypeScript 5.9.3	Strict type safety across the OS store
+Build Tool	Vite 7.2	Development server and production build
+Styling	Tailwind CSS 3.4	Utility-first styling with design tokens
+Components	Radix UI / Shadcn	Accessible primitive components
+Icons	Lucide React	Vector iconography (named imports only)
+Security	DOMPurify	XSS sanitization for user-generated HTML
+Validation	Zod	Runtime schema validation for localStorage data
+Testing	Vitest	Unit and source-level testing
+Architectural Design
+The project follows a clear separation of concerns, separating the OS shell, application logic, and shared utilities.
+1. Centralized State Management (useOS Hook):
+- Technology: React Context + useReducer.
+- Role: This is the "brain" of the OS. It manages all global state, including the list of open windows, their z-indices, focus, minimize/maximize status, and desktop icon positions.
+- Key Pattern: Actions are dispatched to a central osReducer to update the global state.
+2. Virtual File System (VFS) (useFileSystem Hook):
+- Technology: Custom hook built on top of a JavaScript object graph.
+- Role: Manages all file and directory operations.
+- Key Design: Files and folders are identified by a unique id, not their path. This allows for robust renaming and moving without breaking references. It also normalizes paths (e.g., //home//user// -> /home/user).
+- Persistence: The entire VFS is serialized to localStorage under the key ubuntuos_filesystem_v2.
+3. Window Management (WindowFrame & App):
+- Technology: Custom window engine in src/components/WindowFrame.tsx.
+- Role: Provides a standardized, look-and-feel-consistent window chrome (title bar, borders, controls) for all applications.
+- Key Patterns:
+- Drag & Resize: Handled at the WindowFrame level, so individual apps don't need to implement it.
+- Focus Management: Z-index is managed globally via a nextZIndex counter. To focus a window, an FOCUS_WINDOW action is dispatched, which increments the counter. Never should a developer manually set z-index in CSS.
+- State Transitions: Carefully handles transitions between normal, minimized, and maximized states, including restoring previous size and position.
+4. Application Isolation (Dynamic Routing):
+- Technology: React.lazy() and Suspense.
+- Role: Drastically reduces the initial bundle size.
+- Pattern: Instead of eagarly importing all 54 apps, they are loaded on demand. This reduced the initial bundle from ~1 MB to ~360 KB. NotImplemented.tsx is the only component that cannot be lazy-loaded because it serves as a fallback.
+5. Shared Utilities (src/utils/):
+- safeEval.ts: A hardened math expression parser (shunting-yard algorithm) that replaces the dangerous eval() and new Function(). This is mandatory for any math evaluation.
+- sanitizeHtml.ts: A wrapper around DOMPurify to sanitize dangerouslySetInnerHTML content. It also provides sanitizeMarkdownHtml() for markdown tags.
+- storageValidation.ts & safeJsonParse.ts: A runtime validation layer that uses zod to ensure data read from localStorage matches its expected schema before use. This prevents crashes from corrupted data.
+- DynamicIcon.tsx: A shared component for rendering Lucide icons by name. This is the only file in the codebase authorized to use a wildcard import (import * as Icons from 'lucide-react'), as it dynamically resolves icons at runtime, eliminating ~587KB of bundle bloat in other components.
+Security & Performance Principles
+- Security-First: The project has undergone multiple audits. Forbidden patterns include eval(), new Function(), and dangerouslySetInnerHTML without sanitizeHtml().
+- Performance-First: Strict TypeScript configuration (noUnusedLocals, noUnusedParameters) ensures dead code is eliminated at build time. Optimization strategies include code splitting with dynamic imports and a shared DynamicIcon.
+📋 Key Documents and Their Roles
+Document	Purpose & Audience
+plan.md	The original project roadmap. Contains the initial feature checklist, application list (50+ apps), and staged execution plan. Provides historical context for the project's scope.
+README.md	The primary public-facing documentation. Contains the project overview, quick start guide, architecture summary, and a detailed list of recent security and reliability improvements.
+AGENTS.md	A high-signal technical briefing specifically for AI coding agents. It focuses on non-obvious architectural patterns, state management quirks, security rules, and lessons learned from past audits. It is crucial for ensuring future code changes maintain the project's quality standards.
+CLAUDE.md	A more detailed coding standards document, expanding on AGENTS.md with specific implementation guidelines for React, TypeScript, Tailwind, Lucide, and the project's security and persistence rules. It includes a validated plan for a "Real Terminal" feature and a list of prioritized recommendations for future work.
+✅ Summary
+UbuntuOS Web is a complex, well-architected single-page application that cleverly recreates a desktop OS in the browser. Its design is built around principles of strict type safety (TypeScript), implicit security (forbidding eval() and XSS vectors), robust state management (React Context + Reducer), and performance optimization (dynamic imports). The extensive documentation is a testament to the project's maturity and the lessons learned from rigorous code reviews, ensuring a high standard of quality and maintainability.
+
 ## 🧠 Core Architecture
 
 ### Window Manager (Logic: `useOSStore.tsx`)
@@ -366,4 +432,6 @@ Run from the `app/` directory:
 - **Internal CSS injection via `dangerouslySetInnerHTML` still needs validation**. The `chart.tsx` UI component generates CSS variables from `ChartConfig` color values. Even though these come from application-level config (not user input), always validate dynamic content before injection. If chart colors are ever sourced from user input, add hex/rgb/hsl color value validation.
 - **Vitest `@/` alias resolution blocks component tests**. Tests importing components via `@/` aliases fail due to vitest module resolution. Solution: Use source-level tests (reading file source strings) for component validation, or fix the alias configuration to support component rendering tests.
 - **Source-level tests as valid alternative**: When component rendering is blocked by infrastructure, validate by reading component source files and asserting on attribute presence (e.g., `aria-label`, `role`, `tabIndex`). This catches ARIA regressions without requiring full rendering.
+- **Third-party implementation plans must also be independently validated**. The plan_xterm.md draft had the wrong xterm package names (v4 unscoped instead of v5 `@xterm/*`), wrong category casing (lowercase vs PascalCase), and assumed a JWT system existed (it did not). The `AppRouterProps` declared `windowId` but the `AppRouter` component never destructured it. All three issues were caught by reading the actual source code, not the plan.
+
 - **Third-party audit findings must be independently validated**: The kilo-1 audit had a ~33% error rate on CRITICAL/HIGH findings. C-1 (Calendar unused imports) was completely wrong; H-1 (17 apps using raw JSON.parse) was stale/post-fix; H-6 (osReducer line count) misinterpreted file lines vs. function lines. Always grep the actual source before acting on audit findings.

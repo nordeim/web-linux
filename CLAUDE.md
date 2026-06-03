@@ -121,3 +121,28 @@ Follow this six-phase workflow for all implementation tasks:
 10. **Validate chart color values before CSS injection**: The `chart.tsx` component generates CSS variables from `ChartConfig` color values. While currently from hardcoded config, add hex/rgb/hsl validation if colors ever come from user input.
 11. **Add ESLint rule to block wildcard lucide imports**: Prevent `import * as Icons from 'lucide-react'` everywhere except `DynamicIcon.tsx`. This enforces the named import convention at lint time.
 12. **Add test coverage for MINIMIZE_ALL**: Verify that `prevPosition` and `prevSize` are correctly saved and restored after "Minimize All" action.
+
+### Real Terminal Feature Implementation (Validated Plan Available)
+
+A validated implementation plan exists for integrating a real bash terminal (`node-pty` + Docker) into UbuntuOS Web. This was independently audited against the codebase.
+
+**Key validated findings:**
+- **No JWT exists**: The login system is purely in-memory (`isAuthenticated: true`). A JWT issuance system must be built first (+2–3 days). Recommended: backend `/auth/token` endpoint (keeps secret server-side).
+- **Props declared but not destructured**: `AppRouterProps` has `windowId: string`, but `AppRouter({ appId })` only destructures `appId`. The `windowId` must be passed to child components for cleanup and focus.
+- **xterm v5 package scope**: Must use `@xterm/xterm`, `@xterm/addon-fit`, `@xterm/addon-web-links` (not the v4 unscoped names).
+- **PascalCase category**: `AppCategory` type requires PascalCase (`'System'`, not `'system'`).
+- **Vite proxy and backend tsconfig**: Need `/ws` proxy in `vite.config.ts`; backend `tsconfig.json` must have `erasableSyntaxOnly: true` (no enums).
+
+**Pre-implementation decisions required:**
+1. **JWT issuance**: Backend `/auth/token` endpoint (recommended) vs. browser-side generation
+2. **Backend location**: `backend/` at project root (recommended)
+3. **Container network**: Configurable, default `--network=none`
+4. **Warm pool**: On-demand for v1
+5. **Multi-window**: Each window = own container
+6. **Existing Terminal**: Keep both (simulated + PTY coexist)
+
+**Timeline**: 13–19 days (including JWT Phase 0). Wedge demo: 6–8 days.
+
+**Documents:**
+- [Validated_Implementation_Plan_Real_Terminal.md](Validated_Implementation_Plan_Real_Terminal.md) — the corrected plan
+- [Code_Review_Audit_xterm_VALIDATED.md](Code_Review_Audit_xterm_VALIDATED.md) — independent validation report

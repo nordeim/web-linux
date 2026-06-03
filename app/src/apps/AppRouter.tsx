@@ -79,7 +79,7 @@ const AppSkeleton = () => (
   </div>
 );
 
-export default function AppRouter({ appId }: AppRouterProps) {
+export default function AppRouter({ appId, windowId }: AppRouterProps) {
   const renderApp = () => {
     switch (appId) {
       case 'filemanager': return <FileManager />;

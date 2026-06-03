@@ -2,6 +2,8 @@
 // Color Palette — Color harmony generator
 // ============================================================
 
+import { z } from 'zod';
+import { safeJsonParse } from '@/utils/safeJsonParse';
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   Check, RefreshCw, Save, Trash2, Palette,
@@ -133,7 +135,8 @@ export default function ColorPalette() {
   const [harmonyType, setHarmonyType] = useState<HarmonyType>('complementary');
   const [colors, setColors] = useState<string[]>(['#7C4DFF', '#FFB84D']);
   const [savedPalettes, setSavedPalettes] = useState<SavedPalette[]>(() => {
-    try { return JSON.parse(localStorage.getItem('color_palettes') || '[]'); } catch { return []; }
+    const raw = localStorage.getItem('color_palettes');
+    return safeJsonParse(raw ?? '[]', z.array(z.object({ id: z.string(), name: z.string(), colors: z.array(z.string()), timestamp: z.number() })), []);
   });
   const [contrastColor, setContrastColor] = useState('#FFFFFF');
   const [colorBlindMode, setColorBlindMode] = useState<ColorBlindType>('none');

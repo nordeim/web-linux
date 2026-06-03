@@ -3,6 +3,8 @@
 // ============================================================
 
 import { useState, useEffect, useRef } from 'react';
+import { z } from 'zod';
+import { safeJsonParse } from '@/utils/safeJsonParse';
 import {
   Clock, Globe, Bell, Timer, Play, Pause, RotateCcw,
   Plus, X, Trash2, Sun, Moon,
@@ -26,6 +28,16 @@ interface Alarm {
   enabled: boolean;
 }
 
+// Zod schemas for runtime validation
+const AlarmSchema = z.object({
+  id: z.string(),
+  hour: z.number(),
+  minute: z.number(),
+  label: z.string(),
+  repeat: z.array(z.boolean()),
+  enabled: z.boolean(),
+});
+
 const MAJOR_CITIES: WorldCity[] = [
   { id: 'local', name: 'Local Time', country: '', timezone: Intl.DateTimeFormat().resolvedOptions().timeZone },
   { id: 'nyc', name: 'New York', country: 'USA', timezone: 'America/New_York' },
@@ -44,11 +56,13 @@ const DAY_NAMES = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 const generateId = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
 
 const loadCities = (): string[] => {
-  try { return JSON.parse(localStorage.getItem('clock_cities') || '["local","nyc","lon","tok"]'); } catch { return ['local', 'nyc', 'lon', 'tok']; }
+  const raw = localStorage.getItem('clock_cities');
+  return safeJsonParse(raw ?? '[]', z.array(z.string()), ['local', 'nyc', 'lon', 'tok']);
 };
 
 const loadAlarms = (): Alarm[] => {
-  try { return JSON.parse(localStorage.getItem('clock_alarms') || '[]'); } catch { return []; }
+  const raw = localStorage.getItem('clock_alarms');
+  return safeJsonParse(raw ?? '[]', z.array(AlarmSchema), []);
 };
 
 const ClockApp: React.FC = () => {

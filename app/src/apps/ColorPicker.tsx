@@ -2,6 +2,8 @@
 // Color Picker — Advanced color picker tool
 // ============================================================
 
+import { z } from 'zod';
+import { safeJsonParse } from '@/utils/safeJsonParse';
 import { useState, useCallback, useMemo } from 'react';
 import {
   Copy, Check, RefreshCw, Plus, Trash2,
@@ -99,10 +101,12 @@ const PRESET_COLORS = [
 export default function ColorPicker() {
   const [color, setColor] = useState('#7C4DFF');
   const [savedColors, setSavedColors] = useState<SavedColor[]>(() => {
-    try { return JSON.parse(localStorage.getItem('saved_colors') || '[]'); } catch { return []; }
+    const raw = localStorage.getItem('saved_colors');
+    return safeJsonParse(raw ?? '[]', z.array(z.object({ id: z.string(), hex: z.string(), timestamp: z.number() })), []);
   });
   const [recentColors, setRecentColors] = useState<RecentColor[]>(() => {
-    try { return JSON.parse(localStorage.getItem('recent_colors') || '[]'); } catch { return []; }
+    const raw = localStorage.getItem('recent_colors');
+    return safeJsonParse(raw ?? '[]', z.array(z.object({ hex: z.string(), timestamp: z.number() })), []);
   });
   const [contrastBg, setContrastBg] = useState('#FFFFFF');
   const [copied, setCopied] = useState<string | null>(null);

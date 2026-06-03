@@ -20,3 +20,10 @@ Meticulously and systematically re-evaluate each finding in the code audit repor
 
 Awesome meticulous review, analysis and planning. Please keep up the good work. now, please meticulously review and update @README.md , @CLAUDE.md and @AGENTS.md to align with the latest code changes, issues fixed, gotchas to look out for, troubleshooting tips, lessons learnt, outstanding issues and recommendations.
 
+---
+
+please meticulously review and validate @status_new.md , @REMEDIATION_PLAN_DPSK2.md and @status_9.md against the codebase to ensure accurate alignment and to check/confirm the current state of the remediation plan, then meticulously plan to continue with the remediation plan.
+
+---
+
+Please meticulously plan to review and analyze @CLAUDE.md, @README.md and @plan.md and the relevant project documentation files (e.g., README, architecture guides, AI-agent briefings, contributor guidelines) and corresponding source code, your task is to: (1) deeply understand the project's architecture, design rationale, and stated conventions by extracting structured knowledge from each document; (2) validate every material claim in the documentation against the actual source code; (3) conduct a multi-dimensional critical audit of the codebase; and (4) produce a consolidated report that is evidence-traceable, severity-ranked, and actionable.

@@ -2,6 +2,8 @@
 // Chat — Instant messaging with contacts, AI bot, emoji picker
 // ============================================================
 
+import { z } from 'zod';
+import { safeJsonParse } from '@/utils/safeJsonParse';
 import { useState, useRef, useEffect, useCallback, memo } from 'react';
 import {
   Search, Send, Smile, Circle, Plus, Bot
@@ -131,11 +133,8 @@ const formatDateSeparator = (ts: number): string => {
 // ---- Main Chat Component ----
 export default function Chat() {
   const [conversations, setConversations] = useState<Conversation[]>(() => {
-    try {
-      const saved = localStorage.getItem('ubuntuos_chat');
-      if (saved) return JSON.parse(saved);
-    } catch { /* ignore */ }
-    return createInitialConversations();
+    const raw = localStorage.getItem('ubuntuos_chat');
+    return safeJsonParse(raw ?? '[]', z.array(z.any()), createInitialConversations());
   });
   const [activeConvId, setActiveConvId] = useState('bot');
   const [inputText, setInputText] = useState('');

@@ -2,6 +2,8 @@
 // Calculator — Standard & Scientific modes with history
 // ============================================================
 
+import { z } from 'zod';
+import { safeJsonParse } from '@/utils/safeJsonParse';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Delete, History, ChevronLeft,
@@ -19,11 +21,12 @@ const Calculator: React.FC = () => {
   const [display, setDisplay] = useState('0');
   const [prevExpr, setPrevExpr] = useState('');
   const [history, setHistory] = useState<HistoryEntry[]>(() => {
-    try { const s = localStorage.getItem('calc_history'); return s ? JSON.parse(s) : []; } catch { return []; }
+    const raw = localStorage.getItem('calc_history');
+    return safeJsonParse(raw ?? '[]', z.array(z.object({ expr: z.string(), result: z.string() })), []);
   });
   const [showHistory, setShowHistory] = useState(false);
   const [memory, setMemory] = useState<number>(() => {
-    try { return Number(localStorage.getItem('calc_memory') || '0'); } catch { return 0; }
+    return safeJsonParse(localStorage.getItem('calc_memory') ?? '0', z.number(), 0);
   });
   const [waitingForOperand, setWaitingForOperand] = useState(false);
   const [operator, setOperator] = useState<string | null>(null);

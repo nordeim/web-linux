@@ -2,6 +2,8 @@
 // Calendar — Month/Week/Day views with events CRUD
 // ============================================================
 
+import { z } from 'zod';
+import { safeJsonParse } from '@/utils/safeJsonParse';
 import { useState, useEffect, useMemo } from 'react';
 import {
   ChevronLeft, ChevronRight, X, Clock, MapPin,
@@ -32,21 +34,33 @@ const DAY_NAMES_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 
 
 const generateId = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
 
+const CalendarEventSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  date: z.string(),
+  time: z.string(),
+  duration: z.number(),
+  color: z.string(),
+  description: z.string(),
+  location: z.string(),
+});
+
 const loadEvents = (): CalendarEvent[] => {
-  try {
-    const saved = localStorage.getItem('ubuntuos_calendar_events');
-    if (saved) return JSON.parse(saved);
-  } catch { /* ignore */ }
-  // Sample events
-  const today = new Date();
-  const y = today.getFullYear();
-  const m = String(today.getMonth() + 1).padStart(2, '0');
-  const d = String(today.getDate()).padStart(2, '0');
-  return [
-    { id: generateId(), title: 'Project Review', date: `${y}-${m}-${d}`, time: '10:00', duration: 60, color: '#7C4DFF', description: 'Weekly project status review', location: 'Conference Room' },
-    { id: generateId(), title: 'Lunch with Team', date: `${y}-${m}-${d}`, time: '12:30', duration: 60, color: '#4CAF50', description: '', location: 'Cafeteria' },
-    { id: generateId(), title: 'Code Review', date: `${y}-${m}-${String(Math.min(31, Number(d) + 2)).padStart(2, '0')}`, time: '14:00', duration: 90, color: '#2196F3', description: 'Review PRs', location: '' },
-  ];
+  const raw = localStorage.getItem('ubuntuos_calendar_events');
+  const parsed = safeJsonParse(raw ?? '[]', z.array(CalendarEventSchema), []);
+  if (parsed.length === 0) {
+    // Sample events
+    const today = new Date();
+    const y = today.getFullYear();
+    const m = String(today.getMonth() + 1).padStart(2, '0');
+    const d = String(today.getDate()).padStart(2, '0');
+    return [
+      { id: generateId(), title: 'Project Review', date: `${y}-${m}-${d}`, time: '10:00', duration: 60, color: '#7C4DFF', description: 'Weekly project status review', location: 'Conference Room' },
+      { id: generateId(), title: 'Lunch with Team', date: `${y}-${m}-${d}`, time: '12:30', duration: 60, color: '#4CAF50', description: '', location: 'Cafeteria' },
+      { id: generateId(), title: 'Code Review', date: `${y}-${m}-${String(Math.min(31, Number(d) + 2)).padStart(2, '0')}`, time: '14:00', duration: 90, color: '#2196F3', description: 'Review PRs', location: '' },
+    ];
+  }
+  return parsed;
 };
 
 const formatDateKey = (date: Date): string => {

@@ -58,7 +58,9 @@ This codebase has undergone multiple comprehensive security audits and remediati
 ### dpsk-2 Phase 2: Accessibility & Documentation (2026-06-03)
 - **Added ARIA attributes to core components**: Added `aria-label`, `role`, `tabIndex` to `Dock.tsx`, `WindowFrame.tsx`, and `Desktop.tsx` interactive elements.
 - **Added keyboard focus styles**: Global `:focus-visible` and `:focus:not(:focus-visible)` CSS rules in `index.css` for keyboard accessibility.
-- **Added automated accessibility source tests**: 14 tests verify ARIA attribute presence in component source files.
+- **Added automated accessibility source tests**: 14 source-level tests verify ARIA attribute presence in component source files.
+- **Added mock data documentation**: Added "simulated data" comments to `Email.tsx` and `RssReader.tsx` to clarify that data is for demo purposes only.
+- **Fixed TextEditor.tsx raw JSON.parse**: Was missed in original audit due to `try/catch` wrapper; now uses `safeJsonParse` with zod schema validation.
 
 See [REMEDIATION.md](REMEDIATION.md) for the full security audit report, [REMEDIATION_MIMO2.md](REMEDIATION_MIMO2.md) for the prior code review audit remediation, and [REMEDIATION_KIMI2.md](REMEDIATION_KIMI2.md) for the latest code review audit.
 
@@ -113,7 +115,7 @@ After running `npm run dev`, open your browser at the provided port (usually `ht
 | :--- | :--- |
 | `npm run build` | Type-check and production build |
 | `npm run lint` | Run ESLint static analysis |
-| `npm run test` | Run Vitest unit test suite (52 tests) |
+| `npm run test` | Run Vitest unit test suite (62 tests, 9 test files) |
 | `npm run preview` | Local preview of the production build |
 | `tsc -b` | Project-wide type checking |
 
@@ -142,8 +144,7 @@ After running `npm run dev`, open your browser at the provided port (usually `ht
 5. **Unused Local / Import Hygiene**: The `tsconfig.app.json` enforces `"noUnusedLocals": true` and `"noUnusedParameters": true`. Prior build broke with 43 `TS6133` errors across 16 files. Keep imports lean and remove dead code promptly to prevent build regressions.
 6. **ReDoS from User-Crafted Regex**: RegexTester now limits iterations, but apps accepting user regex (e.g., Notes search, Email filters) should also guard against catastrophic backtracking.
 7. **Simulated vs Real Recordings**: ScreenRecorder and VoiceRecorder create placeholder text downloads. Production builds should implement actual `MediaRecorder` API recording or clearly mark as simulated.
-8. **GlobalErrorBoundary Around AppShell**: The `AppShell` component (boot, login, keyboard handlers) is now wrapped in `GlobalErrorBoundary` in `App.tsx`.
-9. **Vitest @/ Alias Resolution**: Component tests using `@/` aliases fail in vitest due to module resolution issues. Currently, only utility tests (relative imports) pass consistently. Component-level tests use source-level validation as a workaround.
+8. **Vitest @/ Alias Resolution**: Component tests using `@/` aliases fail in vitest due to module resolution issues. Currently, only utility tests (relative imports) pass consistently. Component-level tests use source-level validation (reading file source strings) as a workaround. The `ContextMenu-actions.test.tsx` has a pre-existing bug expecting `CASCADE_WINDOWS` but code dispatches `ARRANGE_ICONS`.
 
 ## 📜 License
 

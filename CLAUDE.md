@@ -103,7 +103,8 @@ Follow this six-phase workflow for all implementation tasks:
 
 ### Testing
 - **TDD is effective for security-critical code**. The `safeEval` tests (24 cases) caught multiple edge cases during development.
-- **Component-level tests are missing**. No tests exist for `WindowFrame`, `Desktop`, or `Dock`. These are high-value test targets due to their complexity.
+- **Source-level validation as test workaround**: Component-level tests using `@/` aliases fail in vitest due to module resolution issues. Source-level tests (reading file source strings) are used as a workaround for ARIA attribute validation (14 tests in `aria-attributes.test.ts`).
+- **Component rendering tests blocked**: Tests for `WindowFrame`, `Desktop`, and `Dock` that import components via `@/` aliases fail due to vitest configuration. Fix requires resolving the alias configuration or using relative imports in tests.
 
 ## Recommendations
 
@@ -111,7 +112,7 @@ Follow this six-phase workflow for all implementation tasks:
 2. **Add `vitest` coverage collection** to track test coverage across all modules.
 3. **Implement CI/CD pipeline** with automated `build`, `lint`, and `test` gates.
 4. **Split `osReducer` into domain-specific reducers** (window management, notifications, desktop icons, etc.).
-5. **Fix remaining ~17 apps using raw `JSON.parse`** on localStorage without zod validation (Clock, Todo, ColorPalette, ColorPicker, TextEditor, Calendar, Reminders, Memory, Spreadsheet, Chat, RssReader, Settings, Notes, ArchiveManager, ScreenRecorder, Calculator, VoiceRecorder). Apply the `safeJsonParse` + zod schema pattern demonstrated in PasswordManager, Contacts, and Browser.
+5. **Fix vitest `@/` alias resolution** to enable component-level rendering tests. Currently blocked by module resolution; only utility tests (relative imports) and source-level tests pass.
 6. **Enforce import hygiene during code review**: The `noUnusedLocals`/`noUnusedParameters` TypeScript checks catch dead code at build time, but IDE auto-imports can silently add unused imports. Add a pre-commit hook or lint rule to block commits with unused identifiers.
 7. **Replace all remaining `dangerouslySetInnerHTML` usage**: After RegexTester was refactored to use React components, audit all remaining `dangerouslySetInnerHTML` usage and replace with React component rendering where possible.
 8. **Add ReDoS guards to all regex-accepting apps**: Notes search, Email filters, and any other app that accepts user-supplied regex should implement iteration limits.

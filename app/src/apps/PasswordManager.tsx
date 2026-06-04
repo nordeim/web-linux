@@ -20,7 +20,6 @@ const PasswordEntriesSchema = z.array(PasswordEntrySchema);
 export type PasswordEntry = z.infer<typeof PasswordEntrySchema>;
 
 const STORAGE_KEY = 'ubuntuos_passwords';
-const MASTER_PIN = '1234';
 
 const b64e = (s: string) => { try { return btoa(s); } catch { return s; } };
 const b64d = (s: string) => { try { return atob(s); } catch { return s; } };
@@ -53,6 +52,9 @@ export default function PasswordManager() {
   const [authenticated, setAuthenticated] = useState(false);
   const [pin, setPin] = useState('');
   const [pinError, setPinError] = useState(false);
+  const [storedPin, setStoredPin] = useState(() => localStorage.getItem('password_manager_pin') ?? '1234');
+  const [showChangePin, setShowChangePin] = useState(false);
+  const [newPinValue, setNewPinValue] = useState('');
   const [entries, setEntries] = useState<PasswordEntry[]>(loadEntries);
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
@@ -71,8 +73,17 @@ export default function PasswordManager() {
   useEffect(() => { if (authenticated) saveEntries(entries); }, [entries, authenticated]);
 
   const checkPin = () => {
-    if (pin === MASTER_PIN) { setAuthenticated(true); setPinError(false); }
+    if (pin === storedPin) { setAuthenticated(true); setPinError(false); }
     else { setPinError(true); setPin(''); }
+  };
+
+  const handleChangePin = () => {
+    if (newPinValue.length >= 4) {
+      setStoredPin(newPinValue);
+      localStorage.setItem('password_manager_pin', newPinValue);
+      setShowChangePin(false);
+      setNewPinValue('');
+    }
   };
 
   const filtered = useMemo(() => {
@@ -132,8 +143,20 @@ export default function PasswordManager() {
         <Shield size={16} style={{ color: 'var(--accent-primary)' }} />
         <span className="text-sm font-medium flex-1" style={{ color: 'var(--text-primary)' }}>Passwords</span>
         <button onClick={() => setAuthenticated(false)} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><Lock size={12} /></button>
+        <button onClick={() => { setShowChangePin(true); setNewPinValue(''); }} className="px-2 py-1 rounded-md text-xs" style={{ background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>Change PIN</button>
         <button onClick={() => { resetForm(); setShowForm(true); }} className="flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs" style={{ background: 'var(--accent-primary)', color: '#fff' }}><Plus size={12} /> Add</button>
       </div>
+      <div className="px-3 py-1.5" style={{ background: 'var(--accent-warning-bg)', color: 'var(--accent-warning)' }}>
+        <p className="text-xs font-medium">Demo Mode — passwords are not securely encrypted.</p>
+      </div>
+      {showChangePin && (
+        <div className="px-3 py-2 border-b flex items-center gap-2" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-panel)' }}>
+          <KeyRound size={12} style={{ color: 'var(--text-secondary)' }} />
+          <input type="password" value={newPinValue} onChange={e => setNewPinValue(e.target.value)} maxLength={4} placeholder="New PIN (4 digits)" className="w-32 px-2 py-1 rounded-md text-xs outline-none" style={{ background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }} />
+          <button onClick={handleChangePin} className="px-2 py-1 rounded-md text-xs" style={{ background: 'var(--accent-primary)', color: '#fff' }}>Save</button>
+          <button onClick={() => { setShowChangePin(false); setNewPinValue(''); }} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><X size={12} /></button>
+        </div>
+      )}
       <div className="px-3 py-2">
         <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-md" style={{ background: 'var(--bg-input)', border: '1px solid var(--border-subtle)' }}>
           <Search size={12} style={{ color: 'var(--text-disabled)' }} />

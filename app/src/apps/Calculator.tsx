@@ -182,9 +182,11 @@ const Calculator: React.FC = () => {
     variant?: 'num' | 'op' | 'action' | 'eq' | 'sci';
     className?: string;
     colSpan?: number;
-  }> = ({ label, onClick, variant = 'num', className = '', colSpan }) => (
+    ariaLabel?: string;
+  }> = ({ label, onClick, variant = 'num', className = '', colSpan, ariaLabel }) => (
     <button
       onClick={onClick}
+      aria-label={ariaLabel}
       className={
         `h-12 rounded-md text-sm font-medium transition-all duration-75 active:scale-95 flex items-center justify-center ` +
         (variant === 'num' ? 'bg-[var(--bg-window)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] ' :
@@ -218,7 +220,7 @@ const Calculator: React.FC = () => {
             Scientific
           </button>
         </div>
-        <button onClick={() => setShowHistory(!showHistory)} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
+        <button onClick={() => setShowHistory(!showHistory)} aria-label="Toggle history" className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
           <History size={16} />
         </button>
       </div>
@@ -268,7 +270,7 @@ const Calculator: React.FC = () => {
         {mode === 'standard' ? (
           <div className="grid grid-cols-4 gap-1 h-full">
             <Btn label="AC" onClick={clear} variant="action" />
-            <Btn label={<ChevronLeft size={16} />} onClick={backspace} variant="action" />
+            <Btn label={<ChevronLeft size={16} />} onClick={backspace} variant="action" ariaLabel="Backspace" />
             <Btn label="%" onClick={percentage} variant="action" />
             <Btn label="÷" onClick={() => performOp('/')} variant="op" />
             <Btn label="7" onClick={() => inputDigit('7')} />
@@ -294,7 +296,7 @@ const Calculator: React.FC = () => {
             <Btn label="MR" onClick={memoryRecall} variant="sci" />
             <Btn label="M+" onClick={memoryAdd} variant="sci" />
             <Btn label="M−" onClick={memorySubtract} variant="sci" />
-            <Btn label={<Delete size={14} />} onClick={backspace} variant="action" />
+            <Btn label={<Delete size={14} />} onClick={backspace} variant="action" ariaLabel="Delete" />
 
             {/* Row 2 */}
             <Btn label="sin" onClick={() => sciFunc('sin')} variant="sci" />

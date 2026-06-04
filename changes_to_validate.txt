@@ -1,296 +1,313 @@
-$ git diff app/src/apps/ArchiveManager.tsx
-diff --git a/app/src/apps/ArchiveManager.tsx b/app/src/apps/ArchiveManager.tsx
-index 98d6c1b..704b3bc 100644
---- a/app/src/apps/ArchiveManager.tsx
-+++ b/app/src/apps/ArchiveManager.tsx
-@@ -2,6 +2,8 @@
- // Archive Manager — Create and extract ZIP/TAR archives
- // ============================================================
+$ git diff app/src/apps/Calculator.tsx
+diff --git a/app/src/apps/Calculator.tsx b/app/src/apps/Calculator.tsx
+index 8c420a5..dc3f03a 100644
+--- a/app/src/apps/Calculator.tsx
++++ b/app/src/apps/Calculator.tsx
+@@ -182,9 +182,11 @@ const Calculator: React.FC = () => {
+     variant?: 'num' | 'op' | 'action' | 'eq' | 'sci';
+     className?: string;
+     colSpan?: number;
+-  }> = ({ label, onClick, variant = 'num', className = '', colSpan }) => (
++    ariaLabel?: string;
++  }> = ({ label, onClick, variant = 'num', className = '', colSpan, ariaLabel }) => (
+     <button
+       onClick={onClick}
++      aria-label={ariaLabel}
+       className={
+         `h-12 rounded-md text-sm font-medium transition-all duration-75 active:scale-95 flex items-center justify-center ` +
+         (variant === 'num' ? 'bg-[var(--bg-window)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] ' :
+@@ -218,7 +220,7 @@ const Calculator: React.FC = () => {
+             Scientific
+           </button>
+         </div>
+-        <button onClick={() => setShowHistory(!showHistory)} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
++        <button onClick={() => setShowHistory(!showHistory)} aria-label="Toggle history" className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
+           <History size={16} />
+         </button>
+       </div>
+@@ -268,7 +270,7 @@ const Calculator: React.FC = () => {
+         {mode === 'standard' ? (
+           <div className="grid grid-cols-4 gap-1 h-full">
+             <Btn label="AC" onClick={clear} variant="action" />
+-            <Btn label={<ChevronLeft size={16} />} onClick={backspace} variant="action" />
++            <Btn label={<ChevronLeft size={16} />} onClick={backspace} variant="action" ariaLabel="Backspace" />
+             <Btn label="%" onClick={percentage} variant="action" />
+             <Btn label="÷" onClick={() => performOp('/')} variant="op" />
+             <Btn label="7" onClick={() => inputDigit('7')} />
+@@ -294,7 +296,7 @@ const Calculator: React.FC = () => {
+             <Btn label="MR" onClick={memoryRecall} variant="sci" />
+             <Btn label="M+" onClick={memoryAdd} variant="sci" />
+             <Btn label="M−" onClick={memorySubtract} variant="sci" />
+-            <Btn label={<Delete size={14} />} onClick={backspace} variant="action" />
++            <Btn label={<Delete size={14} />} onClick={backspace} variant="action" ariaLabel="Delete" />
  
-+import { z } from 'zod';
-+import { safeJsonParse } from '@/utils/safeJsonParse';
- import { useState, useEffect } from 'react';
- import {
-   Package, Plus, FileText, ChevronRight, ChevronDown,
-@@ -30,12 +32,25 @@ interface ArchiveFile {
- const generateId = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
- 
- const loadArchives = (): ArchiveFile[] => {
--  try {
--    const saved = localStorage.getItem('ubuntuos_archives');
--    if (saved) return JSON.parse(saved);
--  } catch { /* ignore */ }
--  // Sample archive
--  return [{
-+  const raw = localStorage.getItem('ubuntuos_archives');
-+  const ArchiveEntrySchema: z.ZodType<ArchiveEntry> = z.lazy(() => z.object({
-+    id: z.string(),
-+    name: z.string(),
-+    type: z.enum(['file', 'folder']),
-+    size: z.string(),
-+    children: z.array(ArchiveEntrySchema).optional()
-+  }));
-+
-+  const ArchiveFileSchema = z.object({
-+    id: z.string(),
-+    name: z.string(),
-+    format: z.enum(['zip', 'tar']),
-+    createdAt: z.number(),
-+    entries: z.array(ArchiveEntrySchema),
-+    isPasswordProtected: z.boolean().optional()
-+  });
-+
-+  return safeJsonParse(raw ?? '[]', z.array(ArchiveFileSchema), [{
-     id: generateId(),
-     name: 'documents.zip',
-     format: 'zip',
-@@ -50,7 +65,7 @@ const loadArchives = (): ArchiveFile[] => {
-         { id: generateId(), name: 'logo.png', type: 'file', size: '45 KB' },
-       ]},
-     ],
--  }];
-+  }]);
- };
- 
- const TreeEntry: React.FC<{
+             {/* Row 2 */}
+             <Btn label="sin" onClick={() => sciFunc('sin')} variant="sci" />
 (venv) pete@pop-os:/home/project/web-linux
-$ git diff app/src/apps/Memory.tsx
-diff --git a/app/src/apps/Memory.tsx b/app/src/apps/Memory.tsx
-index 5a4ffac..5b2e398 100644
---- a/app/src/apps/Memory.tsx
-+++ b/app/src/apps/Memory.tsx
-@@ -1,3 +1,5 @@
-+import { z } from 'zod';
-+import { safeJsonParse } from '@/utils/safeJsonParse';
- import { useState, useEffect, useCallback } from 'react';
- import { Brain, Star, Clock, MousePointer } from 'lucide-react';
+$ git diff app/src/apps/PasswordManager.tsx
+diff --git a/app/src/apps/PasswordManager.tsx b/app/src/apps/PasswordManager.tsx
+index da3b834..e2eaca2 100644
+--- a/app/src/apps/PasswordManager.tsx
++++ b/app/src/apps/PasswordManager.tsx
+@@ -20,7 +20,6 @@ const PasswordEntriesSchema = z.array(PasswordEntrySchema);
+ export type PasswordEntry = z.infer<typeof PasswordEntrySchema>;
  
-@@ -31,7 +33,8 @@ const DIFFICULTIES: Record<Difficulty, { rows: number; cols: number; name: strin
+ const STORAGE_KEY = 'ubuntuos_passwords';
+-const MASTER_PIN = '1234';
  
- function getHighScore(diff: Difficulty): { moves: number; time: number } | null {
-   const val = localStorage.getItem(`memory_best_${diff}`);
--  return val ? JSON.parse(val) : null;
-+  if (!val) return null;
-+  return safeJsonParse(val, z.object({ moves: z.number(), time: z.number() }), null);
+ const b64e = (s: string) => { try { return btoa(s); } catch { return s; } };
+ const b64d = (s: string) => { try { return atob(s); } catch { return s; } };
+@@ -53,6 +52,9 @@ export default function PasswordManager() {
+   const [authenticated, setAuthenticated] = useState(false);
+   const [pin, setPin] = useState('');
+   const [pinError, setPinError] = useState(false);
++  const [storedPin, setStoredPin] = useState(() => localStorage.getItem('password_manager_pin') ?? '1234');
++  const [showChangePin, setShowChangePin] = useState(false);
++  const [newPinValue, setNewPinValue] = useState('');
+   const [entries, setEntries] = useState<PasswordEntry[]>(loadEntries);
+   const [search, setSearch] = useState('');
+   const [showForm, setShowForm] = useState(false);
+@@ -71,10 +73,19 @@ export default function PasswordManager() {
+   useEffect(() => { if (authenticated) saveEntries(entries); }, [entries, authenticated]);
+ 
+   const checkPin = () => {
+-    if (pin === MASTER_PIN) { setAuthenticated(true); setPinError(false); }
++    if (pin === storedPin) { setAuthenticated(true); setPinError(false); }
+     else { setPinError(true); setPin(''); }
+   };
+ 
++  const handleChangePin = () => {
++    if (newPinValue.length >= 4) {
++      setStoredPin(newPinValue);
++      localStorage.setItem('password_manager_pin', newPinValue);
++      setShowChangePin(false);
++      setNewPinValue('');
++    }
++  };
++
+   const filtered = useMemo(() => {
+     if (!search) return entries;
+     const q = search.toLowerCase();
+@@ -132,8 +143,20 @@ export default function PasswordManager() {
+         <Shield size={16} style={{ color: 'var(--accent-primary)' }} />
+         <span className="text-sm font-medium flex-1" style={{ color: 'var(--text-primary)' }}>Passwords</span>
+         <button onClick={() => setAuthenticated(false)} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><Lock size={12} /></button>
++        <button onClick={() => { setShowChangePin(true); setNewPinValue(''); }} className="px-2 py-1 rounded-md text-xs" style={{ background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>Change PIN</button>
+         <button onClick={() => { resetForm(); setShowForm(true); }} className="flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs" style={{ background: 'var(--accent-primary)', color: '#fff' }}><Plus size={12} /> Add</button>
+       </div>
++      <div className="px-3 py-1.5" style={{ background: 'var(--accent-warning-bg)', color: 'var(--accent-warning)' }}>
++        <p className="text-xs font-medium">Demo Mode — passwords are not securely encrypted.</p>
++      </div>
++      {showChangePin && (
++        <div className="px-3 py-2 border-b flex items-center gap-2" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-panel)' }}>
++          <KeyRound size={12} style={{ color: 'var(--text-secondary)' }} />
++          <input type="password" value={newPinValue} onChange={e => setNewPinValue(e.target.value)} maxLength={4} placeholder="New PIN (4 digits)" className="w-32 px-2 py-1 rounded-md text-xs outline-none" style={{ background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }} />
++          <button onClick={handleChangePin} className="px-2 py-1 rounded-md text-xs" style={{ background: 'var(--accent-primary)', color: '#fff' }}>Save</button>
++          <button onClick={() => { setShowChangePin(false); setNewPinValue(''); }} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><X size={12} /></button>
++        </div>
++      )}
+       <div className="px-3 py-2">
+         <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-md" style={{ background: 'var(--bg-input)', border: '1px solid var(--border-subtle)' }}>
+           <Search size={12} style={{ color: 'var(--text-disabled)' }} />
+(venv) pete@pop-os:/home/project/web-linux
+$ git diff app/src/apps/Terminal.tsx
+diff --git a/app/src/apps/Terminal.tsx b/app/src/apps/Terminal.tsx
+index 84eb43a..b932906 100644
+--- a/app/src/apps/Terminal.tsx
++++ b/app/src/apps/Terminal.tsx
+@@ -182,10 +182,13 @@ interface TerminalProps {
+   windowId?: string;
  }
- function setHighScore(diff: Difficulty, moves: number, time: number) {
-   const current = getHighScore(diff);
+ 
+-export default function Terminal(_props: TerminalProps) {
++export default function Terminal({ windowId }: TerminalProps) {
+   const fs = useFileSystem();
+-  const [lines, setLines] = useState<TerminalLine[]>([
+-    { type: 'system', text: 'Welcome to UbuntuOS Terminal' },
++  const [lines, setLines] = useState<TerminalLine[]>(() => [
++    {
++      type: 'system',
++      text: windowId ? `Welcome to UbuntuOS Terminal (${windowId})` : 'Welcome to UbuntuOS Terminal',
++    },
+     { type: 'system', text: 'Type "help" for available commands.' },
+     { type: 'output', text: '' },
+   ]);
 (venv) pete@pop-os:/home/project/web-linux
-$ git diff app/src/apps/Notes.tsx
-diff --git a/app/src/apps/Notes.tsx b/app/src/apps/Notes.tsx
-index 7cfd2f3..fb183dd 100644
---- a/app/src/apps/Notes.tsx
-+++ b/app/src/apps/Notes.tsx
-@@ -2,6 +2,8 @@
- // Notes — Three-pane note-taking app with folders
- // ============================================================
+$ git diff app/src/apps/TextEditor.tsx
+diff --git a/app/src/apps/TextEditor.tsx b/app/src/apps/TextEditor.tsx
+index e41cc2a..66d88bc 100644
+--- a/app/src/apps/TextEditor.tsx
++++ b/app/src/apps/TextEditor.tsx
+@@ -264,11 +264,11 @@ const TextEditor: React.FC = () => {
+           <Hash size={14} />
+         </button>
+         <div className="flex-1" />
+-        <button onClick={() => setFontSize(s => Math.max(8, s - 1))} className="p-1 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]">
++        <button onClick={() => setFontSize(s => Math.max(8, s - 1))} aria-label="Zoom out" className="p-1 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]">
+           <ZoomOut size={14} />
+         </button>
+         <span className="text-[10px] text-[var(--text-secondary)] w-6 text-center">{fontSize}</span>
+-        <button onClick={() => setFontSize(s => Math.min(32, s + 1))} className="p-1 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]">
++        <button onClick={() => setFontSize(s => Math.min(32, s + 1))} aria-label="Zoom in" className="p-1 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]">
+           <ZoomIn size={14} />
+         </button>
+       </div>
+@@ -284,7 +284,7 @@ const TextEditor: React.FC = () => {
+             placeholder="Find..."
+             className="flex-1 bg-transparent text-xs text-[var(--text-primary)] outline-none placeholder:text-[var(--text-disabled)]"
+           />
+-          <button onClick={() => setShowFind(false)} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
++          <button onClick={() => setShowFind(false)} aria-label="Close find" className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+             <X size={14} />
+           </button>
+         </div>
+@@ -309,6 +309,7 @@ const TextEditor: React.FC = () => {
+               <span className="truncate max-w-[120px]">{f.isModified ? '● ' : ''}{f.name}</span>
+               <button
+                 onClick={e => { e.stopPropagation(); closeFile(f.id); }}
++                aria-label="Close tab"
+                 className="ml-1 hover:text-[var(--accent-error)]"
+               >
+                 <X size={12} />
+(venv) pete@pop-os:/home/project/web-linux
+$ git diff app/src/hooks/useFileSystem.ts
+diff --git a/app/src/hooks/useFileSystem.ts b/app/src/hooks/useFileSystem.ts
+index fc40565..aa89597 100644
+--- a/app/src/hooks/useFileSystem.ts
++++ b/app/src/hooks/useFileSystem.ts
+@@ -97,6 +97,21 @@ function saveFS(state: FileSystemState) {
+   } catch { /* ignore */ }
+ }
  
-+import { z } from 'zod';
-+import { safeJsonParse } from '@/utils/safeJsonParse';
- import { useState, useEffect, useMemo } from 'react';
- import {
-   Folder, FileText, Plus, Search, Trash2, Bold, Italic,
-@@ -39,22 +41,19 @@ const DEFAULT_FOLDERS: FolderItem[] = [
- const generateId = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
++// Traversal helper: deletes a node and all descendants, returns deleted IDs
++function walkAndDelete(nodes: Record<string, FileSystemNode>, nodeId: string): string[] {
++  const deleted: string[] = [];
++  const node = nodes[nodeId];
++  if (!node) return deleted;
++  if (node.type === 'folder') {
++    Object.values(nodes)
++      .filter((n) => n.parentId === nodeId)
++      .forEach((n) => deleted.push(...walkAndDelete(nodes, n.id)));
++  }
++  delete nodes[nodeId];
++  deleted.push(nodeId);
++  return deleted;
++}
++
+ // ---- Hook ----
+ export function useFileSystem() {
+   const [fs, setFs] = useState<FileSystemState>(loadFS);
+@@ -141,7 +156,7 @@ export function useFileSystem() {
+       const node: FileSystemNode = {
+         id, name, type: 'file', parentId,
+         createdAt: Date.now(), modifiedAt: Date.now(),
+-        content, size: new Blob([content]).size,
++        content, size: new TextEncoder().encode(content).length,
+       };
+       setFs((prev) => ({
+         ...prev,
+@@ -172,20 +187,8 @@ export function useFileSystem() {
+     setFs((prev) => {
+       const nodes = { ...prev.nodes };
+       const trashMeta = { ...prev.trashMetadata };
+-
+-      const recurseDelete = (nodeId: string) => {
+-        const node = nodes[nodeId];
+-        if (!node) return;
+-        if (node.type === 'folder') {
+-          Object.values(nodes)
+-            .filter((n) => n.parentId === nodeId)
+-            .forEach((n) => recurseDelete(n.id));
+-        }
+-        delete nodes[nodeId];
+-        delete trashMeta[nodeId];
+-      };
+-
+-      recurseDelete(id);
++      const deleted = walkAndDelete(nodes, id);
++      deleted.forEach((d) => delete trashMeta[d]);
+       return { nodes, trashMetadata: trashMeta };
+     });
+   }, []);
+@@ -262,7 +265,7 @@ export function useFileSystem() {
+         ...prev,
+         nodes: {
+           ...prev.nodes,
+-          [id]: { ...node, content, size: new Blob([content]).size, modifiedAt: Date.now() },
++          [id]: { ...node, content, size: new TextEncoder().encode(content).length, modifiedAt: Date.now() },
+         },
+       };
+     });
+@@ -273,17 +276,7 @@ export function useFileSystem() {
+       const nodes = { ...prev.nodes };
+       const trashMeta = { ...prev.trashMetadata };
+       Object.keys(trashMeta).forEach((id) => {
+-        const recurseDelete = (nodeId: string) => {
+-          const node = nodes[nodeId];
+-          if (!node) return;
+-          if (node.type === 'folder') {
+-            Object.values(nodes)
+-              .filter((n) => n.parentId === nodeId)
+-              .forEach((n) => recurseDelete(n.id));
+-          }
+-          delete nodes[nodeId];
+-        };
+-        recurseDelete(id);
++        walkAndDelete(nodes, id);
+         delete trashMeta[id];
+       });
+       return { nodes, trashMetadata: trashMeta };
+(venv) pete@pop-os:/home/project/web-linux
+$ git diff app/src/hooks/useOSStore.tsx
+diff --git a/app/src/hooks/useOSStore.tsx b/app/src/hooks/useOSStore.tsx
+index f5786c8..408ab69 100644
+--- a/app/src/hooks/useOSStore.tsx
++++ b/app/src/hooks/useOSStore.tsx
+@@ -5,6 +5,7 @@
+ import React, { createContext, useContext, useReducer, useCallback, useEffect } from 'react';
+ import type { OSState, OSAction, Window, DesktopIcon, Notification, DockItem, WindowState } from '@/types';
+ import { APP_REGISTRY, getAppById, getDefaultDockApps } from '@/apps/registry';
++import { validateDesktopIcons } from '@/utils/storageValidation';
  
- const loadNotes = (): Note[] => {
--  try {
--    const saved = localStorage.getItem('ubuntuos_notes');
--    if (saved) return JSON.parse(saved);
--  } catch { /* ignore */ }
--  return [
-+  const raw = localStorage.getItem('ubuntuos_notes');
-+  return safeJsonParse(raw ?? '[]', z.array(z.object({
-+    id: z.string(), title: z.string(), content: z.string(), folderId: z.string(),
-+    isFavorite: z.boolean(), isPinned: z.boolean(), createdAt: z.number(), updatedAt: z.number()
-+  })), [
-     { id: generateId(), title: 'Welcome to Notes', content: '<p>This is your personal notes app. Create folders, organize your thoughts, and keep everything in one place.</p><p><b>Bold</b>, <i>italic</i>, and lists are supported.</p>', folderId: 'inbox', isFavorite: false, isPinned: true, createdAt: Date.now(), updatedAt: Date.now() },
-     { id: generateId(), title: 'Meeting Notes', content: '<p>Discuss project timeline and deliverables.</p><ul><li>Action item 1</li><li>Action item 2</li></ul>', folderId: 'work', isFavorite: true, isPinned: false, createdAt: Date.now() - 86400000, updatedAt: Date.now() - 3600000 },
--  ];
-+  ]);
+ // ---- Helpers ----
+ let idCounter = 0;
+@@ -57,8 +58,6 @@ const createInitialDockItems = (): DockItem[] => {
+   }));
  };
  
- const loadFolders = (): FolderItem[] => {
--  try {
--    const saved = localStorage.getItem('ubuntuos_note_folders');
--    if (saved) return JSON.parse(saved);
--  } catch { /* ignore */ }
--  return DEFAULT_FOLDERS;
-+  const raw = localStorage.getItem('ubuntuos_note_folders');
-+  return safeJsonParse(raw ?? '[]', z.array(z.object({ id: z.string(), name: z.string(), isSystem: z.boolean() })), DEFAULT_FOLDERS);
+-import { validateDesktopIcons } from '@/utils/storageValidation';
+-
+ const loadDesktopIcons = (): DesktopIcon[] => {
+   return validateDesktopIcons(defaultDesktopIcons);
  };
- 
- const Notes: React.FC = () => {
 (venv) pete@pop-os:/home/project/web-linux
-$ git diff app/src/apps/Reminders.tsx
-diff --git a/app/src/apps/Reminders.tsx b/app/src/apps/Reminders.tsx
-index d438a24..06864ac 100644
---- a/app/src/apps/Reminders.tsx
-+++ b/app/src/apps/Reminders.tsx
-@@ -1,3 +1,5 @@
-+import { z } from 'zod';
-+import { safeJsonParse } from '@/utils/safeJsonParse';
- import { useState, useEffect, useMemo } from 'react';
- import {
-   Bell, Plus, X, Check, Calendar, Clock, Trash2, Edit2,
-@@ -19,11 +21,11 @@ type FilterType = 'all' | 'today' | 'upcoming' | 'overdue' | 'completed';
- const STORAGE_KEY = 'ubuntuos_reminders';
- 
- const loadReminders = (): Reminder[] => {
--  try {
--    const saved = localStorage.getItem(STORAGE_KEY);
--    if (saved) return JSON.parse(saved);
--  } catch { /* ignore */ }
--  return [];
-+  const raw = localStorage.getItem(STORAGE_KEY);
-+  return safeJsonParse(raw ?? '[]', z.array(z.object({
-+    id: z.string(), title: z.string(), date: z.string(), time: z.string(),
-+    priority: z.enum(['low', 'medium', 'high']), completed: z.boolean(), createdAt: z.number()
-+  })), []);
- };
- 
- const saveReminders = (reminders: Reminder[]) => {
+$ git diff app/src/utils/authToken.ts
+diff --git a/app/src/utils/authToken.ts b/app/src/utils/authToken.ts
+index 77df1a2..01c3a3e 100644
+--- a/app/src/utils/authToken.ts
++++ b/app/src/utils/authToken.ts
+@@ -46,6 +46,9 @@ async function createHmac(message: string, key: string): Promise<string> {
+  * development and testing only.
+  */
+ export async function generateToken(userName: string): Promise<string> {
++  if (!import.meta.env.DEV) {
++    throw new Error('Development-only: authToken.ts is not for production use. Use a backend `/auth/token` endpoint.');
++  }
+   const header = { alg: 'HS256', typ: 'JWT' };
+   const now = Math.floor(Date.now() / 1000);
+   const payload = {
 (venv) pete@pop-os:/home/project/web-linux
-$ git diff app/src/apps/RssReader.tsx
-diff --git a/app/src/apps/RssReader.tsx b/app/src/apps/RssReader.tsx
-index c56820d..014d10b 100644
---- a/app/src/apps/RssReader.tsx
-+++ b/app/src/apps/RssReader.tsx
-@@ -1,3 +1,5 @@
-+import { z } from 'zod';
-+import { safeJsonParse } from '@/utils/safeJsonParse';
- import { useState, useEffect, useMemo } from 'react';
- import {
-   Rss, RefreshCw, Check, CheckCheck, Plus, X, ChevronLeft,
-@@ -73,11 +75,9 @@ const MOCK_FEEDS: Feed[] = [
- ];
- 
- const loadReadState = (): Set<string> => {
--  try {
--    const saved = localStorage.getItem(STORAGE_KEY);
--    if (saved) return new Set(JSON.parse(saved));
--  } catch { /* ignore */ }
--  return new Set();
-+  const raw = localStorage.getItem(STORAGE_KEY);
-+  const parsed = safeJsonParse(raw ?? '[]', z.array(z.string()), []);
-+  return new Set(parsed);
- };
- 
- const saveReadState = (readIds: Set<string>) => {
-(venv) pete@pop-os:/home/project/web-linux
-$ git diff app/src/apps/ScreenRecorder.tsx
-diff --git a/app/src/apps/ScreenRecorder.tsx b/app/src/apps/ScreenRecorder.tsx
-index a9043f1..7a2cbc7 100644
---- a/app/src/apps/ScreenRecorder.tsx
-+++ b/app/src/apps/ScreenRecorder.tsx
-@@ -2,6 +2,8 @@
- // Screen Recorder — Record screen with preview and controls
- // ============================================================
- 
-+import { z } from 'zod';
-+import { safeJsonParse } from '@/utils/safeJsonParse';
- import { useState, useRef, useEffect, memo } from 'react';
- import {
-   Monitor, AppWindow, Square, Play, Pause, Video, Download, Trash2, Circle
-@@ -109,10 +111,11 @@ export default function ScreenRecorder() {
-   const [elapsed, setElapsed] = useState(0);
-   const [showCountdown, setShowCountdown] = useState(false);
-   const [recordings, setRecordings] = useState<ScreenRecording[]>(() => {
--    try {
--      const saved = localStorage.getItem('ubuntuos_screenrecordings');
--      return saved ? JSON.parse(saved) : [];
--    } catch { return []; }
-+    const raw = localStorage.getItem('ubuntuos_screenrecordings');
-+    return safeJsonParse(raw ?? '[]', z.array(z.object({
-+      id: z.string(), name: z.string(), duration: z.number(), size: z.string(),
-+      date: z.number(), mode: z.enum(['screen', 'window', 'area'])
-+    })), []);
-   });
-   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
- 
-(venv) pete@pop-os:/home/project/web-linux
-$ git diff app/src/apps/Settings.tsx
-diff --git a/app/src/apps/Settings.tsx b/app/src/apps/Settings.tsx
-index b561eec..5453ec6 100644
---- a/app/src/apps/Settings.tsx
-+++ b/app/src/apps/Settings.tsx
-@@ -2,6 +2,8 @@
- // System Settings — Full system preferences panel
- // ============================================================
- 
-+import { z } from 'zod';
-+import { safeJsonParse } from '@/utils/safeJsonParse';
- import { useState, useCallback } from 'react';
- import {
-   Wifi, Bluetooth, Image, Palette, Bell, Volume2, Battery,
-@@ -91,7 +93,8 @@ const Settings: React.FC = () => {
- 
-   // Settings state (loaded from localStorage)
-   const [settings, setSettings] = useState<Record<string, unknown>>(() => {
--    try { return JSON.parse(localStorage.getItem('ubuntuos_settings') || '{}'); } catch { return {}; }
-+    const raw = localStorage.getItem('ubuntuos_settings');
-+    return safeJsonParse(raw ?? '{}', z.record(z.string(), z.any()), {});
-   });
- 
-   const updateSetting = useCallback((key: string, value: unknown) => {
-(venv) pete@pop-os:/home/project/web-linux
-$ git diff app/src/apps/Spreadsheet.tsx
-diff --git a/app/src/apps/Spreadsheet.tsx b/app/src/apps/Spreadsheet.tsx
-index ae5f58d..355bec5 100644
---- a/app/src/apps/Spreadsheet.tsx
-+++ b/app/src/apps/Spreadsheet.tsx
-@@ -2,6 +2,8 @@
- // Spreadsheet — Grid with formulas, formatting, CSV export
- // ============================================================
- 
-+import { z } from 'zod';
-+import { safeJsonParse } from '@/utils/safeJsonParse';
- import { useState, useEffect, useCallback, useRef } from 'react';
- import {
-   Bold, Italic, Paintbrush, Download, Plus,
-@@ -39,10 +41,14 @@ interface Sheet {
- const generateId = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
- 
- const loadSheets = (): Sheet[] => {
--  try {
--    const saved = localStorage.getItem('ubuntuos_spreadsheet');
--    if (saved) return JSON.parse(saved);
--  } catch { /* ignore */ }
-+  const raw = localStorage.getItem('ubuntuos_spreadsheet');
-+  const parsed = safeJsonParse(raw ?? '[]', z.array(z.object({
-+    id: z.string(), name: z.string(), cells: z.record(z.string(), z.object({
-+      value: z.string(),
-+      style: z.object({ bold: z.boolean().optional(), italic: z.boolean().optional(), fontSize: z.number().optional(), bgColor: z.string().optional(), textColor: z.string().optional() }).optional()
-+    }))
-+  })), null);
-+  if (parsed && parsed.length > 0) return parsed;
-   const sampleCells: Record<string, CellData> = {
-     'A1': { value: 'Item' },
-     'B1': { value: 'Q1' },
-(venv) pete@pop-os:/home/project/web-linux
-$ git diff app/src/components/Desktop.tsx
-diff --git a/app/src/components/Desktop.tsx b/app/src/components/Desktop.tsx
-index 9864a0d..c4f57f0 100644
---- a/app/src/components/Desktop.tsx
-+++ b/app/src/components/Desktop.tsx
-@@ -92,6 +92,8 @@ const Desktop = memo(function Desktop() {
-     <div
-       ref={desktopRef}
-       className="fixed inset-0 z-10"
-+      role="list"
-+      aria-label="Desktop"
-       style={{
-         backgroundImage: `url(${theme.wallpaper})`,
-         backgroundSize: 'cover',
-@@ -109,6 +111,10 @@ const Desktop = memo(function Desktop() {
-         <div
-           key={icon.id}
-           className="absolute flex flex-col items-center gap-1 cursor-pointer group"
-+          role="listitem"
-+          tabIndex={0}
-+          aria-label={icon.name}
-+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleIconDoubleClick(icon); } }}
-           style={{
-             left: icon.position.x,
-             top: icon.position.y,
+$ git diff app/src/utils/storageValidation.ts
+diff --git a/app/src/utils/storageValidation.ts b/app/src/utils/storageValidation.ts
+index d95c5eb..7af66a3 100644
+--- a/app/src/utils/storageValidation.ts
++++ b/app/src/utils/storageValidation.ts
+@@ -93,6 +93,7 @@ export function validateFileSystem(defaultFS: FileSystemState): FileSystemState
+       // On successful validation with legacy key, save to new key
+       if (!localStorage.getItem(FILESYSTEM_KEY)) {
+         localStorage.setItem(FILESYSTEM_KEY, saved);
++        localStorage.removeItem(LEGACY_FILESYSTEM_KEY);
+       }
+       return result.data;
+     }
 

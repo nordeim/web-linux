@@ -46,6 +46,9 @@ async function createHmac(message: string, key: string): Promise<string> {
  * development and testing only.
  */
 export async function generateToken(userName: string): Promise<string> {
+  if (!import.meta.env.DEV) {
+    throw new Error('Development-only: authToken.ts is not for production use. Use a backend `/auth/token` endpoint.');
+  }
   const header = { alg: 'HS256', typ: 'JWT' };
   const now = Math.floor(Date.now() / 1000);
   const payload = {

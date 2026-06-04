@@ -4,7 +4,7 @@ Comprehensive, high-fidelity web-based replica of the Ubuntu Linux desktop envir
 
 ## Project Overview
 
-**UbuntuOS Web** is a multi-windowed desktop experience built for the browser. It implements a custom window manager, a virtual file system (VFS), and 54 functional applications.
+**UbuntuOS Web** is a multi-windowed desktop experience built for the browser. It implements a custom window manager, a virtual file system (VFS), and 55 functional applications.
 
 ### Core Technologies
 - **Framework**: React 19.2 (Functional Components, Hooks, Context API)

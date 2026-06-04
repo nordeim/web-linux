@@ -182,10 +182,13 @@ interface TerminalProps {
   windowId?: string;
 }
 
-export default function Terminal(_props: TerminalProps) {
+export default function Terminal({ windowId }: TerminalProps) {
   const fs = useFileSystem();
-  const [lines, setLines] = useState<TerminalLine[]>([
-    { type: 'system', text: 'Welcome to UbuntuOS Terminal' },
+  const [lines, setLines] = useState<TerminalLine[]>(() => [
+    {
+      type: 'system',
+      text: windowId ? `Welcome to UbuntuOS Terminal (${windowId})` : 'Welcome to UbuntuOS Terminal',
+    },
     { type: 'system', text: 'Type "help" for available commands.' },
     { type: 'output', text: '' },
   ]);

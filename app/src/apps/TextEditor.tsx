@@ -264,11 +264,11 @@ const TextEditor: React.FC = () => {
           <Hash size={14} />
         </button>
         <div className="flex-1" />
-        <button onClick={() => setFontSize(s => Math.max(8, s - 1))} className="p-1 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]">
+        <button onClick={() => setFontSize(s => Math.max(8, s - 1))} aria-label="Zoom out" className="p-1 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]">
           <ZoomOut size={14} />
         </button>
         <span className="text-[10px] text-[var(--text-secondary)] w-6 text-center">{fontSize}</span>
-        <button onClick={() => setFontSize(s => Math.min(32, s + 1))} className="p-1 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]">
+        <button onClick={() => setFontSize(s => Math.min(32, s + 1))} aria-label="Zoom in" className="p-1 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]">
           <ZoomIn size={14} />
         </button>
       </div>
@@ -284,7 +284,7 @@ const TextEditor: React.FC = () => {
             placeholder="Find..."
             className="flex-1 bg-transparent text-xs text-[var(--text-primary)] outline-none placeholder:text-[var(--text-disabled)]"
           />
-          <button onClick={() => setShowFind(false)} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+          <button onClick={() => setShowFind(false)} aria-label="Close find" className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
             <X size={14} />
           </button>
         </div>
@@ -309,6 +309,7 @@ const TextEditor: React.FC = () => {
               <span className="truncate max-w-[120px]">{f.isModified ? '● ' : ''}{f.name}</span>
               <button
                 onClick={e => { e.stopPropagation(); closeFile(f.id); }}
+                aria-label="Close tab"
                 className="ml-1 hover:text-[var(--accent-error)]"
               >
                 <X size={12} />

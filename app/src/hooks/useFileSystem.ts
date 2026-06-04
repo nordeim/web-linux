@@ -97,6 +97,21 @@ function saveFS(state: FileSystemState) {
   } catch { /* ignore */ }
 }
 
+// Traversal helper: deletes a node and all descendants, returns deleted IDs
+function walkAndDelete(nodes: Record<string, FileSystemNode>, nodeId: string): string[] {
+  const deleted: string[] = [];
+  const node = nodes[nodeId];
+  if (!node) return deleted;
+  if (node.type === 'folder') {
+    Object.values(nodes)
+      .filter((n) => n.parentId === nodeId)
+      .forEach((n) => deleted.push(...walkAndDelete(nodes, n.id)));
+  }
+  delete nodes[nodeId];
+  deleted.push(nodeId);
+  return deleted;
+}
+
 // ---- Hook ----
 export function useFileSystem() {
   const [fs, setFs] = useState<FileSystemState>(loadFS);
@@ -141,7 +156,7 @@ export function useFileSystem() {
       const node: FileSystemNode = {
         id, name, type: 'file', parentId,
         createdAt: Date.now(), modifiedAt: Date.now(),
-        content, size: new Blob([content]).size,
+        content, size: new TextEncoder().encode(content).length,
       };
       setFs((prev) => ({
         ...prev,
@@ -172,20 +187,8 @@ export function useFileSystem() {
     setFs((prev) => {
       const nodes = { ...prev.nodes };
       const trashMeta = { ...prev.trashMetadata };
-
-      const recurseDelete = (nodeId: string) => {
-        const node = nodes[nodeId];
-        if (!node) return;
-        if (node.type === 'folder') {
-          Object.values(nodes)
-            .filter((n) => n.parentId === nodeId)
-            .forEach((n) => recurseDelete(n.id));
-        }
-        delete nodes[nodeId];
-        delete trashMeta[nodeId];
-      };
-
-      recurseDelete(id);
+      const deleted = walkAndDelete(nodes, id);
+      deleted.forEach((d) => delete trashMeta[d]);
       return { nodes, trashMetadata: trashMeta };
     });
   }, []);
@@ -262,7 +265,7 @@ export function useFileSystem() {
         ...prev,
         nodes: {
           ...prev.nodes,
-          [id]: { ...node, content, size: new Blob([content]).size, modifiedAt: Date.now() },
+          [id]: { ...node, content, size: new TextEncoder().encode(content).length, modifiedAt: Date.now() },
         },
       };
     });
@@ -273,17 +276,7 @@ export function useFileSystem() {
       const nodes = { ...prev.nodes };
       const trashMeta = { ...prev.trashMetadata };
       Object.keys(trashMeta).forEach((id) => {
-        const recurseDelete = (nodeId: string) => {
-          const node = nodes[nodeId];
-          if (!node) return;
-          if (node.type === 'folder') {
-            Object.values(nodes)
-              .filter((n) => n.parentId === nodeId)
-              .forEach((n) => recurseDelete(n.id));
-          }
-          delete nodes[nodeId];
-        };
-        recurseDelete(id);
+        walkAndDelete(nodes, id);
         delete trashMeta[id];
       });
       return { nodes, trashMetadata: trashMeta };

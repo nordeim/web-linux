@@ -76,6 +76,42 @@ describe('Accessibility - ARIA Attributes in Source', () => {
       expect(source).toContain("e.key === 'Enter' || e.key === ' '")
     });
   });
+
+  describe('Calculator.tsx', () => {
+    const source = readSource('../../apps/Calculator.tsx');
+
+    it('has aria-label on history toggle button', () => {
+      expect(source).toContain('aria-label="Toggle history"');
+    });
+
+    it('has aria-label on backspace action button', () => {
+      expect(source).toContain('ariaLabel="Backspace"');
+    });
+
+    it('has aria-label on delete action button', () => {
+      expect(source).toContain('ariaLabel="Delete"');
+    });
+  });
+
+  describe('TextEditor.tsx', () => {
+    const source = readSource('../../apps/TextEditor.tsx');
+
+    it('has aria-label on zoom out button', () => {
+      expect(source).toContain('aria-label="Zoom out"');
+    });
+
+    it('has aria-label on zoom in button', () => {
+      expect(source).toContain('aria-label="Zoom in"');
+    });
+
+    it('has aria-label on close find button', () => {
+      expect(source).toContain('aria-label="Close find"');
+    });
+
+    it('has aria-label on close tab button', () => {
+      expect(source).toContain('aria-label="Close tab"');
+    });
+  });
 });
 
 describe('Accessibility - Focus Visible Styles', () => {

@@ -183,7 +183,7 @@ UbuntuOS Web is a comprehensive web-based replica of the Ubuntu Linux desktop en
 The project serves a dual purpose:
 1. Developer Showcase: It demonstrates advanced architectural patterns in React, such as complex state management without external libraries (using Context + useReducer), and creative solutions to SPA challenges like windowing systems and z-index stacking.
 2. User Toolset: It provides a portable, web-accessible collection of common productivity, utility, and entertainment applications (e.g., Calculator, Terminal, Games, Text Editor).
-The motivation for the architecture stemmed from the complexity of managing 54 individual applications. Eagerly loading all of them would create an unacceptable initial bundle size, and managing state across all these disparate components without a clear architecture would lead to a tangled, unmaintainable codebase.
+The motivation for the architecture stemmed from the complexity of managing 55 individual applications. Eagerly loading all of them would create an unacceptable initial bundle size, and managing state across all these disparate components without a clear architecture would lead to a tangled, unmaintainable codebase.
 🛠️ HOW: Architecture, Tech Stack, and Design
 Core Tech Stack
 Layer	Technology	Purpose
@@ -217,7 +217,7 @@ The project follows a clear separation of concerns, separating the OS shell, app
 4. Application Isolation (Dynamic Routing):
 - Technology: React.lazy() and Suspense.
 - Role: Drastically reduces the initial bundle size.
-- Pattern: Instead of eagarly importing all 54 apps, they are loaded on demand. This reduced the initial bundle from ~1 MB to ~360 KB. NotImplemented.tsx is the only component that cannot be lazy-loaded because it serves as a fallback.
+- Pattern: Instead of eagarly importing all 55 apps, they are loaded on demand. This reduced the initial bundle from ~1 MB to ~360 KB. NotImplemented.tsx is the only component that cannot be lazy-loaded because it serves as a fallback.
 5. Shared Utilities (src/utils/):
 - safeEval.ts: A hardened math expression parser (shunting-yard algorithm) that replaces the dangerous eval() and new Function(). This is mandatory for any math evaluation.
 - sanitizeHtml.ts: A wrapper around DOMPurify to sanitize dangerouslySetInnerHTML content. It also provides sanitizeMarkdownHtml() for markdown tags.

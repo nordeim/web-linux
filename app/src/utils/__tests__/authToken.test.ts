@@ -26,4 +26,15 @@ describe('authToken', () => {
     clearToken();
     expect(getToken()).toBeNull();
   });
+
+  it('should throw in production mode to prevent client-side JWT signing', async () => {
+    const originalProd = (import.meta.env as Record<string, unknown>).PROD;
+    try {
+      (import.meta.env as Record<string, unknown>).PROD = true;
+      (import.meta.env as Record<string, unknown>).DEV = false;
+      await expect(generateToken('User')).rejects.toThrow('Development-only');
+    } finally {
+      (import.meta.env as Record<string, unknown>).PROD = originalProd;
+    }
+  });
 });

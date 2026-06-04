@@ -5,6 +5,7 @@
 import React, { createContext, useContext, useReducer, useCallback, useEffect } from 'react';
 import type { OSState, OSAction, Window, DesktopIcon, Notification, DockItem, WindowState } from '@/types';
 import { APP_REGISTRY, getAppById, getDefaultDockApps } from '@/apps/registry';
+import { validateDesktopIcons } from '@/utils/storageValidation';
 
 // ---- Helpers ----
 let idCounter = 0;
@@ -56,8 +57,6 @@ const createInitialDockItems = (): DockItem[] => {
     bounce: false,
   }));
 };
-
-import { validateDesktopIcons } from '@/utils/storageValidation';
 
 const loadDesktopIcons = (): DesktopIcon[] => {
   return validateDesktopIcons(defaultDesktopIcons);

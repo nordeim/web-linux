@@ -93,6 +93,7 @@ export function validateFileSystem(defaultFS: FileSystemState): FileSystemState 
       // On successful validation with legacy key, save to new key
       if (!localStorage.getItem(FILESYSTEM_KEY)) {
         localStorage.setItem(FILESYSTEM_KEY, saved);
+        localStorage.removeItem(LEGACY_FILESYSTEM_KEY);
       }
       return result.data;
     }

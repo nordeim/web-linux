@@ -479,8 +479,12 @@ export const OSProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
   // Sync desktop icons to localStorage whenever the icon state changes.
   // Moved out of the reducer to preserve reducer purity.
+  // Debounced to avoid rapid writes during drag operations (L-1).
   useEffect(() => {
-    localStorage.setItem('ubuntuos_desktop_icons', JSON.stringify(state.desktopIcons));
+    const timeoutId = setTimeout(() => {
+      localStorage.setItem('ubuntuos_desktop_icons', JSON.stringify(state.desktopIcons));
+    }, 300);
+    return () => clearTimeout(timeoutId);
   }, [state.desktopIcons]);
 
   return (

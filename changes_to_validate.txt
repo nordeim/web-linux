@@ -1,313 +1,270 @@
-$ git diff app/src/apps/Calculator.tsx
-diff --git a/app/src/apps/Calculator.tsx b/app/src/apps/Calculator.tsx
-index 8c420a5..dc3f03a 100644
---- a/app/src/apps/Calculator.tsx
-+++ b/app/src/apps/Calculator.tsx
-@@ -182,9 +182,11 @@ const Calculator: React.FC = () => {
-     variant?: 'num' | 'op' | 'action' | 'eq' | 'sci';
-     className?: string;
-     colSpan?: number;
--  }> = ({ label, onClick, variant = 'num', className = '', colSpan }) => (
-+    ariaLabel?: string;
-+  }> = ({ label, onClick, variant = 'num', className = '', colSpan, ariaLabel }) => (
-     <button
-       onClick={onClick}
-+      aria-label={ariaLabel}
-       className={
-         `h-12 rounded-md text-sm font-medium transition-all duration-75 active:scale-95 flex items-center justify-center ` +
-         (variant === 'num' ? 'bg-[var(--bg-window)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] ' :
-@@ -218,7 +220,7 @@ const Calculator: React.FC = () => {
-             Scientific
-           </button>
-         </div>
--        <button onClick={() => setShowHistory(!showHistory)} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
-+        <button onClick={() => setShowHistory(!showHistory)} aria-label="Toggle history" className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
-           <History size={16} />
-         </button>
-       </div>
-@@ -268,7 +270,7 @@ const Calculator: React.FC = () => {
-         {mode === 'standard' ? (
-           <div className="grid grid-cols-4 gap-1 h-full">
-             <Btn label="AC" onClick={clear} variant="action" />
--            <Btn label={<ChevronLeft size={16} />} onClick={backspace} variant="action" />
-+            <Btn label={<ChevronLeft size={16} />} onClick={backspace} variant="action" ariaLabel="Backspace" />
-             <Btn label="%" onClick={percentage} variant="action" />
-             <Btn label="÷" onClick={() => performOp('/')} variant="op" />
-             <Btn label="7" onClick={() => inputDigit('7')} />
-@@ -294,7 +296,7 @@ const Calculator: React.FC = () => {
-             <Btn label="MR" onClick={memoryRecall} variant="sci" />
-             <Btn label="M+" onClick={memoryAdd} variant="sci" />
-             <Btn label="M−" onClick={memorySubtract} variant="sci" />
--            <Btn label={<Delete size={14} />} onClick={backspace} variant="action" />
-+            <Btn label={<Delete size={14} />} onClick={backspace} variant="action" ariaLabel="Delete" />
- 
-             {/* Row 2 */}
-             <Btn label="sin" onClick={() => sciFunc('sin')} variant="sci" />
-(venv) pete@pop-os:/home/project/web-linux
 $ git diff app/src/apps/PasswordManager.tsx
 diff --git a/app/src/apps/PasswordManager.tsx b/app/src/apps/PasswordManager.tsx
-index da3b834..e2eaca2 100644
+index e2eaca2..d5b89ba 100644
 --- a/app/src/apps/PasswordManager.tsx
 +++ b/app/src/apps/PasswordManager.tsx
-@@ -20,7 +20,6 @@ const PasswordEntriesSchema = z.array(PasswordEntrySchema);
- export type PasswordEntry = z.infer<typeof PasswordEntrySchema>;
+@@ -5,6 +5,7 @@ import {
+ } from 'lucide-react';
+ import { z } from 'zod';
+ import { safeJsonParse } from '@/utils/safeJsonParse';
++import { safeStoredPin, savePin } from '@/utils/pinStorage';
  
- const STORAGE_KEY = 'ubuntuos_passwords';
--const MASTER_PIN = '1234';
- 
- const b64e = (s: string) => { try { return btoa(s); } catch { return s; } };
- const b64d = (s: string) => { try { return atob(s); } catch { return s; } };
-@@ -53,6 +52,9 @@ export default function PasswordManager() {
+ const PasswordEntrySchema = z.object({
+   id: z.string(),
+@@ -52,7 +53,7 @@ export default function PasswordManager() {
    const [authenticated, setAuthenticated] = useState(false);
    const [pin, setPin] = useState('');
    const [pinError, setPinError] = useState(false);
-+  const [storedPin, setStoredPin] = useState(() => localStorage.getItem('password_manager_pin') ?? '1234');
-+  const [showChangePin, setShowChangePin] = useState(false);
-+  const [newPinValue, setNewPinValue] = useState('');
+-  const [storedPin, setStoredPin] = useState(() => localStorage.getItem('password_manager_pin') ?? '1234');
++  const [storedPin, setStoredPin] = useState(() => safeStoredPin());
+   const [showChangePin, setShowChangePin] = useState(false);
+   const [newPinValue, setNewPinValue] = useState('');
    const [entries, setEntries] = useState<PasswordEntry[]>(loadEntries);
-   const [search, setSearch] = useState('');
-   const [showForm, setShowForm] = useState(false);
-@@ -71,10 +73,19 @@ export default function PasswordManager() {
-   useEffect(() => { if (authenticated) saveEntries(entries); }, [entries, authenticated]);
- 
-   const checkPin = () => {
--    if (pin === MASTER_PIN) { setAuthenticated(true); setPinError(false); }
-+    if (pin === storedPin) { setAuthenticated(true); setPinError(false); }
-     else { setPinError(true); setPin(''); }
+@@ -78,9 +79,8 @@ export default function PasswordManager() {
    };
  
-+  const handleChangePin = () => {
-+    if (newPinValue.length >= 4) {
-+      setStoredPin(newPinValue);
-+      localStorage.setItem('password_manager_pin', newPinValue);
-+      setShowChangePin(false);
-+      setNewPinValue('');
-+    }
-+  };
-+
-   const filtered = useMemo(() => {
-     if (!search) return entries;
-     const q = search.toLowerCase();
-@@ -132,8 +143,20 @@ export default function PasswordManager() {
+   const handleChangePin = () => {
+-    if (newPinValue.length >= 4) {
++    if (savePin(newPinValue)) {
+       setStoredPin(newPinValue);
+-      localStorage.setItem('password_manager_pin', newPinValue);
+       setShowChangePin(false);
+       setNewPinValue('');
+     }
+@@ -142,7 +142,7 @@ export default function PasswordManager() {
+       <div className="flex items-center gap-2 px-3 py-2 border-b" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-panel)' }}>
          <Shield size={16} style={{ color: 'var(--accent-primary)' }} />
          <span className="text-sm font-medium flex-1" style={{ color: 'var(--text-primary)' }}>Passwords</span>
-         <button onClick={() => setAuthenticated(false)} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><Lock size={12} /></button>
-+        <button onClick={() => { setShowChangePin(true); setNewPinValue(''); }} className="px-2 py-1 rounded-md text-xs" style={{ background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>Change PIN</button>
+-        <button onClick={() => setAuthenticated(false)} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><Lock size={12} /></button>
++        <button onClick={() => setAuthenticated(false)} aria-label="Lock" className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><Lock size={12} /></button>
+         <button onClick={() => { setShowChangePin(true); setNewPinValue(''); }} className="px-2 py-1 rounded-md text-xs" style={{ background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>Change PIN</button>
          <button onClick={() => { resetForm(); setShowForm(true); }} className="flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs" style={{ background: 'var(--accent-primary)', color: '#fff' }}><Plus size={12} /> Add</button>
        </div>
-+      <div className="px-3 py-1.5" style={{ background: 'var(--accent-warning-bg)', color: 'var(--accent-warning)' }}>
-+        <p className="text-xs font-medium">Demo Mode — passwords are not securely encrypted.</p>
-+      </div>
-+      {showChangePin && (
-+        <div className="px-3 py-2 border-b flex items-center gap-2" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-panel)' }}>
-+          <KeyRound size={12} style={{ color: 'var(--text-secondary)' }} />
-+          <input type="password" value={newPinValue} onChange={e => setNewPinValue(e.target.value)} maxLength={4} placeholder="New PIN (4 digits)" className="w-32 px-2 py-1 rounded-md text-xs outline-none" style={{ background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }} />
-+          <button onClick={handleChangePin} className="px-2 py-1 rounded-md text-xs" style={{ background: 'var(--accent-primary)', color: '#fff' }}>Save</button>
-+          <button onClick={() => { setShowChangePin(false); setNewPinValue(''); }} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><X size={12} /></button>
-+        </div>
-+      )}
-       <div className="px-3 py-2">
-         <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-md" style={{ background: 'var(--bg-input)', border: '1px solid var(--border-subtle)' }}>
-           <Search size={12} style={{ color: 'var(--text-disabled)' }} />
+@@ -167,13 +167,13 @@ export default function PasswordManager() {
+         <div className="p-3 border-b" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-panel)' }}>
+           <div className="flex items-center justify-between mb-2">
+             <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{editingId ? 'Edit' : 'New'} Entry</span>
+-            <button onClick={() => { setShowForm(false); resetForm(); }} className="p-1 rounded"><X size={14} style={{ color: 'var(--text-secondary)' }} /></button>
++            <button onClick={() => { setShowForm(false); resetForm(); }} aria-label="Close form" className="p-1 rounded"><X size={14} style={{ color: 'var(--text-secondary)' }} /></button>
+           </div>
+           <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Title / Service name" className="w-full px-2 py-1 rounded-md text-xs outline-none mb-1.5" style={{ background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }} />
+           <input value={username} onChange={e => setUsername(e.target.value)} placeholder="Username / Email" className="w-full px-2 py-1 rounded-md text-xs outline-none mb-1.5" style={{ background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }} />
+           <div className="flex gap-1.5 mb-1.5">
+             <input value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" className="flex-1 px-2 py-1 rounded-md text-xs outline-none" style={{ background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }} />
+-            <button onClick={() => setShowGen(!showGen)} className="px-2 py-1 rounded-md" style={{ background: 'var(--bg-hover)', color: 'var(--accent-secondary)' }}><KeyRound size={12} /></button>
++            <button onClick={() => setShowGen(!showGen)} aria-label="Generate password" className="px-2 py-1 rounded-md" style={{ background: 'var(--bg-hover)', color: 'var(--accent-secondary)' }}><KeyRound size={12} /></button>
+           </div>
+           {showGen && (
+             <div className="p-2 rounded-md mb-1.5" style={{ background: 'var(--bg-window)' }}>
+@@ -211,9 +211,9 @@ export default function PasswordManager() {
+                       {e.url && <span className="text-xs truncate max-w-[120px]" style={{ color: 'var(--text-disabled)' }}>{e.url}</span>}
+                     </div>
+                     <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+-                      <button onClick={() => startEdit(e)} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><Edit2 size={11} /></button>
+-                      <button onClick={() => copyToClipboard(e.password)} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><Copy size={11} /></button>
+-                      <button onClick={() => setEntries(prev => prev.filter(x => x.id !== e.id))} className="p-1 rounded" style={{ color: 'var(--accent-error)' }}><Trash2 size={11} /></button>
++                      <button onClick={() => startEdit(e)} aria-label={`Edit ${e.title}`} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><Edit2 size={11} /></button>
++                      <button onClick={() => copyToClipboard(e.password)} aria-label="Copy password" className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><Copy size={11} /></button>
++                      <button onClick={() => setEntries(prev => prev.filter(x => x.id !== e.id))} aria-label={`Delete ${e.title}`} className="p-1 rounded" style={{ color: 'var(--accent-error)' }}><Trash2 size={11} /></button>
+                     </div>
+                   </div>
+                   <div className="flex items-center gap-1.5 mb-1">
+@@ -223,10 +223,10 @@ export default function PasswordManager() {
+                     <div className="flex-1 flex items-center gap-1 px-2 py-1 rounded text-xs font-mono" style={{ background: 'var(--bg-window)', color: 'var(--text-primary)' }}>
+                       {isVisible ? e.password : '•'.repeat(Math.min(e.password.length, 20))}
+                     </div>
+-                    <button onClick={() => toggleVisibility(e.id)} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}>
++                    <button onClick={() => toggleVisibility(e.id)} aria-label={isVisible ? "Hide password" : "Show password"} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}>
+                       {isVisible ? <EyeOff size={12} /> : <Eye size={12} />}
+                     </button>
+-                    <button onClick={() => copyToClipboard(e.password)} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><Copy size={12} /></button>
++                    <button onClick={() => copyToClipboard(e.password)} aria-label="Copy password" className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><Copy size={12} /></button>
+                   </div>
+                 </div>
+               );
 (venv) pete@pop-os:/home/project/web-linux
-$ git diff app/src/apps/Terminal.tsx
-diff --git a/app/src/apps/Terminal.tsx b/app/src/apps/Terminal.tsx
-index 84eb43a..b932906 100644
---- a/app/src/apps/Terminal.tsx
-+++ b/app/src/apps/Terminal.tsx
-@@ -182,10 +182,13 @@ interface TerminalProps {
-   windowId?: string;
- }
+$ git diff app/src/hooks/useAuthToken.tsx
+diff --git a/app/src/hooks/useAuthToken.tsx b/app/src/hooks/useAuthToken.tsx
+index 6fd4de0..39943b9 100644
+--- a/app/src/hooks/useAuthToken.tsx
++++ b/app/src/hooks/useAuthToken.tsx
+@@ -3,7 +3,7 @@
  
--export default function Terminal(_props: TerminalProps) {
-+export default function Terminal({ windowId }: TerminalProps) {
-   const fs = useFileSystem();
--  const [lines, setLines] = useState<TerminalLine[]>([
--    { type: 'system', text: 'Welcome to UbuntuOS Terminal' },
-+  const [lines, setLines] = useState<TerminalLine[]>(() => [
-+    {
-+      type: 'system',
-+      text: windowId ? `Welcome to UbuntuOS Terminal (${windowId})` : 'Welcome to UbuntuOS Terminal',
-+    },
-     { type: 'system', text: 'Type "help" for available commands.' },
-     { type: 'output', text: '' },
-   ]);
-(venv) pete@pop-os:/home/project/web-linux
-$ git diff app/src/apps/TextEditor.tsx
-diff --git a/app/src/apps/TextEditor.tsx b/app/src/apps/TextEditor.tsx
-index e41cc2a..66d88bc 100644
---- a/app/src/apps/TextEditor.tsx
-+++ b/app/src/apps/TextEditor.tsx
-@@ -264,11 +264,11 @@ const TextEditor: React.FC = () => {
-           <Hash size={14} />
-         </button>
-         <div className="flex-1" />
--        <button onClick={() => setFontSize(s => Math.max(8, s - 1))} className="p-1 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]">
-+        <button onClick={() => setFontSize(s => Math.max(8, s - 1))} aria-label="Zoom out" className="p-1 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]">
-           <ZoomOut size={14} />
-         </button>
-         <span className="text-[10px] text-[var(--text-secondary)] w-6 text-center">{fontSize}</span>
--        <button onClick={() => setFontSize(s => Math.min(32, s + 1))} className="p-1 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]">
-+        <button onClick={() => setFontSize(s => Math.min(32, s + 1))} aria-label="Zoom in" className="p-1 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]">
-           <ZoomIn size={14} />
-         </button>
-       </div>
-@@ -284,7 +284,7 @@ const TextEditor: React.FC = () => {
-             placeholder="Find..."
-             className="flex-1 bg-transparent text-xs text-[var(--text-primary)] outline-none placeholder:text-[var(--text-disabled)]"
-           />
--          <button onClick={() => setShowFind(false)} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
-+          <button onClick={() => setShowFind(false)} aria-label="Close find" className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
-             <X size={14} />
-           </button>
-         </div>
-@@ -309,6 +309,7 @@ const TextEditor: React.FC = () => {
-               <span className="truncate max-w-[120px]">{f.isModified ? '● ' : ''}{f.name}</span>
-               <button
-                 onClick={e => { e.stopPropagation(); closeFile(f.id); }}
-+                aria-label="Close tab"
-                 className="ml-1 hover:text-[var(--accent-error)]"
-               >
-                 <X size={12} />
+ import { useCallback } from 'react';
+ import { useOS } from '@/hooks/useOSStore';
+-import { generateToken as _generateToken, setToken as _setToken, clearToken as _clearToken } from '@/utils/authToken';
++import { generateToken as _generateToken, clearToken as _clearToken } from '@/utils/authToken';
+ 
+ export function useAuthToken() {
+   const { state, dispatch } = useOS();
 (venv) pete@pop-os:/home/project/web-linux
 $ git diff app/src/hooks/useFileSystem.ts
 diff --git a/app/src/hooks/useFileSystem.ts b/app/src/hooks/useFileSystem.ts
-index fc40565..aa89597 100644
+index aa89597..2c26f70 100644
 --- a/app/src/hooks/useFileSystem.ts
 +++ b/app/src/hooks/useFileSystem.ts
-@@ -97,6 +97,21 @@ function saveFS(state: FileSystemState) {
+@@ -5,6 +5,7 @@
+ import { useState, useCallback, useEffect } from 'react';
+ import type { FileSystemNode, FileSystemState, FileAssociation } from '@/types';
+ import { validateFileSystem, saveFileSystem } from '@/utils/storageValidation';
++import { walkAndDelete, recurseMoveNode } from '@/utils/vfsHelpers';
+ 
+ const generateId = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+ 
+@@ -97,21 +98,6 @@ function saveFS(state: FileSystemState) {
    } catch { /* ignore */ }
  }
  
-+// Traversal helper: deletes a node and all descendants, returns deleted IDs
-+function walkAndDelete(nodes: Record<string, FileSystemNode>, nodeId: string): string[] {
-+  const deleted: string[] = [];
-+  const node = nodes[nodeId];
-+  if (!node) return deleted;
-+  if (node.type === 'folder') {
-+    Object.values(nodes)
-+      .filter((n) => n.parentId === nodeId)
-+      .forEach((n) => deleted.push(...walkAndDelete(nodes, n.id)));
-+  }
-+  delete nodes[nodeId];
-+  deleted.push(nodeId);
-+  return deleted;
-+}
-+
+-// Traversal helper: deletes a node and all descendants, returns deleted IDs
+-function walkAndDelete(nodes: Record<string, FileSystemNode>, nodeId: string): string[] {
+-  const deleted: string[] = [];
+-  const node = nodes[nodeId];
+-  if (!node) return deleted;
+-  if (node.type === 'folder') {
+-    Object.values(nodes)
+-      .filter((n) => n.parentId === nodeId)
+-      .forEach((n) => deleted.push(...walkAndDelete(nodes, n.id)));
+-  }
+-  delete nodes[nodeId];
+-  deleted.push(nodeId);
+-  return deleted;
+-}
+-
  // ---- Hook ----
  export function useFileSystem() {
    const [fs, setFs] = useState<FileSystemState>(loadFS);
-@@ -141,7 +156,7 @@ export function useFileSystem() {
-       const node: FileSystemNode = {
-         id, name, type: 'file', parentId,
-         createdAt: Date.now(), modifiedAt: Date.now(),
--        content, size: new Blob([content]).size,
-+        content, size: new TextEncoder().encode(content).length,
-       };
-       setFs((prev) => ({
-         ...prev,
-@@ -172,20 +187,8 @@ export function useFileSystem() {
-     setFs((prev) => {
-       const nodes = { ...prev.nodes };
-       const trashMeta = { ...prev.trashMetadata };
--
--      const recurseDelete = (nodeId: string) => {
+@@ -209,20 +195,9 @@ export function useFileSystem() {
+ 
+       trashMeta[id] = { originalPath, deletedAt: Date.now() };
+ 
+-      const recurseMove = (nodeId: string, newParentId: string) => {
 -        const node = nodes[nodeId];
 -        if (!node) return;
+-        nodes[nodeId] = { ...node, parentId: newParentId, modifiedAt: Date.now() };
 -        if (node.type === 'folder') {
 -          Object.values(nodes)
 -            .filter((n) => n.parentId === nodeId)
--            .forEach((n) => recurseDelete(n.id));
+-            .forEach((n) => recurseMove(n.id, nodeId));
 -        }
--        delete nodes[nodeId];
--        delete trashMeta[nodeId];
 -      };
 -
--      recurseDelete(id);
-+      const deleted = walkAndDelete(nodes, id);
-+      deleted.forEach((d) => delete trashMeta[d]);
-       return { nodes, trashMetadata: trashMeta };
-     });
-   }, []);
-@@ -262,7 +265,7 @@ export function useFileSystem() {
-         ...prev,
-         nodes: {
-           ...prev.nodes,
--          [id]: { ...node, content, size: new Blob([content]).size, modifiedAt: Date.now() },
-+          [id]: { ...node, content, size: new TextEncoder().encode(content).length, modifiedAt: Date.now() },
-         },
-       };
-     });
-@@ -273,17 +276,7 @@ export function useFileSystem() {
-       const nodes = { ...prev.nodes };
-       const trashMeta = { ...prev.trashMetadata };
-       Object.keys(trashMeta).forEach((id) => {
--        const recurseDelete = (nodeId: string) => {
--          const node = nodes[nodeId];
--          if (!node) return;
--          if (node.type === 'folder') {
--            Object.values(nodes)
--              .filter((n) => n.parentId === nodeId)
--              .forEach((n) => recurseDelete(n.id));
--          }
--          delete nodes[nodeId];
--        };
--        recurseDelete(id);
-+        walkAndDelete(nodes, id);
-         delete trashMeta[id];
-       });
+       const trashFilesId = Object.values(nodes).find((n) => n.name === 'files' && n.parentId && nodes[n.parentId]?.name === '.trash')?.id;
+       if (trashFilesId) {
+-        recurseMove(id, trashFilesId);
++        recurseMoveNode(nodes, id, trashFilesId);
+       }
+ 
        return { nodes, trashMetadata: trashMeta };
 (venv) pete@pop-os:/home/project/web-linux
 $ git diff app/src/hooks/useOSStore.tsx
 diff --git a/app/src/hooks/useOSStore.tsx b/app/src/hooks/useOSStore.tsx
-index f5786c8..408ab69 100644
+index 408ab69..8211d6f 100644
 --- a/app/src/hooks/useOSStore.tsx
 +++ b/app/src/hooks/useOSStore.tsx
-@@ -5,6 +5,7 @@
- import React, { createContext, useContext, useReducer, useCallback, useEffect } from 'react';
- import type { OSState, OSAction, Window, DesktopIcon, Notification, DockItem, WindowState } from '@/types';
- import { APP_REGISTRY, getAppById, getDefaultDockApps } from '@/apps/registry';
-+import { validateDesktopIcons } from '@/utils/storageValidation';
+@@ -479,8 +479,12 @@ export const OSProvider: React.FC<{ children: React.ReactNode }> = ({ children }
  
- // ---- Helpers ----
- let idCounter = 0;
-@@ -57,8 +58,6 @@ const createInitialDockItems = (): DockItem[] => {
-   }));
- };
+   // Sync desktop icons to localStorage whenever the icon state changes.
+   // Moved out of the reducer to preserve reducer purity.
++  // Debounced to avoid rapid writes during drag operations (L-1).
+   useEffect(() => {
+-    localStorage.setItem('ubuntuos_desktop_icons', JSON.stringify(state.desktopIcons));
++    const timeoutId = setTimeout(() => {
++      localStorage.setItem('ubuntuos_desktop_icons', JSON.stringify(state.desktopIcons));
++    }, 300);
++    return () => clearTimeout(timeoutId);
+   }, [state.desktopIcons]);
  
--import { validateDesktopIcons } from '@/utils/storageValidation';
--
- const loadDesktopIcons = (): DesktopIcon[] => {
-   return validateDesktopIcons(defaultDesktopIcons);
- };
+   return (
 (venv) pete@pop-os:/home/project/web-linux
-$ git diff app/src/utils/authToken.ts
-diff --git a/app/src/utils/authToken.ts b/app/src/utils/authToken.ts
-index 77df1a2..01c3a3e 100644
---- a/app/src/utils/authToken.ts
-+++ b/app/src/utils/authToken.ts
-@@ -46,6 +46,9 @@ async function createHmac(message: string, key: string): Promise<string> {
-  * development and testing only.
-  */
- export async function generateToken(userName: string): Promise<string> {
-+  if (!import.meta.env.DEV) {
-+    throw new Error('Development-only: authToken.ts is not for production use. Use a backend `/auth/token` endpoint.');
-+  }
-   const header = { alg: 'HS256', typ: 'JWT' };
-   const now = Math.floor(Date.now() / 1000);
-   const payload = {
+$ git diff app/src/utils/safeJsonParse.ts
+diff --git a/app/src/utils/safeJsonParse.ts b/app/src/utils/safeJsonParse.ts
+index f221ce1..ba9e950 100644
+--- a/app/src/utils/safeJsonParse.ts
++++ b/app/src/utils/safeJsonParse.ts
+@@ -20,7 +20,6 @@ export function safeJsonParse<T>(
+     const parsed = JSON.parse(raw);
+     const result = schema.safeParse(parsed);
+     if (result.success) return result.data;
+-    // eslint-disable-next-line no-console
+     console.warn('safeJsonParse: validation failed', result.error.format());
+     return fallback;
+   } catch {
 (venv) pete@pop-os:/home/project/web-linux
-$ git diff app/src/utils/storageValidation.ts
-diff --git a/app/src/utils/storageValidation.ts b/app/src/utils/storageValidation.ts
-index d95c5eb..7af66a3 100644
---- a/app/src/utils/storageValidation.ts
-+++ b/app/src/utils/storageValidation.ts
-@@ -93,6 +93,7 @@ export function validateFileSystem(defaultFS: FileSystemState): FileSystemState
-       // On successful validation with legacy key, save to new key
-       if (!localStorage.getItem(FILESYSTEM_KEY)) {
-         localStorage.setItem(FILESYSTEM_KEY, saved);
-+        localStorage.removeItem(LEGACY_FILESYSTEM_KEY);
-       }
-       return result.data;
-     }
+$ git diff app/vite.config.ts
+diff --git a/app/vite.config.ts b/app/vite.config.ts
+index 241283c..282aac9 100644
+--- a/app/vite.config.ts
++++ b/app/vite.config.ts
+@@ -3,9 +3,9 @@ import react from "@vitejs/plugin-react"
+ import { defineConfig } from "vitest/config"
+ import { inspectAttr } from 'plugin-inspect-react-code'
+ 
+-export default defineConfig({
++export default defineConfig(({ mode }) => ({
+   base: './',
+-  plugins: [inspectAttr(), react()],
++  plugins: mode === 'production' ? [react()] : [inspectAttr(), react()],
+   server: {
+     port: 3000,
+     proxy: {
+@@ -22,18 +22,10 @@ export default defineConfig({
+   },
+   build: {
+     sourcemap: true,
+-    rollupOptions: {
+-      output: {
+-        manualChunks: {
+-          react: ['react', 'react-dom'],
+-          lucide: ['lucide-react'],
+-        },
+-      },
+-    },
+   },
+   test: {
+     globals: true,
+     environment: 'jsdom',
+     setupFiles: './vitest.setup.ts',
+   },
+-});
++}));
+(venv) pete@pop-os:/home/project/web-linux
+$ git diff app/package.json
+diff --git a/app/package.json b/app/package.json
+index 13c2b01..c23f438 100644
+--- a/app/package.json
++++ b/app/package.json
+@@ -3,6 +3,9 @@
+   "private": true,
+   "version": "0.0.0",
+   "type": "module",
++  "engines": {
++    "node": ">=20"
++  },
+   "scripts": {
+     "dev": "vite",
+     "build": "tsc -b && vite build",
+@@ -47,7 +50,6 @@
+     "embla-carousel-react": "^8.6.0",
+     "input-otp": "^1.4.2",
+     "lucide-react": "^0.562.0",
+-    "next-themes": "^0.4.6",
+     "react": "^19.2.0",
+     "react-day-picker": "^9.13.0",
+     "react-dom": "^19.2.0",
+@@ -55,7 +57,6 @@
+     "react-resizable-panels": "^4.2.2",
+     "react-router": "^7.6.1",
+     "recharts": "^2.15.4",
+-    "sonner": "^2.0.7",
+     "tailwind-merge": "^3.4.0",
+     "vaul": "^1.1.2",
+     "zod": "^4.3.5"
+@@ -79,7 +80,6 @@
+     "postcss": "^8.5.6",
+     "tailwindcss": "^3.4.19",
+     "tailwindcss-animate": "^1.0.7",
+-    "tw-animate-css": "^1.4.0",
+     "typescript": "~5.9.3",
+     "typescript-eslint": "^8.46.4",
+     "vite": "^7.2.4",
 

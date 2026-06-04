@@ -5,6 +5,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { FileSystemNode, FileSystemState, FileAssociation } from '@/types';
 import { validateFileSystem, saveFileSystem } from '@/utils/storageValidation';
+import { walkAndDelete, recurseMoveNode } from '@/utils/vfsHelpers';
 
 const generateId = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
 
@@ -95,21 +96,6 @@ function saveFS(state: FileSystemState) {
   try {
     saveFileSystem(state);
   } catch { /* ignore */ }
-}
-
-// Traversal helper: deletes a node and all descendants, returns deleted IDs
-function walkAndDelete(nodes: Record<string, FileSystemNode>, nodeId: string): string[] {
-  const deleted: string[] = [];
-  const node = nodes[nodeId];
-  if (!node) return deleted;
-  if (node.type === 'folder') {
-    Object.values(nodes)
-      .filter((n) => n.parentId === nodeId)
-      .forEach((n) => deleted.push(...walkAndDelete(nodes, n.id)));
-  }
-  delete nodes[nodeId];
-  deleted.push(nodeId);
-  return deleted;
 }
 
 // ---- Hook ----
@@ -209,20 +195,9 @@ export function useFileSystem() {
 
       trashMeta[id] = { originalPath, deletedAt: Date.now() };
 
-      const recurseMove = (nodeId: string, newParentId: string) => {
-        const node = nodes[nodeId];
-        if (!node) return;
-        nodes[nodeId] = { ...node, parentId: newParentId, modifiedAt: Date.now() };
-        if (node.type === 'folder') {
-          Object.values(nodes)
-            .filter((n) => n.parentId === nodeId)
-            .forEach((n) => recurseMove(n.id, nodeId));
-        }
-      };
-
       const trashFilesId = Object.values(nodes).find((n) => n.name === 'files' && n.parentId && nodes[n.parentId]?.name === '.trash')?.id;
       if (trashFilesId) {
-        recurseMove(id, trashFilesId);
+        recurseMoveNode(nodes, id, trashFilesId);
       }
 
       return { nodes, trashMetadata: trashMeta };

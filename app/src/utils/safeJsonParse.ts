@@ -20,7 +20,6 @@ export function safeJsonParse<T>(
     const parsed = JSON.parse(raw);
     const result = schema.safeParse(parsed);
     if (result.success) return result.data;
-    // eslint-disable-next-line no-console
     console.warn('safeJsonParse: validation failed', result.error.format());
     return fallback;
   } catch {

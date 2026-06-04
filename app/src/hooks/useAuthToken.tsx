@@ -3,7 +3,7 @@
 
 import { useCallback } from 'react';
 import { useOS } from '@/hooks/useOSStore';
-import { generateToken as _generateToken, setToken as _setToken, clearToken as _clearToken } from '@/utils/authToken';
+import { generateToken as _generateToken, clearToken as _clearToken } from '@/utils/authToken';
 
 export function useAuthToken() {
   const { state, dispatch } = useOS();

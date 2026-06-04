@@ -504,7 +504,7 @@ return color && isValidColor(color) ? `--color-${key}: ${color};` : null;
 - **`eval()` is never safe**, even with regex sanitization. Build a proper parser or use a restricted subset.
 - **TypeScript types are not runtime guarantees**. `JSON.parse()` + `as T` is a security and reliability risk. Always validate persisted data with **zod** at runtime.
 - **Shared zod validation utility saves boilerplate**. `safeJsonParse(raw, schema, fallback)` (in `src/utils/safeJsonParse.ts`) provides a zero-boilerplate wrapper for `storageValidation.ts`-style validation in ad-hoc app reads.
-- **Monolithic reducers are hard to maintain**. The `osReducer` is approximately 350 lines and is difficult to test and reason about. Consider splitting by domain.
+- **Monolithic reducers are hard to maintain**. The `osReducer` is approximately 375 lines and is difficult to test and reason about. Consider splitting by domain.
 - **Window state transitions are surprisingly complex**. The interaction of z-index, focus, minimize, maximize, and close requires careful handling of edge cases.
 - **Dead import (Icons) can crash an entire app**. `NotImplemented.tsx` was missing `import * as Icons from 'lucide-react'`, causing a `ReferenceError` whenever any unbuilt app opened. Always verify imports manually.
 - **Dead code breaks builds, not just aesthetics**. `tsconfig.app.json` enforces `noUnusedLocals` and `noUnusedParameters`. A single unused import (e.g., a stolen from `lucide-react`) or unread state variable will cause `npm run build` to fail with `TS6133`. Clean up dead code immediately when removing features.

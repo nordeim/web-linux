@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { z } from 'zod';
 import { safeJsonParse } from '@/utils/safeJsonParse';
+import { safeStoredPin, savePin } from '@/utils/pinStorage';
 
 const PasswordEntrySchema = z.object({
   id: z.string(),
@@ -52,7 +53,7 @@ export default function PasswordManager() {
   const [authenticated, setAuthenticated] = useState(false);
   const [pin, setPin] = useState('');
   const [pinError, setPinError] = useState(false);
-  const [storedPin, setStoredPin] = useState(() => localStorage.getItem('password_manager_pin') ?? '1234');
+  const [storedPin, setStoredPin] = useState(() => safeStoredPin());
   const [showChangePin, setShowChangePin] = useState(false);
   const [newPinValue, setNewPinValue] = useState('');
   const [entries, setEntries] = useState<PasswordEntry[]>(loadEntries);
@@ -78,9 +79,8 @@ export default function PasswordManager() {
   };
 
   const handleChangePin = () => {
-    if (newPinValue.length >= 4) {
+    if (savePin(newPinValue)) {
       setStoredPin(newPinValue);
-      localStorage.setItem('password_manager_pin', newPinValue);
       setShowChangePin(false);
       setNewPinValue('');
     }
@@ -142,7 +142,7 @@ export default function PasswordManager() {
       <div className="flex items-center gap-2 px-3 py-2 border-b" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-panel)' }}>
         <Shield size={16} style={{ color: 'var(--accent-primary)' }} />
         <span className="text-sm font-medium flex-1" style={{ color: 'var(--text-primary)' }}>Passwords</span>
-        <button onClick={() => setAuthenticated(false)} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><Lock size={12} /></button>
+        <button onClick={() => setAuthenticated(false)} aria-label="Lock" className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><Lock size={12} /></button>
         <button onClick={() => { setShowChangePin(true); setNewPinValue(''); }} className="px-2 py-1 rounded-md text-xs" style={{ background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>Change PIN</button>
         <button onClick={() => { resetForm(); setShowForm(true); }} className="flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs" style={{ background: 'var(--accent-primary)', color: '#fff' }}><Plus size={12} /> Add</button>
       </div>
@@ -167,13 +167,13 @@ export default function PasswordManager() {
         <div className="p-3 border-b" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-panel)' }}>
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{editingId ? 'Edit' : 'New'} Entry</span>
-            <button onClick={() => { setShowForm(false); resetForm(); }} className="p-1 rounded"><X size={14} style={{ color: 'var(--text-secondary)' }} /></button>
+            <button onClick={() => { setShowForm(false); resetForm(); }} aria-label="Close form" className="p-1 rounded"><X size={14} style={{ color: 'var(--text-secondary)' }} /></button>
           </div>
           <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Title / Service name" className="w-full px-2 py-1 rounded-md text-xs outline-none mb-1.5" style={{ background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }} />
           <input value={username} onChange={e => setUsername(e.target.value)} placeholder="Username / Email" className="w-full px-2 py-1 rounded-md text-xs outline-none mb-1.5" style={{ background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }} />
           <div className="flex gap-1.5 mb-1.5">
             <input value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" className="flex-1 px-2 py-1 rounded-md text-xs outline-none" style={{ background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }} />
-            <button onClick={() => setShowGen(!showGen)} className="px-2 py-1 rounded-md" style={{ background: 'var(--bg-hover)', color: 'var(--accent-secondary)' }}><KeyRound size={12} /></button>
+            <button onClick={() => setShowGen(!showGen)} aria-label="Generate password" className="px-2 py-1 rounded-md" style={{ background: 'var(--bg-hover)', color: 'var(--accent-secondary)' }}><KeyRound size={12} /></button>
           </div>
           {showGen && (
             <div className="p-2 rounded-md mb-1.5" style={{ background: 'var(--bg-window)' }}>
@@ -211,9 +211,9 @@ export default function PasswordManager() {
                       {e.url && <span className="text-xs truncate max-w-[120px]" style={{ color: 'var(--text-disabled)' }}>{e.url}</span>}
                     </div>
                     <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => startEdit(e)} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><Edit2 size={11} /></button>
-                      <button onClick={() => copyToClipboard(e.password)} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><Copy size={11} /></button>
-                      <button onClick={() => setEntries(prev => prev.filter(x => x.id !== e.id))} className="p-1 rounded" style={{ color: 'var(--accent-error)' }}><Trash2 size={11} /></button>
+                      <button onClick={() => startEdit(e)} aria-label={`Edit ${e.title}`} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><Edit2 size={11} /></button>
+                      <button onClick={() => copyToClipboard(e.password)} aria-label="Copy password" className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><Copy size={11} /></button>
+                      <button onClick={() => setEntries(prev => prev.filter(x => x.id !== e.id))} aria-label={`Delete ${e.title}`} className="p-1 rounded" style={{ color: 'var(--accent-error)' }}><Trash2 size={11} /></button>
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5 mb-1">
@@ -223,10 +223,10 @@ export default function PasswordManager() {
                     <div className="flex-1 flex items-center gap-1 px-2 py-1 rounded text-xs font-mono" style={{ background: 'var(--bg-window)', color: 'var(--text-primary)' }}>
                       {isVisible ? e.password : '•'.repeat(Math.min(e.password.length, 20))}
                     </div>
-                    <button onClick={() => toggleVisibility(e.id)} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}>
+                    <button onClick={() => toggleVisibility(e.id)} aria-label={isVisible ? "Hide password" : "Show password"} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}>
                       {isVisible ? <EyeOff size={12} /> : <Eye size={12} />}
                     </button>
-                    <button onClick={() => copyToClipboard(e.password)} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><Copy size={12} /></button>
+                    <button onClick={() => copyToClipboard(e.password)} aria-label="Copy password" className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><Copy size={12} /></button>
                   </div>
                 </div>
               );

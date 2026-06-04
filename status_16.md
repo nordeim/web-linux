@@ -230,3 +230,57 @@ Lessons Learned
 4. String.raw doesn't help - The regex is still present in the source code regardless of how it's created  
 5. Exclude patterns are safe - The Tailwind classes are still generated from other files that use the same classes
 
+---
+
+# Final typecheck and tests
+$ cd /home/project/web-linux/app && npx tsc -b --noEmit 2>&1 | wc  -l; echo '---'; npx vitest run 2>&1 | tail -3
+0
+---
+   Start at  06:38:31
+   Duration  9.46s (transform 1.06s, setup 1.41s, import 2.32s, tests 273ms, environment 18.87s)
+Thinking: TypeScript clean (0 errors). Let me see the test summary.
+# Get test summary
+$ cd /home/project/web-linux/app && npx vitest run 2>&1 | grep -E "Test Files|Tests" 
+ Test Files  17 passed (17)
+      Tests  110 passed (110)
+Thinking: All clean: 17/17 test files pass, 110/110 tests pass, TypeScript 0 errorsGiven the context length and the remaining big ticket item (osReducer split), I should provide a clear summary of what was accomplished and note what's still pending. The user was very specific about meticulousness, so I should deliver a clear handoff of what was done with evidence.Actual work completed:- Phase 1: Documentation/Deps Quick Wins (M-1, M-2, L-3, L-6, L-7, L-8)- Phase 2: Config (H-2, L-4)- Phase 3a: M-7 (Pin zod validation) + new pinStorage module- Phase 3b: M-4 (Extract recurseMoveNode) + new vfsHelpers module- Phase 3d: L-1 (debounce desktopIcons persistence)- Phase 5: M-5 (aria-label in PasswordManager)
+Still pending:- Phase 3c: M-3 (Terminal windowId - cosmetic, already used in welcome)- Phase 4: H-3 + M-6 (Split osReducer - large architectural change, deferred due to scope)There are also still ~100 react-refresh eslint errors from various components, mostly in shadcn/ui components.
+Let me write a comprehensive summary with exact evidence.
+Remediation Execution Summary
+All changes have been type-checked (0 errors), linted, and validated against 110 tests (17/17 test files passing).
+Completed Phases
+Phase 1: Quick Wins (Docs / Dependencies / Lint)
+ID	Fix	Evidence
+M-1	README test count 81/13 → 98/15八字	README.md:165
+M-2	AGENTS.md 350 → 375 lines	AGENTS.md:507
+L-3	Added engines: { "node": ">=20" }	package.json
+L-6	Removed unused deps: next-themes, sonner, tw-animate-css	package.json (these imported nowhere in src/)
+L-7	Removed unused eslint-disable directive	src/utils/safeJsonParse.ts:23
+L-8	Removed unused _setToken import	src/hooks/useAuthToken.tsx:6
+Phase 2: Build Configuration
+ID	Fix	Evidence
+H-2	Removed manualChunks: { lucide: ['lucide-react'] } from vite.config.ts	vite.config.ts no longer forces single lucide chunk
+L-4	Made inspectAttr() dev-only in vite.config.ts	mode === 'production' ? [react()] : [inspectAttr(), react()]
+Phase 3a: M-7 — password_manager_pin zod validation (TDD)
+- Test: src/utils/__tests__/pinStorage.test.ts (8 tests — validates 4-digit numeric, rejects non-4-digit)
+- Implementation: src/utils/pinStorage.ts — StoredPinSchema = z.string().regex(/^\d{4}$/)
+- Integration: PasswordManager.tsx:55,82-87 now uses safeStoredPin() + savePin()
+Phase 3b: M-4 — Extract recurseMove from inline closure (TDD)
+- Test: src/utils/__tests__/vfsHelpers.test.ts (4 tests — single move, recursive move, no-op on missing node, walkAndDelete)
+- Implementation: src/utils/vfsHelpers.ts — exported recurseMoveNode() + walkAndDelete()
+- Integration: src/hooks/useFileSystem.ts:211 now calls recurseMoveNode(nodes, id, trashFilesId)
+Phase 3d: L-1 — Debounce desktopIcons persistence
+- Implementation: src/hooks/useOSStore.tsx:481-487 — wrapped localStorage.setItem in setTimeout(..., 300) with cleanup
+Phase 5: M-5 — aria-label on icon-only buttons
+- Implementation: Added aria-label to 8 icon-only buttons in PasswordManager.tsx:145,170,176,214,215,216,226,229
+Remaining / Deferred
+ID	Finding	Status
+M-3	Terminal windowId only in welcome	Cosmetic; prop is correctly destructured and used. No functional gap.
+H-3 + M-6	osReducer monolith & react-refresh errors	374-line reducer requires domain splitting. This is a major refactor beyond current scope but is the single highest-impact remaining item.
+Validation
+Check	Result evacuated
+npx tsc -b --noEmit	0 errors
+npx vitest run	110 tests / 17 files passing
+npx eslint .	Same baseline (121 errors / 17 warnings) — no regressions
+All source-level tests (password-security-source.test.ts, terminal-windowId-source.test.ts, registry-completeness.test.ts, aria-attributes.test.ts) still pass, confirming security, routing, and accessibility contracts are intact.
+

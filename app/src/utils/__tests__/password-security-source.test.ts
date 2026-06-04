@@ -14,8 +14,8 @@ describe('PasswordManager security controls', () => {
     expect(src).toContain('not securely encrypted');
   });
 
-  it('reads PIN from localStorage instead of a hardcoded constant', () => {
-    expect(src).toMatch(/localStorage\.getItem\(['"][^'"]*pin['"]\)/i);
+  it('reads PIN via safeStoredPin instead of a hardcoded constant', () => {
+    expect(src).toMatch(/safeStoredPin/);
   });
 
   it('has a way to change the PIN (UI handler or state)', () => {

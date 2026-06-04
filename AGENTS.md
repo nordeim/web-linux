@@ -173,12 +173,12 @@ This document provides high-signal technical context for AI coding agents. It fo
 📌 WHAT: The Project
 UbuntuOS Web is a comprehensive web-based replica of the Ubuntu Linux desktop environment. It is not a static mockup, but a fully interactive, single-page application (SPA) built on modern web technologies.
 - Product Type: Web application (Desktop Environment)
-- Core Functionality: A complete desktop environment with a custom window manager, a virtual file system (VFS), and 54 functional, interactive applications.
+- Core Functionality: A complete desktop environment with a custom window manager, a virtual file system (VFS), and 55 functional, interactive applications.
 - Key Features: 
 - Window Manager: Custom z-index stacking, drag-and-drop windows, minimize/maximize/restore functionality.
 - Desktop Environment: 
 - Virtual File System (VFS): A robust file management layer with unique ID-based references, trash handling, and localStorage persistence for data.
-- Application Ecosystem: 54 pre-installed apps across 7 categories (System, Productivity, Internet, Media, Games, DevTools, Creative).
+- Application Ecosystem: 55 pre-installed apps across 7 categories (System, Productivity, Internet, Media, Games, DevTools, Creative).
 🎯 WHY: The Purpose and Rationale
 The project serves a dual purpose:
 1. Developer Showcase: It demonstrates advanced architectural patterns in React, such as complex state management without external libraries (using Context + useReducer), and creative solutions to SPA challenges like windowing systems and z-index stacking.
@@ -377,6 +377,12 @@ Run from the `app/` directory:
 **Fix**: `MINIMIZE_ALL` now captures `prevPosition: { ...w.position }` and `prevSize: { ...w.size }` before minimizing, matching the behavior of `MINIMIZE_WINDOW`.
 **Context**: This inconsistency created a UX regression where the restore behavior differed depending on whether windows were minimized individually or via "Minimize All".
 
+### Apps Using Unvalidated `localStorage`
+**Symptom**: App crashes on load, shows corrupted data, or loads stale values after localStorage has been tampered with.  
+**Root Cause**: Some apps used `JSON.parse(localStorage.getItem(...))` without schema validation. Corrupted data or unexpected types would cause `TypeError`s or silent failures.  
+**Fix**: All apps now use `safeJsonParse(raw, schema, fallback)` from `@/utils/safeJsonParse`, which validates with zod before returning data. `Todo.tsx` and `VoiceRecorder.tsx` were the last two apps fixed in the 2026-06-04 remediation. If adding a new feature, always use `safeJsonParse` with a zod schema.
+**Context**: This was a medium-severity finding (M1–M2) in the 2026-06-04 audit. The `safeJsonParse` utility provides zero-boilerplate validation: `safeJsonParse(localStorage.getItem('key'), MySchema, fallbackValue)`.
+
 ## 🔒 Security Reminders
 
 1. Any new app that evaluates math must use `safeEval()`.
@@ -390,11 +396,14 @@ Run from the `app/` directory:
 9. **Export shared sanitization utilities from `@/utils/` modules**. `sanitizeMarkdownHtml()` was local to `MarkdownPreview.tsx` but is now properly exported from `@/utils/sanitizeHtml` for reuse across apps.
 10. **Remove dead code immediately**, not just comment it out. `Desktop.tsx` retained a commented `import * as Icons from 'lucide-react'` line that served no purpose and violated build hygiene.
 11. **Source-level tests are valid for accessibility regression detection**. When vitest infrastructure blocks component rendering, reading source files and asserting on ARIA attribute presence catches regressions. See `aria-attributes.test.ts` for the pattern.
+12. **Audit all z-index increment sites for the overflow cap**. After `END_ALT_TAB` was found missing the z-index cap (while `OPEN_WINDOW` and `FOCUS_WINDOW` had it), establish a pattern of auditing every point that increments z-index when changes are made. The cap is `Math.min(nextZIndex + 1, 2147483647)`.
+13. **Remove unused dependencies before they accumulate**. The `jose` JWT library was installed but unused, increasing bundle size and potential attack surface. Dependencies should only be added when actively needed; remove them if plans change.
+14. **Propagate windowId through the component hierarchy explicitly**. When a component's child needs per-window identity (cleanup, focus, or container mapping), always pass `windowId` as a prop. Do not rely on child components re-registering or deriving window identity from global state.
 
 ## 📐 Performance Patterns
 
 ### React.lazy + Suspense for Code Splitting
-- **Before**: All 54 apps eagerly imported in `AppRouter.tsx`, creating a ~1 MB initial bundle.
+- **Before**: All 55 apps eagerly imported in `AppRouter.tsx`, creating a ~1 MB initial bundle.
 - **After**: `AppRouter.tsx` uses `React.lazy()` + `Suspense` with `AppSkeleton` fallback. Each app is loaded on demand, producing 60 individual chunks. Initial shell reduced to ~360 KB.
 - **Caveat**: `NotImplemented.tsx` cannot be lazy-loaded (it's the fallback). All other apps are lazy.
 - **Build verification**: `npx vite build` now emits `dist/assets/[AppName]-[hash].js` for each app.
@@ -435,3 +444,4 @@ Run from the `app/` directory:
 - **Third-party implementation plans must also be independently validated**. The plan_xterm.md draft had the wrong xterm package names (v4 unscoped instead of v5 `@xterm/*`), wrong category casing (lowercase vs PascalCase), and assumed a JWT system existed (it did not). The `AppRouterProps` declared `windowId` but the `AppRouter` component never destructured it. All three issues were caught by reading the actual source code, not the plan.
 
 - **Third-party audit findings must be independently validated**: The kilo-1 audit had a ~33% error rate on CRITICAL/HIGH findings. C-1 (Calendar unused imports) was completely wrong; H-1 (17 apps using raw JSON.parse) was stale/post-fix; H-6 (osReducer line count) misinterpreted file lines vs. function lines. Always grep the actual source before acting on audit findings.
+- **Remove unused dependencies before they accumulate**: The `jose` JWT library was installed for the Real Terminal feature but was unused, increasing bundle size and potential attack surface. Dependencies should only be added when actively needed; remove them if plans change.

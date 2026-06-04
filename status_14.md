@@ -534,3 +534,133 @@ Verification Results:
 - Dependencies: jose fully removed, no references remain
 All changes align with the project's security standards (zod validation, safeJsonParse utility) and TypeScript strict mode requirements.
 
+---
+
+Let me also check for any remaining issues:
+- Path for "kimi-3" report: Code_Review_Audit_kimi-3.md exists
+- Test count: 69 tests, 11 files
+- App count: 55 in all docs
+- jose removed from all docs
+- registry.ts updated to 55
+Also, I should check if there are any remaining "54" references in the docs that shouldn't be there, and check if the jose removal is documented properly.
+Let me do a final scan and then check the test result.  Let me do a final verification scan and check the test results:
+# Final verification scan
+$ echo "=== Checking for outdated references ===" && echo "Remaining '54' refs:" && grep -n "54" /home/project/web-linux/README.md | grep -v "55" | grep -v "to 55" | grep -v "Real Terminal" || echo "None" && echo "" && echo "jose references:" && grep -in "jose" /home/project/web-linux/README.md /home/project/web-linux/CLAUDE.md /home/project/web-linux/AGENTS.md || echo "jose appears only where relevant" && echo "" && echo "test count refs:" && grep -n "test.*69" /home/project/web-linux/README.md /home/project/web-linux/CLAUDE.md || echo "Test counts verified"
+=== Checking for outdated references ===
+Remaining '54' refs:
+None
+
+jose references:
+/home/project/web-linux/README.md:75:- **Removed unused `jose` dependency**: The `jose` JWT library was installed for a planned real terminal feature but was unused. Removed to reduce bundle size and attack surface.
+/home/project/web-linux/CLAUDE.md:126:14. **Remove unused dependencies immediately**: The `jose` package was installed but unused for days. Dependencies should only be added when actively needed. Regularly audit `package.json` for unused packages and remove them to reduce bundle size and attack surface.
+/home/project/web-linux/CLAUDE.md:134:- **No JWT exists**: The login system is purely in-memory (`isAuthenticated: true`). A JWT issuance system must be built first (+2–3 days). Recommended: backend `/auth/token` endpoint (keeps secret server-side). Note: the `jose` package was previously installed but has been removed as it was unused.
+/home/project/web-linux/AGENTS.md:400:13. **Remove unused dependencies before they accumulate**. The `jose` JWT library was installed but unused, increasing bundle size and potential attack surface. Dependencies should only be added when actively needed; remove them if plans change.
+/home/project/web-linux/AGENTS.md:447:- **Remove unused dependencies before they accumulate**: The `jose` JWT library was installed for the Real Terminal feature but was unused, increasing bundle size and potential attack surface. Dependencies should only be added when actively needed; remove them if plans change.
+…
+Click to expand
+Looking at the results, everything looks good:
+1. No remaining "54" that shouldn't be there
+2. jose references are all in documentation about its removal (not in package.json)
+3. Test count shows 69 tests, 11 files in README.md
+I note that I should also check CLAUDE.md for test count references. Let me check and also ensure the TypeScript build still passes after all my changes. Actually, I only changed documentation files and registry.ts header, so the TypeScript build should still pass.
+Let me also run a quick TypeScript check to be safe.  Let me run a final TypeScript check to make sure all my documentation and code changes are consistent:
+# TypeScript check after changes in app
+$ npx tsc -b --noEmit 2>&1 | head -20
+(no output)
+TypeScript compilation is clean. Let me run the production build and tests one more time to ensure everything is still working. </think>   TypeScript compilation is clean. Let me run a final build and test pass:  TypeScript clean. Running final build and test pass:
+# Production build verification in app
+$ npm run build 2>&1 | tail -10
+dist/assets/Settings-CZm_jAVf.js          24.67 kB │ gzip:   4.75 kB │ map:    39.26 kB
+dist/assets/sanitizeHtml-BRQB0EWI.js      26.67 kB │ gzip:  10.01 kB │ map:   122.32 kB
+dist/assets/index-SdmdX64W.js            363.03 kB │ gzip: 104.65 kB │ map: 1,580.19 kB
+dist/assets/lucide-zY2_hBoN.js           587.20 kB │ gzip: 156.44 kB │ map: 1,833.01 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 9.25s
+The build is successful. Now let me run the tests one more time.  Build success. Let me run the tests:
+# Final test verification in app
+$ npx vitest run 2>&1 | tail -10
+RUN  v4.1.7 /home/project/web-linux/app
+
+
+ Test Files  11 passed (11)
+      Tests  69 passed (69)
+   Start at  12:49:23
+   Duration  6.57s (transform 1.21s, setup 909ms, import 2.27s, tests 253ms, environment 12.19s)
+All 69 tests pass and the build is clean. Let me finalize the todo list and prepare a comprehensive summary for the user.
+The three documentation files have been updated comprehensively. Let me verify one more time that all the key changes are reflected:
+README.md:
+- App count: 54 → 55 (including real-terminal) ✓
+- Test count: 62 → 69 (11 test files) ✓
+- New remediation section for kimi-3 ✓
+- jose removal documented ✓
+- Key Features table updated (System: 7 → 8 Apps) ✓
+- Documentation table updated with new references ✓
+CLAUDE.md:
+- App count: 54 → 55 ✓
+- Code splitting: 54 → 55 apps ✓
+- New security rules added (z-index cap, jose removal, windowId propagation) ✓
+- Real Terminal section updated (windowId now resolved, jose removed) ✓
+- New recommendations added (z-index, dependencies, windowId) ✓
+AGENTS.md:
+- App count: 54 → 55 (two references) ✓
+- New troubleshooting entry: Apps Using Unvalidated localStorage ✓
+- Security reminders updated (12, 13, 14 added) ✓
+- Performance patterns: 54 → 55 ✓
+- Lessons learned enhanced ✓
+registry.ts:
+- Header: 54 → 55 Apps ✓
+Everything looks clean. Let me update the todo and provide the comprehensive summary.  All 69 tests pass. Let me finalize the todo list:   69 All tests pass. Let me finalize:
+# Todos
+[✓] Update README.md with latest changes (app count 55, test count 69, new remediation section, jose removal, real-terminal)
+[✓] Update CLAUDE.md with latest changes (app count 55, test count 69, new security rules, real-terminal, jose removal)
+[✓] Update AGENTS.md with latest changes (app count 55, new troubleshooting entries, security reminders, lessons learned)
+[✓] Fix registry.ts count from 54 to 55
+[✓] Verify all updated files are consistent and accurate
+All documentation updates are complete. Let me provide a comprehensive summary of all the changes made. </think>   All three documentation files have been meticulously updated. Here's a comprehensive summary of the changes:
+Documentation Updates Complete
+Files Updated
+1. README.md (174 lines → updated)
+2. CLAUDE.md (149 lines → updated)
+3. AGENTS.md (440 lines → updated)
+4. app/src/apps/registry.ts (header count fixed)
+README.md Changes
+- Header: Updated app count from "54 functional applications" to "55"
+- Key Features Table: System apps count updated from 7 to 8
+- New Remediation Section: Added ### kimi-3 Code Review Audit & Remediation (2026-06-04) with all five fixes documented:
+- real-terminal routing in AppRouter.tsx
+- z-index cap in END_ALT_TAB
+- safeJsonParse migration for Todo.tsx and VoiceRecorder.tsx
+- windowId prop propagation
+- jose dependency removal
+- Build Commands Table: Test count updated from "62 tests, 9 test files" to "69 tests, 11 test files"
+- Documentation Table: Added Code_Review_Audit_kimi-3.md reference
+- Cross-references: Extended to include REMEDIATION_PLAN.md and new audit file
+CLAUDE.md Changes
+- Introduction: Updated app count from 54 to 55
+- Security Section: Added SafeJSONParse for Apps rule with reference implementation pattern
+- Code Splitting: Updated from 54 to 55 apps
+- Recommendations: Added three new high-priority items:
+- 12: Audit all z-index increment sites for overflow cap
+- 13: Remove unused dependencies immediately (jose reference)
+- 14: Propagate windowId through component hierarchy explicitly
+- Real Terminal Section: Updated with RESOLVED status for windowId issue; noted jose removal
+AGENTS.md Changes
+- AI Agent Briefing: Updated two app count references (54 → 55)
+- Troubleshooting & Gotchas: Added new entry: Apps Using Unvalidated localStorage documenting the safeJsonParse migration
+- Security Reminders: Added three new rules:
+- 12: Audit all z-index increment sites
+- 13: Remove unused dependencies before they accumulate
+- 14: Propagate windowId through component hierarchy explicitly
+- Performance Patterns: Updated from 54 to 55 apps
+- Lessons Learned: Added new entry about removing unused dependencies (jose)
+registry.ts
+- Updated header comment from "54 Apps" to "55 Apps"
+Verification Results
+- TypeScript: Zero errors
+- Production build: Success (9.25s)
+- Tests: All 69 tests pass across 11 test files
+

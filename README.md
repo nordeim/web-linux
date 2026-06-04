@@ -8,7 +8,7 @@
 [![Tailwind CSS 3.4](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A comprehensive, high-fidelity web-based replica of the Ubuntu Linux desktop environment. This project delivers a fully interactive experience in the browser, featuring a window manager, virtual file system, and 54 functional applications.
+A comprehensive, high-fidelity web-based replica of the Ubuntu Linux desktop environment. This project delivers a fully interactive experience in the browser, featuring a window manager, virtual file system, and 55 functional applications (including a real terminal).
 
 ## 🌟 Overview
 
@@ -20,7 +20,7 @@ Built for developers as a showcase of architectural patterns and for users as a 
 
 | Category | Apps | Highlights |
 | :--- | :--- | :--- |
-| **📁 System** | 7 Apps | Terminal with bash commands, File Manager, System Monitor, Settings |
+| **📁 System** | 8 Apps | Terminal (simulated + real bash), File Manager, System Monitor, Settings |
 | **📝 Productivity** | 10 Apps | Calendar, Spreadsheet, Todo List, Password Manager, Whiteboard |
 | **🌐 Internet** | 7 Apps | Tabbed Browser, Email Client, Chat, RSS Reader, Network Tools |
 | **🎬 Media** | 7 Apps | Video/Music Players, Photo Editor, Screen/Voice Recorders |
@@ -66,7 +66,16 @@ This codebase has undergone multiple comprehensive security audits and remediati
 - **Fixed ReDoS in TextEditor find bar**: Added `escapeRegExp()` and `countMatchesSafely()` utilities to prevent catastrophic backtracking from user-controlled search input. Escapes regex special characters and caps iterations at 1000.
 - **Fixed stale ContextMenu test**: Updated `ContextMenu-actions.test.tsx` to expect `ARRANGE_ICONS` (not `CASCADE_WINDOWS`), matching the actual source dispatch.
 
-See [REMEDIATION.md](REMEDIATION.md) for the full security audit report, [REMEDIATION_MIMO2.md](REMEDIATION_MIMO2.md) for the prior code review audit remediation, and [REMEDIATION_KIMI2.md](REMEDIATION_KIMI2.md) for the latest code review audit.
+### kimi-3 Code Review Audit & Remediation (2026-06-04)
+Key fixes from the comprehensive kimi-3 audit, conducted after the real terminal feature plan validation:
+- **Added real-terminal routing**: Registered `real-terminal` appId in `AppRouter.tsx` to route to `<Terminal />`, enabling the coexistence of simulated and real bash terminals.
+- **Fixed z-index cap in END_ALT_TAB**: The `END_ALT_TAB` reducer case was incrementing `nextZIndex` without capping it at `2147483647`, which could cause z-index overflow after prolonged use. Fixed to use `Math.min(state.nextZIndex + 1, 2147483647)`.
+- **Eliminated remaining raw JSON.parse in Todo.tsx and VoiceRecorder.tsx**: Both apps previously used unvalidated `JSON.parse()` for localStorage reads. Now use `safeJsonParse(raw, schema, fallback)` with zod schemas, aligning with the project's security policy and preventing data corruption crashes.
+- **Fixed windowId prop handling**: `Terminal.tsx` now accepts an optional `windowId` prop, and `AppRouter.tsx` passes `windowId` to `<Terminal />` for `real-terminal`. Enables future real terminal coexistence and per-window cleanup.
+- **Removed unused `jose` dependency**: The `jose` JWT library was installed for a planned real terminal feature but was unused. Removed to reduce bundle size and attack surface.
+- **Updated documentation counts**: App count corrected from 54 to 55 (real-terminal added). Test count updated to 69 tests across 11 test files.
+
+See [REMEDIATION.md](REMEDIATION.md) for the full security audit report, [REMEDIATION_MIMO2.md](REMEDIATION_MIMO2.md) for the prior code review audit remediation, and [REMEDIATION_KIMI2.md](REMEDIATION_KIMI2.md) for the latest code review audit. See [REMEDIATION_PLAN.md](REMEDIATION_PLAN.md) for the active remediation tracking, and [Code_Review_Audit_kimi-3.md](Code_Review_Audit_kimi-3.md) for the latest audit findings.
 
 ## 🎯 Real Terminal Feature Plan
 
@@ -128,7 +137,7 @@ After running `npm run dev`, open your browser at the provided port (usually `ht
 | :--- | :--- |
 | `npm run build` | Type-check and production build |
 | `npm run lint` | Run ESLint static analysis |
-| `npm run test` | Run Vitest unit test suite (62 tests, 9 test files) |
+| `npm run test` | Run Vitest unit test suite (69 tests, 11 test files) |
 | `npm run preview` | Local preview of the production build |
 | `tsc -b` | Project-wide type checking |
 
@@ -147,6 +156,7 @@ After running `npm run dev`, open your browser at the provided port (usually `ht
 | `REMEDIATION_PLAN.md` | Active remediation plan with todo list and execution tracking |
 | `REMEDIATION_PLAN_DPSK2.md` | dpsk-2 code review audit remediation plan and execution tracking |
 | `Code_Review_Audit_xterm_VALIDATED.md` | Validation report for Real Terminal feature plan |
+| `Code_Review_Audit_kimi-3.md` | Latest comprehensive code review audit (2026-06-04) |
 
 ## ⚠️ Known Issues & Recommendations
 

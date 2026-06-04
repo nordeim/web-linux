@@ -1,6 +1,6 @@
 # UbuntuOS Web
 
-Web-based Linux desktop environment (Ubuntu-style) built with React 19, TypeScript, and Tailwind CSS. Features 54 interactive applications and a virtual file system with localStorage persistence.
+Web-based Linux desktop environment (Ubuntu-style) built with React 19, TypeScript, and Tailwind CSS. Features 55 interactive applications and a virtual file system with localStorage persistence.
 
 ## Foundational Principles
 
@@ -40,6 +40,7 @@ Follow this six-phase workflow for all implementation tasks:
 
 ### Persistence
 - **localStorage Schema Validation**: All `localStorage` reads must go through `validateDesktopIcons()` or `validateFileSystem()` from `@/utils/storageValidation`. For ad-hoc app-specific reads, use `safeJsonParse(raw, schema, fallback)` from `@/utils/safeJsonParse`. Never trust `JSON.parse()` output without runtime validation.
+- **SafeJSONParse for Apps**: Apps reading from localStorage must define zod schemas and use `safeJsonParse()`. See `Todo.tsx` and `VoiceRecorder.tsx` for the reference implementation pattern (define schema, import `safeJsonParse`, replace `JSON.parse` with validated call).
 - **Versioned Keys**: The VFS uses `ubuntuos_filesystem_v2`. Legacy keys are supported for migration but new code should only write to the versioned key.
 
 ## Project Structure
@@ -77,7 +78,7 @@ Follow this six-phase workflow for all implementation tasks:
 ## Performance
 
 ### Code Splitting
-- **React.lazy() + Suspense** reduced initial bundle from ~1 MB to ~360 KB by splitting 54 apps into individual chunks.
+- **React.lazy() + Suspense** reduced initial bundle from ~1 MB to ~360 KB by splitting 55 apps into individual chunks.
 - **Shared DynamicIcon** eliminates ~8× code duplication across Dock, WindowFrame, Desktop, AppLauncher, and other components.
 - **Lucide monolithic import** (`import * as Icons from 'lucide-react'`) still imports the entire library (~587 KB). Use named imports when possible.
 
@@ -121,14 +122,17 @@ Follow this six-phase workflow for all implementation tasks:
 10. **Validate chart color values before CSS injection**: The `chart.tsx` component generates CSS variables from `ChartConfig` color values. While currently from hardcoded config, add hex/rgb/hsl validation if colors ever come from user input.
 11. **Add ESLint rule to block wildcard lucide imports**: Prevent `import * as Icons from 'lucide-react'` everywhere except `DynamicIcon.tsx`. This enforces the named import convention at lint time.
 12. **Add test coverage for MINIMIZE_ALL**: Verify that `prevPosition` and `prevSize` are correctly saved and restored after "Minimize All" action.
+13. **Audit all z-index increment sites**: After finding `END_ALT_TAB` was missing the z-index cap (patched in `OPEN_WINDOW` and `FOCUS_WINDOW` but not here), audit every reducer case that increments z-index to ensure `Math.min(nextZIndex + 1, 2147483647)` is applied consistently.
+14. **Remove unused dependencies immediately**: The `jose` package was installed but unused for days. Dependencies should only be added when actively needed. Regularly audit `package.json` for unused packages and remove them to reduce bundle size and attack surface.
+15. **Propagate windowId through component hierarchy**: When a component needs per-window identity (for cleanup, focus, or container mapping), always pass `windowId` explicitly rather than relying on global state or re-registering inside children.
 
 ### Real Terminal Feature Implementation (Validated Plan Available)
 
 A validated implementation plan exists for integrating a real bash terminal (`node-pty` + Docker) into UbuntuOS Web. This was independently audited against the codebase.
 
 **Key validated findings:**
-- **No JWT exists**: The login system is purely in-memory (`isAuthenticated: true`). A JWT issuance system must be built first (+2–3 days). Recommended: backend `/auth/token` endpoint (keeps secret server-side).
-- **Props declared but not destructured**: `AppRouterProps` has `windowId: string`, but `AppRouter({ appId })` only destructures `appId`. The `windowId` must be passed to child components for cleanup and focus.
+- **No JWT exists**: The login system is purely in-memory (`isAuthenticated: true`). A JWT issuance system must be built first (+2–3 days). Recommended: backend `/auth/token` endpoint (keeps secret server-side). Note: the `jose` package was previously installed but has been removed as it was unused.
+- **Props declared but not destructured** — RESOLVED: `Terminal.tsx` now accepts an optional `windowId` prop, and `AppRouter.tsx` passes `windowId` to child terminal components. `real-terminal` routing is now registered in `AppRouter.tsx`.
 - **xterm v5 package scope**: Must use `@xterm/xterm`, `@xterm/addon-fit`, `@xterm/addon-web-links` (not the v4 unscoped names).
 - **PascalCase category**: `AppCategory` type requires PascalCase (`'System'`, not `'system'`).
 - **Vite proxy and backend tsconfig**: Need `/ws` proxy in `vite.config.ts`; backend `tsconfig.json` must have `erasableSyntaxOnly: true` (no enums).

@@ -3,6 +3,7 @@ AGENTS.md
 CLAUDE.md
 GEMINI.md
 README.md
+status_14.md
 app/tsconfig.node.json
 app/components.json
 app/tsconfig.json
@@ -14,7 +15,6 @@ app/tsconfig.app.json
 app/vitest.setup.ts
 app/src/App.tsx
 app/src/main.tsx
-app/src/components
 app/src/components/Desktop.tsx
 app/src/components/LoginScreen.tsx
 app/src/components/NotificationSystem.tsx
@@ -144,14 +144,18 @@ app/src/apps/Calculator.tsx
 app/src/apps/VoiceRecorder.tsx
 app/src/hooks/use-mobile.ts
 app/src/hooks/__tests__/osReducer-zindex.test.tsx
+app/src/hooks/__tests__/osReducer-auth-source.test.ts
 app/src/hooks/__tests__/osReducer.test.ts
+app/src/hooks/useAuthToken.tsx
 app/src/hooks/useOSStore.tsx
 app/src/hooks/useFileSystem.ts
+app/src/utils/authToken.ts
 app/src/utils/storageValidation.ts
 app/src/utils/sanitizeHtml.ts
 app/src/utils/safeEval.ts
 app/src/utils/safeJsonParse.ts
 app/src/utils/__tests__/safeEval.test.ts
+app/src/utils/__tests__/authToken.test.ts
 app/src/utils/__tests__/safeJsonParse-integration.test.ts
 app/src/utils/__tests__/safeJsonParse.test.ts
 app/src/lib/utils.ts

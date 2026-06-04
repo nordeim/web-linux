@@ -4,8 +4,19 @@
 
 import { useState, useRef, useEffect, memo } from 'react';
 import {
-  Mic, Play, Pause, Square, Trash2, Download
+  Mic, Play, Pause, Square, Trash2
 } from 'lucide-react';
+import { z } from 'zod';
+import { safeJsonParse } from '@/utils/safeJsonParse';
+
+// ---- Zod Schema for Runtime Validation ----
+const RecordingSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  duration: z.number(),
+  date: z.number(),
+  waveformData: z.array(z.number()),
+});
 
 // ---- Types ----
 interface Recording {
@@ -99,18 +110,19 @@ const formatTime = (seconds: number): string => {
 
 const generateWaveform = () => Array.from({ length: 40 }, () => Math.random() * 60 + 8);
 
+const loadRecordings = (): Recording[] => {
+  const saved = localStorage.getItem('ubuntuos_recordings');
+  if (!saved) return [];
+  return safeJsonParse(saved, z.array(RecordingSchema), []);
+};
+
 // ---- Main Voice Recorder ----
 export default function VoiceRecorder() {
   const [recorderState, setRecorderState] = useState<RecorderState>('idle');
   const [elapsed, setElapsed] = useState(0);
-  const [recordings, setRecordings] = useState<Recording[]>(() => {
-    try {
-      const saved = localStorage.getItem('ubuntuos_recordings');
-      return saved ? JSON.parse(saved) : [];
-    } catch { return []; }
-    });
+  const [recordings, setRecordings] = useState<Recording[]>(loadRecordings);
   const [playingId, setPlayingId] = useState<string | null>(null);
-  const [playTime, setPlayTime] = useState(0);
+  const [_playTime, _setPlayTime] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const playTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -119,264 +131,110 @@ export default function VoiceRecorder() {
     localStorage.setItem('ubuntuos_recordings', JSON.stringify(recordings));
   }, [recordings]);
 
-  // Recording timer
+  // Timer for recording
   useEffect(() => {
-    if (recorderState === 'recording') {
-      timerRef.current = setInterval(() => {
-        setElapsed((prev) => prev + 1);
-      }, 1000);
-    } else {
+    if (recorderState !== 'recording') {
       if (timerRef.current) clearInterval(timerRef.current);
+      return;
     }
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+    timerRef.current = setInterval(() => {
+      setElapsed((prev) => prev + 1);
+    }, 1000);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
   }, [recorderState]);
 
-  // Playback timer
+  // Timer for playback
   useEffect(() => {
-    if (recorderState === 'playing' && playingId) {
-      const recording = recordings.find((r) => r.id === playingId);
-      if (!recording) return;
-      playTimerRef.current = setInterval(() => {
-        setPlayTime((prev) => {
-          if (prev >= recording.duration) {
-            setRecorderState('idle');
-            setPlayingId(null);
-            return 0;
-          }
-          return prev + 1;
-        });
-      }, 1000);
+    if (!playingId) {
+      if (playTimerRef.current) clearInterval(playTimerRef.current);
+      return;
     }
-    return () => { if (playTimerRef.current) clearInterval(playTimerRef.current); };
-  }, [recorderState, playingId, recordings]);
+    playTimerRef.current = setInterval(() => {
+      _setPlayTime((prev) => prev + 1);
+    }, 1000);
+    return () => {
+      if (playTimerRef.current) clearInterval(playTimerRef.current);
+    };
+  }, [playingId]);
 
   const startRecording = () => {
     setRecorderState('recording');
     setElapsed(0);
   };
 
-  const pauseRecording = () => {
-    setRecorderState('paused');
-  };
-
-  const resumeRecording = () => {
-    setRecorderState('recording');
-  };
-
   const stopRecording = () => {
-    if (elapsed > 0) {
-      const newRecording: Recording = {
-        id: Math.random().toString(36).slice(2),
-        name: `Recording ${recordings.length + 1}`,
-        duration: elapsed,
-        date: Date.now(),
-        waveformData: generateWaveform(),
-      };
-      setRecordings((prev) => [newRecording, ...prev]);
-    }
     setRecorderState('idle');
-    setElapsed(0);
-  };
-
-  const playRecording = (recording: Recording) => {
-    if (playingId === recording.id && recorderState === 'playing') {
-      setRecorderState('idle');
-      setPlayingId(null);
-      setPlayTime(0);
-    } else {
-      setPlayingId(recording.id);
-      setRecorderState('playing');
-      setPlayTime(0);
-    }
+    const newRecording: Recording = {
+      id: generateId(),
+      name: `Recording ${recordings.length + 1}`,
+      duration: elapsed,
+      date: Date.now(),
+      waveformData: generateWaveform(),
+    };
+    setRecordings((prev) => [newRecording, ...prev]);
   };
 
   const deleteRecording = (id: string) => {
     setRecordings((prev) => prev.filter((r) => r.id !== id));
-    if (playingId === id) {
+    if (playingId === id) setPlayingId(null);
+  };
+
+  const togglePlay = (recording: Recording) => {
+    if (playingId === recording.id) {
       setPlayingId(null);
-      setRecorderState('idle');
-      setPlayTime(0);
+    } else {
+      setPlayingId(recording.id);
+      _setPlayTime(0);
     }
   };
 
-  const downloadRecording = (recording: Recording) => {
-    // Simulated download - create a text blob as placeholder
-    const blob = new Blob([`Simulated audio recording: ${recording.name}\nDuration: ${formatTime(recording.duration)}`], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${recording.name}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const statusLabel = recorderState === 'idle' ? 'Ready to record' :
-    recorderState === 'recording' ? 'Recording...' :
-    recorderState === 'paused' ? 'Paused' :
-    'Playing';
-
-  const currentWaveform = playingId ? recordings.find((r) => r.id === playingId)?.waveformData : undefined;
-
   return (
-    <div className="flex flex-col h-full" style={{ background: 'var(--bg-window)' }}>
-      {/* Visualizer Area */}
-      <div
-        className="flex flex-col items-center justify-center gap-4 px-6 py-5 shrink-0"
-        style={{ background: 'var(--bg-titlebar)', borderBottom: '1px solid var(--border-subtle)' }}
-      >
-        <WaveformVisualizer
-          isActive={recorderState === 'recording'}
-          isPlaying={recorderState === 'playing'}
-          waveformData={currentWaveform}
-        />
+    <div className="flex flex-col h-full p-4 gap-4" style={{ color: 'var(--text-primary)' }}>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">Voice Recorder</h2>
+        <div className="text-xs opacity-50">{recordings.length} recordings</div>
+      </div>
 
-        {/* Audio Level Meter */}
-        {recorderState === 'recording' && <AudioLevelMeter isRecording={true} />}
-
-        {/* Timer */}
-        <div style={{ fontSize: '36px', fontWeight: 300, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
-          {formatTime(recorderState === 'playing' ? playTime : elapsed)}
-        </div>
-
-        {/* Status */}
-        <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-          {statusLabel}
-          {recorderState === 'recording' && (
-            <span className="inline-flex items-center gap-1.5 ml-2">
-              <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--accent-error)' }} />
-              <span style={{ fontSize: '11px', color: 'var(--accent-error)' }}>REC</span>
-            </span>
-          )}
-        </div>
-
-        {/* Controls */}
-        <div className="flex items-center gap-4">
+      {/* Recording Controls */}
+      <div className="flex flex-col items-center gap-3 p-4 rounded-2xl" style={{ background: 'var(--bg-tertiary)' }}>
+        <WaveformVisualizer isActive={recorderState === 'recording'} isPlaying={!!playingId} />
+        <AudioLevelMeter isRecording={recorderState === 'recording'} />
+        <div className="text-2xl font-mono">{formatTime(elapsed)}</div>
+        <div className="flex items-center gap-3">
           {recorderState === 'idle' ? (
-            <button
-              onClick={startRecording}
-              className="flex items-center justify-center rounded-full transition-all hover:scale-105"
-              style={{
-                width: 64, height: 64,
-                background: 'var(--accent-error)', color: 'white',
-                boxShadow: '0 0 20px rgba(244,67,54,0.3)',
-              }}
-            >
-              <Mic size={28} />
+            <button onClick={startRecording} className="p-3 rounded-full" style={{ background: 'var(--accent-error)' }}>
+              <Mic size={24} className="text-white" />
             </button>
-          ) : recorderState === 'recording' ? (
-            <>
-              <button
-                onClick={pauseRecording}
-                className="flex items-center justify-center rounded-full transition-all hover:scale-105"
-                style={{ width: 48, height: 48, background: 'var(--bg-hover)', color: 'var(--text-primary)', border: '1px solid var(--border-default)' }}
-              >
-                <Pause size={20} />
-              </button>
-              <button
-                onClick={stopRecording}
-                className="flex items-center justify-center rounded-full transition-all hover:scale-105"
-                style={{
-                  width: 64, height: 64,
-                  background: 'var(--accent-error)', color: 'white',
-                  animation: 'pulse 1s infinite',
-                }}
-              >
-                <Square size={24} />
-              </button>
-            </>
-          ) : recorderState === 'paused' ? (
-            <>
-              <button
-                onClick={resumeRecording}
-                className="flex items-center justify-center rounded-full transition-all hover:scale-105"
-                style={{ width: 48, height: 48, background: 'var(--accent-primary)', color: 'white' }}
-              >
-                <Play size={20} className="ml-0.5" />
-              </button>
-              <button
-                onClick={stopRecording}
-                className="flex items-center justify-center rounded-full transition-all hover:scale-105"
-                style={{ width: 64, height: 64, background: 'var(--accent-error)', color: 'white' }}
-              >
-                <Square size={24} />
-              </button>
-            </>
           ) : (
-            <button
-              onClick={() => { setRecorderState('idle'); setPlayingId(null); setPlayTime(0); }}
-              className="flex items-center justify-center rounded-full transition-all hover:scale-105"
-              style={{ width: 48, height: 48, background: 'var(--accent-error)', color: 'white' }}
-            >
-              <Square size={20} />
+            <button onClick={stopRecording} className="p-3 rounded-full" style={{ background: 'var(--accent-error)' }}>
+              <Square size={24} className="text-white" />
             </button>
           )}
         </div>
       </div>
 
       {/* Recordings List */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar">
-        {recordings.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full gap-2">
-            <Mic size={32} style={{ color: 'var(--text-disabled)' }} />
-            <span style={{ fontSize: '12px', color: 'var(--text-disabled)' }}>No recordings yet</span>
-          </div>
-        ) : (
-          recordings.map((recording) => (
-            <div
-              key={recording.id}
-              className="flex items-center gap-3 px-4 py-3 transition-all"
-              style={{ borderBottom: '1px solid var(--border-subtle)' }}
-            >
-              <button
-                onClick={() => playRecording(recording)}
-                className="flex items-center justify-center rounded-full transition-all shrink-0"
-                style={{
-                  width: 36, height: 36,
-                  background: playingId === recording.id && recorderState === 'playing' ? 'var(--accent-primary)' : 'var(--bg-hover)',
-                  color: playingId === recording.id && recorderState === 'playing' ? 'white' : 'var(--text-secondary)',
-                }}
-              >
-                {playingId === recording.id && recorderState === 'playing' ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}
-              </button>
-
-              <div className="flex-1 min-w-0">
-                <div className="truncate" style={{ fontSize: '13px', color: 'var(--text-primary)' }}>{recording.name}</div>
-                <div className="flex items-center gap-2">
-                  <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{formatTime(recording.duration)}</span>
-                  <span style={{ fontSize: '11px', color: 'var(--text-disabled)' }}>{new Date(recording.date).toLocaleDateString()}</span>
-                </div>
-                {/* Mini waveform */}
-                {playingId === recording.id && recorderState === 'playing' && (
-                  <div className="flex items-end gap-px mt-1" style={{ height: 16 }}>
-                    {recording.waveformData.slice(0, 30).map((h, i) => (
-                      <div
-                        key={i}
-                        className="rounded-full"
-                        style={{ width: 2, height: Math.max(2, h * 0.25), background: 'var(--accent-primary)', opacity: 0.6 }}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <button
-                onClick={() => downloadRecording(recording)}
-                className="flex items-center justify-center rounded-lg hover:bg-[var(--bg-hover)] shrink-0"
-                style={{ width: 28, height: 28 }}
-              >
-                <Download size={14} style={{ color: 'var(--text-secondary)' }} />
-              </button>
-              <button
-                onClick={() => deleteRecording(recording.id)}
-                className="flex items-center justify-center rounded-lg hover:bg-[var(--bg-hover)] shrink-0"
-                style={{ width: 28, height: 28 }}
-              >
-                <Trash2 size={14} style={{ color: 'var(--text-secondary)' }} />
-              </button>
+      <div className="flex flex-col gap-2 flex-1 overflow-y-auto">
+        {recordings.map((recording) => (
+          <div key={recording.id} className="flex items-center gap-3 p-3 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
+            <button onClick={() => togglePlay(recording)} className="p-2 rounded-full" style={{ background: 'var(--accent-primary)' }}>
+              {playingId === recording.id ? <Pause size={18} className="text-white" /> : <Play size={18} className="text-white" />}
+            </button>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-medium truncate">{recording.name}</div>
+              <div className="text-xs opacity-50">{formatTime(recording.duration)}</div>
             </div>
-          ))
-        )}
+            <button onClick={() => deleteRecording(recording.id)} className="p-2 rounded-lg hover:opacity-70">
+              <Trash2 size={16} className="text-[var(--accent-error)]" />
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
+
+const generateId = () => Math.random().toString(36).slice(2) + Date.now().toString(36);

@@ -1,6 +1,6 @@
 // ============================================================
 // App Router — Maps appId to component using React.lazy + Suspense
-// Eliminates eager imports of all 54 apps into a single bundle.
+// Eliminates eager imports of all 55 apps into a single bundle.
 // ============================================================
 
 import { lazy, Suspense } from 'react';
@@ -79,11 +79,12 @@ const AppSkeleton = () => (
   </div>
 );
 
-export default function AppRouter({ appId, windowId: _windowId }: AppRouterProps) {
+export default function AppRouter({ appId, windowId }: AppRouterProps) {
   const renderApp = () => {
     switch (appId) {
       case 'filemanager': return <FileManager />;
       case 'terminal': return <Terminal />;
+      case 'real-terminal': return <Terminal windowId={windowId} />;
       case 'calculator': return <Calculator />;
       case 'texteditor': return <TextEditor />;
       case 'settings': return <Settings />;

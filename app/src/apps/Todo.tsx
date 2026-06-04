@@ -7,6 +7,27 @@ import {
   CheckSquare, Plus, Calendar,
   Trash2, Edit2, Check,
 } from 'lucide-react';
+import { z } from 'zod';
+import { safeJsonParse } from '@/utils/safeJsonParse';
+
+// ---- Zod Schemas for Runtime Validation ----
+const TaskSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  completed: z.boolean(),
+  dueDate: z.string(),
+  priority: z.enum(['none', 'low', 'medium', 'high']),
+  tags: z.array(z.string()),
+  projectId: z.string(),
+  createdAt: z.number(),
+});
+
+const ProjectSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  isSystem: z.boolean(),
+  icon: z.string(),
+});
 
 interface Task {
   id: string;
@@ -43,24 +64,21 @@ const PRIORITY_COLORS: Record<string, string> = {
 const generateId = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
 
 const loadTasks = (): Task[] => {
-  try {
-    const saved = localStorage.getItem('ubuntuos_todos');
-    if (saved) return JSON.parse(saved);
-  } catch { /* ignore */ }
+  const saved = localStorage.getItem('ubuntuos_todos');
   const today = new Date().toISOString().split('T')[0];
-  return [
-    { id: generateId(), title: 'Explore the UbuntuOS desktop', completed: false, dueDate: today, priority: 'high', tags: ['welcome'], projectId: 'inbox', createdAt: Date.now() },
-    { id: generateId(), title: 'Try the terminal app', completed: false, dueDate: today, priority: 'medium', tags: ['welcome'], projectId: 'inbox', createdAt: Date.now() - 10000 },
-    { id: generateId(), title: 'Customize your settings', completed: true, dueDate: today, priority: 'low', tags: [], projectId: 'inbox', createdAt: Date.now() - 20000 },
+  const defaultTasks = [
+    { id: generateId(), title: 'Explore the UbuntuOS desktop', completed: false, dueDate: today, priority: 'high' as const, tags: ['welcome'], projectId: 'inbox', createdAt: Date.now() },
+    { id: generateId(), title: 'Try the terminal app', completed: false, dueDate: today, priority: 'medium' as const, tags: ['welcome'], projectId: 'inbox', createdAt: Date.now() - 10000 },
+    { id: generateId(), title: 'Customize your settings', completed: true, dueDate: today, priority: 'low' as const, tags: [], projectId: 'inbox', createdAt: Date.now() - 20000 },
   ];
+  if (!saved) return defaultTasks;
+  return safeJsonParse(saved, z.array(TaskSchema), defaultTasks);
 };
 
 const loadCustomProjects = (): Project[] => {
-  try {
-    const saved = localStorage.getItem('ubuntuos_todo_projects');
-    if (saved) return JSON.parse(saved);
-  } catch { /* ignore */ }
-  return [];
+  const saved = localStorage.getItem('ubuntuos_todo_projects');
+  if (!saved) return [];
+  return safeJsonParse(saved, z.array(ProjectSchema), []);
 };
 
 const Todo: React.FC = () => {

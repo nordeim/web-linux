@@ -401,6 +401,7 @@ export function osReducer(state: OSState, action: OSAction): OSState {
     case 'END_ALT_TAB': {
       const visibleWins = state.windows.filter((w) => w.state !== 'minimized');
       const target = visibleWins[state.altTabIndex];
+      const nextZ = Math.min(state.nextZIndex + 1, 2147483647);
       return {
         ...state,
         isAltTabbing: false,
@@ -408,9 +409,9 @@ export function osReducer(state: OSState, action: OSAction): OSState {
         ...(target ? {
           activeWindowId: target.id,
           windows: state.windows.map((w) =>
-            w.id === target.id ? { ...w, isFocused: true, zIndex: state.nextZIndex } : { ...w, isFocused: false }
+            w.id === target.id ? { ...w, isFocused: true, zIndex: nextZ } : { ...w, isFocused: false }
           ),
-        nextZIndex: Math.min(state.nextZIndex + 1, 2147483647),
+        nextZIndex: nextZ,
         } : {}),
       };
     }

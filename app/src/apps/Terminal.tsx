@@ -178,7 +178,11 @@ interface TerminalContext {
   history: string[];
 }
 
-export default function Terminal() {
+interface TerminalProps {
+  windowId?: string;
+}
+
+export default function Terminal(_props: TerminalProps) {
   const fs = useFileSystem();
   const [lines, setLines] = useState<TerminalLine[]>([
     { type: 'system', text: 'Welcome to UbuntuOS Terminal' },

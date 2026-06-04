@@ -476,7 +476,7 @@ export const APP_REGISTRY: AppDefinition[] = [
     minSize: { width: 400, height: 320 },
   },
 
-  // ======== CREATIVE (4) ========
+  // ======== CREATIVE (5) ========
   {
     id: 'drawing',
     name: 'Drawing',
@@ -512,6 +512,15 @@ export const APP_REGISTRY: AppDefinition[] = [
     description: 'Create ASCII text art and diagrams',
     defaultSize: { width: 640, height: 480 },
     minSize: { width: 400, height: 320 },
+  },
+  {
+    id: 'matrixrain',
+    name: 'Matrix Rain',
+    icon: 'Terminal',
+    category: 'Creative',
+    description: 'Animated Matrix-style rain effect',
+    defaultSize: { width: 600, height: 400 },
+    minSize: { width: 400, height: 300 },
   },
 ];
 

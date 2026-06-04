@@ -274,6 +274,8 @@ UbuntuOS Web is a complex, well-architected single-page application that cleverl
 - **Persistence**: The VFS is synced to `localStorage` under `ubuntuos_filesystem_v2`.
 - **Associations**: `FILE_ASSOCIATIONS` in `useFileSystem.ts` maps extensions to `appId` and icons. Update this to register new file types.
 - **Path Normalization**: `findNodeByPath('/home//user/')` is normalized to `/home/user` before traversal. Trailing slashes and double slashes are handled.
+- **`walkAndDelete` Traversal Helper**: A module-level `walkAndDelete(nodes, nodeId)` function recursively deletes a node and all descendants, returning an list of deleted IDs. It replaces two previously duplicated inline `recurseDelete` closures in `deleteNode` and `emptyTrash`, eliminating ~30 lines of duplication while preserving immutability (it operates on a shallow-copied `nodes` object).
+- **`TextEncoder` for File Size**: `createFile` and `writeFile` use `new TextEncoder().encode(content).length` instead of `new Blob([content]).size`. `TextEncoder` avoids a full Blob allocation, is lighter, and yields an identical UTF-8 byte count.
 
 ## 🛠️ Development Workflow
 
@@ -383,6 +385,52 @@ Run from the `app/` directory:
 **Fix**: All apps now use `safeJsonParse(raw, schema, fallback)` from `@/utils/safeJsonParse`, which validates with zod before returning data. `Todo.tsx` and `VoiceRecorder.tsx` were the last two apps fixed in the 2026-06-04 remediation. If adding a new feature, always use `safeJsonParse` with a zod schema.
 **Context**: This was a medium-severity finding (M1–M2) in the 2026-06-04 audit. The `safeJsonParse` utility provides zero-boilerplate validation: `safeJsonParse(localStorage.getItem('key'), MySchema, fallbackValue)`.
 
+### VFS `walkAndDelete` Duplication
+**Symptom**: `deleteNode` and `emptyTrash` in `useFileSystem.ts` both contained nearly identical inline `recurseDelete` closures, violating DRY and making maintenance harder.  
+**Root Cause**: Both functions needed recursive descendant deletion logic but duplicated it inline.  
+**Fix**: Extracted a module-level `walkAndDelete(nodes, nodeId)` helper that returns `string[]` of deleted IDs. Callers receive the IDs and clean up `trashMeta` independently. This preserves immutability (operates on a shallow-copied `nodes` object), eliminates ~30 lines of duplication, and is reusable across VFS operations.
+
+### `new Blob([content]).size` Allocation Overhead
+**Symptom**: File creation and writes in the VFS allocate unnecessary `Blob` objects just to compute a string's byte length.  
+**Root Cause**: `createFile` and `writeFile` used `new Blob([content]).size` for size calculation.  
+**Fix**: Replaced with `new TextEncoder().encode(content).length`. `TextEncoder` is lighter, avoids Blob allocation, and produces the exact same UTF-8 byte count. Applied to both `createFile` and `writeFile` in `useFileSystem.ts`.
+
+### Legacy localStorage Key Bloat After Migration
+**Symptom**: `localStorage` grows over time with stale keys, even after migration.  
+**Root Cause**: `storageValidation.ts` migrated data from `ubuntuos_filesystem` (legacy) to `ubuntuos_filesystem_v2` but left the old key in place.  
+**Fix**: `validateFileSystem` now calls `localStorage.removeItem(LEGACY_FILESYSTEM_KEY)` after successfully saving migrated data to the new key, keeping storage clean.
+
+### Mid-File Import Statements
+**Symptom**: Build failures or confusing import chains when `import` statements appear in the middle of a file rather than at the top.  
+**Root Cause**: `useOSStore.tsx` had `import { validateDesktopIcons } from '@/utils/storageValidation'` between the `createInitialDockItems` and `loadDesktopIcons` helper functions, breaking TypeScript/React conventions.  
+**Fix**: Moved the import to the top of the file with all other top-level imports. Always keep all `import` statements at the top of the file.
+
+### `authToken.ts` Production Guard
+**Symptom**: The development-only JWT token generator (`generateToken`) could be accidentally called in production, generating invalid or insecure tokens.  
+**Root Cause**: `authToken.ts` was intended for development and testing only but had no guard against production use.  
+**Fix**: Added an `if (!import.meta.env.DEV) throw new Error(...)` guard at the top of `generateToken`. Any attempt to use it in a production build throws immediately. For production, use a backend `/auth/token` endpoint instead.
+
+### PasswordManager Hardcoded PIN (C-2)
+**Symptom**: The PasswordManager app used a hardcoded `MASTER_PIN = '1234'`, creating a critical security vulnerability.  
+**Root Cause**: A development placeholder was left in production code.  
+**Fix**: 
+- Removed `const MASTER_PIN = '1234'`.
+- Added `storedPin` state, persisted to `localStorage` under `password_manager_pin`, defaulting to `'1234'` for backward compatibility.
+- Added a "Change PIN" UI in the authenticated view to let users set their own PIN.
+- Added a demo-mode security warning banner.
+- `checkPin` now compares against the user-stored PIN instead of a constant. Note: this is still demo-grade security; a production app must use proper encryption and backend validation.
+
+### Terminal `windowId` Prop (H-1)
+**Symptom**: `Terminal.tsx` declared an optional `windowId` prop in its interface but never destructured or used it, making it a dead prop.  
+**Root Cause**: The prop was added contractually but never wired into the component logic.  
+**Fix**: Changed `(_props: TerminalProps)` to `({ windowId }: TerminalProps)`. The initial `lines` state now includes `windowId` in the welcome message when present, making the prop functional and enabling per-window identification.
+
+### Missing ARIA on Icon-Only Buttons (H-2)
+**Symptom**: Screen readers cannot identify the purpose of buttons that contain only an icon (no visible text).  
+**Root Cause**: `Calculator.tsx` and `TextEditor.tsx` had multiple icon-only `<button>` elements without `aria-label`.  
+**Fix**: Added `aria-label` to: Calculator's history toggle (`aria-label="Toggle history"`), backspace (`ariaLabel="Backspace"`), and delete (`ariaLabel="Delete"`); TextEditor's zoom out/in, close find, and close tab buttons. The `ariaLabel` prop flows through a reusable `Btn` component in Calculator. For subsequent apps, always add `aria-label` to any `<button>` that lacks visible text.
+**Context**: This was a high-severity accessibility finding. The fix was validated with 7 new source-level tests in `aria-attributes.test.ts`.
+
 ## 🔒 Security Reminders
 
 1. Any new app that evaluates math must use `safeEval()`.
@@ -399,6 +447,9 @@ Run from the `app/` directory:
 12. **Audit all z-index increment sites for the overflow cap**. After `END_ALT_TAB` was found missing the z-index cap (while `OPEN_WINDOW` and `FOCUS_WINDOW` had it), establish a pattern of auditing every point that increments z-index when changes are made. The cap is `Math.min(nextZIndex + 1, 2147483647)`.
 13. **Remove unused dependencies before they accumulate**. The `jose` JWT library was installed but unused, increasing bundle size and potential attack surface. Dependencies should only be added when actively needed; remove them if plans change.
 14. **Propagate windowId through the component hierarchy explicitly**. When a component's child needs per-window identity (cleanup, focus, or container mapping), always pass `windowId` as a prop. Do not rely on child components re-registering or deriving window identity from global state.
+15. **Development-only utilities must have production guards**. `authToken.ts` previously lacked a guard against production use. Any development-only helper (JWT generators, mock data injectors, debug toggles) should throw or no-op in production builds.
+16. **Never ship hardcoded secrets or demo credentials in production code**. The PasswordManager's hardcoded `MASTER_PIN = '1234'` was a critical vulnerability. Even for demo apps, secrets must be user-configurable and persisted securely. Always add a visible security warning when encryption is absent.
+17. **Icon-only buttons must have accessible names**. Any `<button>` containing only an icon (no visible text) requires an `aria-label`. This is a WCAG requirement and a high-severity accessibility gap.
 
 ## 📐 Performance Patterns
 
@@ -445,3 +496,11 @@ Run from the `app/` directory:
 
 - **Third-party audit findings must be independently validated**: The kilo-1 audit had a ~33% error rate on CRITICAL/HIGH findings. C-1 (Calendar unused imports) was completely wrong; H-1 (17 apps using raw JSON.parse) was stale/post-fix; H-6 (osReducer line count) misinterpreted file lines vs. function lines. Always grep the actual source before acting on audit findings.
 - **Remove unused dependencies before they accumulate**: The `jose` JWT library was installed for the Real Terminal feature but was unused, increasing bundle size and potential attack surface. Dependencies should only be added when actively needed; remove them if plans change.
+- **`walkAndDelete` reduces VFS duplication**: Extracting a single `walkAndDelete` helper eliminated ~30 lines of duplicated inline `recurseDelete` closures in `deleteNode` and `emptyTrash`. Preserving immutability (shallow-copied `nodes` object) while returning deleted IDs allows callers to clean up `trashMeta` independently.
+- **`TextEncoder` is lighter than `Blob` for byte counting**: `new TextEncoder().encode(content).length` produces the same UTF-8 byte count as `new Blob([content]).size` without allocating a full `Blob` object. This is a micro-optimization but matters for frequently called operations like `writeFile`.
+- **Legacy localStorage keys must be cleaned after migration**: After migrating data from `ubuntuos_filesystem` → `ubuntuos_filesystem_v2`, the old key was left in place, causing storage bloat. Always delete the legacy key after confirming a successful migration.
+- **Mid-file imports break conventions and readability**: `useOSStore.tsx` had an `import` between helper functions, which is confusing and violates TypeScript/React style. Always keep all `import` statements at the top of the file.
+- **Development-only utilities must have production guards**: `authToken.ts` previously lacked a guard against production use. Any development-only helper should throw immediately when `import.meta.env.PROD` is true, preventing accidental misuse.
+- **Demo apps still need security hygiene**: The PasswordManager's hardcoded `MASTER_PIN = '1234'` was a critical vulnerability. Even for demo features, secrets must be user-configurable, persisted with schema validation, and accompanied by a visible security warning.
+- **Dead props create silent contract violations**: `Terminal.tsx` declared `windowId` in its interface but never destructured or used it. Always verify that declared props are actually consumed in the component body; otherwise, the prop contract is misleading.
+- **Source-level tests catch ARIA regressions**: When vitest infrastructure blocks component rendering, reading source files and asserting on attribute presence (e.g., `aria-label`, `role`, `tabIndex`) catches regressions without requiring full rendering. See `aria-attributes.test.ts` for the pattern.

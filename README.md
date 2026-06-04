@@ -73,7 +73,22 @@ Key fixes from the comprehensive kimi-3 audit, conducted after the real terminal
 - **Eliminated remaining raw JSON.parse in Todo.tsx and VoiceRecorder.tsx**: Both apps previously used unvalidated `JSON.parse()` for localStorage reads. Now use `safeJsonParse(raw, schema, fallback)` with zod schemas, aligning with the project's security policy and preventing data corruption crashes.
 - **Fixed windowId prop handling**: `Terminal.tsx` now accepts an optional `windowId` prop, and `AppRouter.tsx` passes `windowId` to `<Terminal />` for `real-terminal`. Enables future real terminal coexistence and per-window cleanup.
 - **Removed unused `jose` dependency**: The `jose` JWT library was installed for a planned real terminal feature but was unused. Removed to reduce bundle size and attack surface.
-- **Updated documentation counts**: App count corrected from 54 to 55 (real-terminal added). Test count updated to 69 tests across 11 test files.
+- **Updated documentation counts**: App count corrected from 54 to 55 (real-terminal added). Test count updated to 81 tests across 13 test files.
+
+### dpsk-2 Phase 3: VFS Refactor, Security Hardening & Accessibility (2026-06-04)
+- **Extracted `walkAndDelete` VFS helper**: Removed duplicated inline `recurseDelete` closures in `deleteNode` and `emptyTrash` within `useFileSystem.ts`. Replaced with a single module-level `walkAndDelete(nodes, nodeId)` function that returns deleted IDs, eliminating ~30 lines of duplication while preserving immutability and trash cleanup behavior.
+- **Replaced `Blob` with `TextEncoder` for size calculations**: `createFile` and `writeFile` in `useFileSystem.ts` now use `new TextEncoder().encode(content).length` instead of `new Blob([content]).size`. `TextEncoder` avoids a full Blob allocation, is lighter, and yields identical UTF-8 byte counts.
+- **Added legacy localStorage cleanup after migration**: `storageValidation.ts` now removes the legacy `ubuntuos_filesystem` key after successfully migrating data to `ubuntuos_filesystem_v2`, preventing stale data bloat.
+- **Fixed mid-file import anti-pattern**: Moved the `validateDesktopIcons` import in `useOSStore.tsx` from its previous position between helper functions up to the top-level imports, aligning with TypeScript/React conventions.
+- **Hardened `authToken.ts` against production misuse**: Added an `import.meta.env.DEV` guard to `generateToken()` so it throws in non-development environments. This prevents accidental use of the development-only JWT generator in production.
+- **Hardened PasswordManager PIN security (C-2)**:
+  - Removed hardcoded `MASTER_PIN = '1234'` constant.
+  - Added `storedPin` state backed by `localStorage` (`password_manager_pin`), defaulting to `'1234'` for backward compatibility.
+  - Added a "Change PIN" UI in the authenticated view, allowing users to set a custom 4-digit PIN.
+  - Added a demo-mode security warning banner: "Demo Mode — passwords are not securely encrypted."
+- **Made `Terminal.tsx` `windowId` prop functional (H-1)**: Changed `_props` to destructured `({ windowId })` and included `windowId` in the initial welcome message, fulfilling the prop contract and enabling per-window identification.
+- **Added ARIA labels to icon-only buttons (H-2)**: Added `aria-label` attributes to icon-only buttons in `Calculator.tsx` (history toggle, backspace, delete) and `TextEditor.tsx` (zoom in/out, close find, close tab) to improve screen-reader accessibility.
+- **Added automated ARIA source-level tests**: Added 7 new source-level tests (`Calculator.tsx` ×3, `TextEditor.tsx` ×4) to `aria-attributes.test.ts`, bringing the suite to 81 tests. These tests verify `aria-label` presence in component source files without requiring full DOM rendering.
 
 See [REMEDIATION.md](REMEDIATION.md) for the full security audit report, [REMEDIATION_MIMO2.md](REMEDIATION_MIMO2.md) for the prior code review audit remediation, and [REMEDIATION_KIMI2.md](REMEDIATION_KIMI2.md) for the latest code review audit. See [REMEDIATION_PLAN.md](REMEDIATION_PLAN.md) for the active remediation tracking, and [Code_Review_Audit_kimi-3.md](Code_Review_Audit_kimi-3.md) for the latest audit findings.
 
@@ -137,7 +152,7 @@ After running `npm run dev`, open your browser at the provided port (usually `ht
 | :--- | :--- |
 | `npm run build` | Type-check and production build |
 | `npm run lint` | Run ESLint static analysis |
-| `npm run test` | Run Vitest unit test suite (69 tests, 11 test files) |
+| `npm run test` | Run Vitest unit test suite (81 tests, 13 test files) |
 | `npm run preview` | Local preview of the production build |
 | `tsc -b` | Project-wide type checking |
 
@@ -161,8 +176,8 @@ After running `npm run dev`, open your browser at the provided port (usually `ht
 ## ⚠️ Known Issues & Recommendations
 
 1. **VFS localStorage Limit**: The virtual file system uses `localStorage`, which has a ~5 MB limit. For large file storage, consider migrating to IndexedDB.
-2. **Accessibility - Remaining Work**: Core shell components (Dock, WindowFrame, Desktop) now have ARIA labels. Games and media apps may still need keyboard navigation and ARIA labels. Run a Lighthouse accessibility audit for details.
-3. **Split osReducer**: The `osReducer` is approximately 350 lines and handles window, dock, notification, context menu, icon, theme, and alt-tab logic. Now `export`ed for testing. Consider splitting into domain-specific reducers.
+2. **Accessibility - Remaining Work**: Core shell components (Dock, WindowFrame, Desktop) and the Calculator and TextEditor apps now have ARIA labels. Games and media apps may still need keyboard navigation and ARIA labels. Run a Lighthouse accessibility audit for details.
+3. **Split osReducer**: The `osReducer` is approximately 375 lines and handles window, dock, notification, context menu, icon, theme, and alt-tab logic. Now `export`ed for testing. Consider splitting into domain-specific reducers.
 4. **CI/CD Pipeline**: Automated build + lint + test gates are not yet implemented.
 5. **Unused Local / Import Hygiene**: The `tsconfig.app.json` enforces `"noUnusedLocals": true` and `"noUnusedParameters": true`. Prior build broke with 43 `TS6133` errors across 16 files. Keep imports lean and remove dead code promptly to prevent build regressions.
 6. **ReDoS from User-Crafted Regex**: RegexTester now limits iterations, but apps accepting user regex (e.g., Notes search, Email filters) should also guard against catastrophic backtracking.

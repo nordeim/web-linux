@@ -81,6 +81,7 @@ Follow this six-phase workflow for all implementation tasks:
 - **React.lazy() + Suspense** reduced initial bundle from ~1 MB to ~360 KB by splitting 55 apps into individual chunks.
 - **Shared DynamicIcon** eliminates ~8× code duplication across Dock, WindowFrame, Desktop, AppLauncher, and other components.
 - **Lucide monolithic import** (`import * as Icons from 'lucide-react'`) still imports the entire library (~587 KB). Use named imports when possible.
+- **`TextEncoder` beats `Blob` for byte counting**. `new TextEncoder().encode(content).length` gives identical UTF-8 byte counts without allocating a `Blob` object. Applied to `createFile` and `writeFile` in `useFileSystem.ts`.
 
 ### Build Hygiene
 - **"noUnusedLocals": true** and **"noUnusedParameters": true** are enforced in `tsconfig.app.json`. A single unused import or variable will break the production build (`npm run build`).
@@ -97,9 +98,11 @@ Follow this six-phase workflow for all implementation tasks:
 - **ReDoS (catastrophic backtracking) from user regex is real**. A pattern like `(a+)+$` against a long string can freeze the browser tab entirely. Always limit `exec()` iterations (e.g., 1000) and bail out early. Never trust user-supplied regex without guards.
 - **Third-party audit findings must be independently validated before acting**: The kilo-1 audit had a ~33% error rate on CRITICAL/HIGH findings. One finding claimed `Calendar.tsx` had unused imports that broke the build (imports were actually used — build passed). Another claimed 17 apps used raw `JSON.parse` (all had been fixed). Always verify audit claims against the actual source before prioritizing fixes.
 - **Unbounded array creation from user input crashes browsers**. The Calculator factorial function previously created an array of size `Math.floor(v)` without a cap, allowing input like `1e8` to crash the tab. Always cap input-dependent allocations (factorial capped at 170, where JavaScript `Number` overflows to `Infinity`).
+- **Development-only utilities must have production guards**. `authToken.ts` previously lacked a guard against production use. Any development-only helper (JWT generators, mock data injectors, debug toggles) should throw immediately when `import.meta.env.PROD` is true, preventing accidental misuse.
+- **Demo apps still need security hygiene**. The PasswordManager's hardcoded `MASTER_PIN = '1234'` was a critical vulnerability. Even for demo features, secrets must be user-configurable, persisted with schema validation, and accompanied by a visible security warning.
 
 ### State Management
-- **Monolithic reducers are hard to maintain**. The `osReducer` is approximately 350 lines and violates separation of concerns. Consider splitting into domain-specific reducers or switching to a state management library with selectors.
+- **Monolithic reducers are hard to maintain**. The `osReducer` is approximately 375 lines and violates separation of concerns. Consider splitting into domain-specific reducers or switching to a state management library with selectors.
 - **Z-index as a number is fragile**. The `2147483647` cap is correct, but a better solution would be to recalculate z-indices periodically to avoid the cap entirely.
 - **Window state transitions need explicit guards**. The `MINIMIZE_WINDOW` and `CLOSE_WINDOW` actions both need careful handling of `activeWindowId` to avoid `null` dereferences.
 
@@ -107,6 +110,14 @@ Follow this six-phase workflow for all implementation tasks:
 - **TDD is effective for security-critical code**. The `safeEval` tests (24 cases) caught multiple edge cases during development.
 - **Source-level validation as test workaround**: Component-level tests using `@/` aliases fail in vitest due to module resolution issues. Source-level tests (reading file source strings) are used as a workaround for ARIA attribute validation (14 tests in `aria-attributes.test.ts`).
 - **Component rendering tests blocked**: Tests for `WindowFrame`, `Desktop`, and `Dock` that import components via `@/` aliases fail due to vitest configuration. Fix requires resolving the alias configuration or using relative imports in tests.
+
+### Refactoring & Maintenance
+- **`walkAndDelete` reduces VFS duplication**. Extracting a single `walkAndDelete` helper eliminated ~30 lines of duplicated inline `recurseDelete` closures in `deleteNode` and `emptyTrash`. Preserving immutability (shallow-copied `nodes` object) while returning deleted IDs allows callers to clean up `trashMeta` independently.
+- **`TextEncoder` is lighter than `Blob` for byte counting**. `new TextEncoder().encode(content).length` produces the same UTF-8 byte count as `new Blob([content]).size` without allocating a full `Blob` object. This micro-optimization matters for frequently called operations like `writeFile`.
+- **Legacy localStorage keys must be cleaned after migration**. After migrating data from `ubuntuos_filesystem` → `ubuntuos_filesystem_v2`, the old key was left in place, causing storage bloat. Always delete the legacy key after confirming a successful migration.
+- **Mid-file imports break conventions and readability**. `useOSStore.tsx` had an `import` between helper functions, which is confusing and violates TypeScript/React style. Always keep all `import` statements at the top of the file.
+- **Dead props create silent contract violations**. `Terminal.tsx` declared `windowId` in its interface but never destructured or used it. Always verify that declared props are actually consumed in the component body; otherwise, the prop contract is misleading.
+- **Source-level tests catch ARIA regressions**. When vitest infrastructure blocks component rendering, reading source files and asserting on attribute presence (e.g., `aria-label`, `role`, `tabIndex`) catches regressions without requiring full rendering. See `aria-attributes.test.ts` for the pattern.
 
 ## Recommendations
 
@@ -125,6 +136,11 @@ Follow this six-phase workflow for all implementation tasks:
 13. **Audit all z-index increment sites**: After finding `END_ALT_TAB` was missing the z-index cap (patched in `OPEN_WINDOW` and `FOCUS_WINDOW` but not here), audit every reducer case that increments z-index to ensure `Math.min(nextZIndex + 1, 2147483647)` is applied consistently.
 14. **Remove unused dependencies immediately**: The `jose` package was installed but unused for days. Dependencies should only be added when actively needed. Regularly audit `package.json` for unused packages and remove them to reduce bundle size and attack surface.
 15. **Propagate windowId through component hierarchy**: When a component needs per-window identity (for cleanup, focus, or container mapping), always pass `windowId` explicitly rather than relying on global state or re-registering inside children.
+16. **Extract shared traversal helpers to reduce duplication**. The `walkAndDelete` helper in `useFileSystem.ts` eliminated ~30 lines of duplicated inline closures. When you see the same recursive pattern in two places, extract it.
+17. **Clean up legacy keys after data migrations**. Migrating `localStorage` data without removing the old key causes storage bloat. Delete the legacy key immediately after confirming the migration succeeded.
+18. **Keep all imports at the top of the file**. Mid-file `import` statements (e.g., `useOSStore.tsx` had one between helper functions) violate TypeScript/React conventions and confuse readers. 
+19. **Give development-only code an explicit guard**. Any utility intended only for dev/test (JWT generators, mock data, debug flags) should throw in production. This prevents accidental misuse in production builds.
+20. **Demo features need visible security warnings**. When security features (e.g., password manager, encryption) are simulated or use weak defaults, always show a prominent warning banner. Users should not mistake demo-grade security for production-grade protection.
 
 ### Real Terminal Feature Implementation (Validated Plan Available)
 

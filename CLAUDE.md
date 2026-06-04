@@ -47,7 +47,7 @@ Follow this six-phase workflow for all implementation tasks:
 - `app/src/apps/`: Individual application components.
 - `app/src/components/`: Core desktop environment components (Dock, Desktop, etc.).
 - `app/src/hooks/`: Core state and FS logic.
-- `app/src/utils/`: Utility functions (safeEval, sanitizeHtml, storageValidation).
+- `app/src/utils/`: Utility functions (safeEval, sanitizeHtml, storageValidation, colorValidation).
 - `app/src/types/`: Centralized type definitions.
 
 ## Development Workflow
@@ -69,6 +69,7 @@ Follow this six-phase workflow for all implementation tasks:
 2. Register the app in `app/src/apps/registry.ts` with metadata.
 3. Add the component to `app/src/apps/AppRouter.tsx`.
 4. (Optional) Add a desktop icon in `app/src/hooks/useOSStore.tsx` in `defaultDesktopIcons`.
+5. **IMPORTANT**: Ensure the app ID in `registry.ts` matches the case statement in `AppRouter.tsx`. The registry completeness test (`src/apps/__tests__/registry-completeness.test.ts`) will automatically verify this.
 
 ### File Operations
 - Use `fs.readFile(id)` and `fs.writeFile(id, content)`.
@@ -76,6 +77,15 @@ Follow this six-phase workflow for all implementation tasks:
 - File associations are defined in `app/src/hooks/useFileSystem.ts`.
 
 ## Performance
+
+### Tailwind CSS Content Scanning
+- **Issue**: Tailwind CSS content scanner can misinterpret regex patterns in source files as CSS class selectors, causing build warnings.
+- **Example**: The regex `[-:\|\s]` in `MarkdownPreview.tsx` was interpreted as a CSS class selector.
+- **Solution**: Exclude affected files from Tailwind scanning in `tailwind.config.mjs`:
+  ```javascript
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}', '!./src/apps/MarkdownPreview.tsx']
+  ```
+- **Verification**: Run `npm run build` and check for `css-syntax-error` warnings.
 
 ### Code Splitting
 - **React.lazy() + Suspense** reduced initial bundle from ~1 MB to ~360 KB by splitting 55 apps into individual chunks.
@@ -122,6 +132,7 @@ Follow this six-phase workflow for all implementation tasks:
 ## Recommendations
 
 1. **Migrate VFS from localStorage to IndexedDB** for larger file storage (>5 MB).
+2. **Validate CSS color values before injection**: The `chart.tsx` component now uses `isValidColor()` from `@/utils/colorValidation` to validate color values before CSS injection. Always use this utility when injecting dynamic color values.
 2. **Add `vitest` coverage collection** to track test coverage across all modules.
 3. **Implement CI/CD pipeline** with automated `build`, `lint`, and `test` gates.
 4. **Split `osReducer` into domain-specific reducers** (window management, notifications, desktop icons, etc.).

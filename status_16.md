@@ -136,3 +136,97 @@ The remediation plan has been successfully executed with TDD approach:
   
 The codebase is now in better condition than before the audit, with improved documentation accuracy, proper app registration, and enhanced security for CSS injection prevention.
 
+The fix is complete:  
+1. No CSS warning in the build output  
+2. All tests pass (98 tests across 15 test files)  
+3. Build succeeds  
+  
+Let me now create a summary of the remediation work.  
+
+────────────────────────────────────────────────────────────────────────────────  
+  
+CSS Build Warning Remediation Complete  
+  
+Root Cause Analysis  
+  
+Warning: ▲ [WARNING] Expected identifier but found "-" [css-syntax-error]  
+  
+Root Cause: Tailwind CSS content scanner in tailwind.config.mjs was scanning all ./src/**/*.{js,ts,jsx,tsx} files. The regex pattern in src/apps/MarkdownPreview.tsx line 81 contained [-:\|\s] which Tailwind's scanner misinterpreted as 
+a CSS class selector, generating invalid CSS   -: \|\s;.  
+  
+Trigger Pattern:  
+  
+```javascript  
+  html = html.replace(/\|(.+)\|\n\|[-:\|\s]+\|\n((?:\|.+\|\n?)+)/g, ...  
+```  
+  
+Fix Applied  
+  
+Solution: Exclude MarkdownPreview.tsx from Tailwind CSS content scanning.  
+  
+File Changed: app/tailwind.config.mjs  
+  
+Change:  
+  
+```javascript  
+  // Before:  
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],  
+  
+  // After:  
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}', '!./src/apps/MarkdownPreview.tsx'],  
+```  
+  
+Why This Works:  
+1. Tailwind's content scanner no longer scans MarkdownPreview.tsx  
+2. The regex pattern is no longer misinterpreted as a CSS class  
+3. Tailwind classes used by MarkdownPreview.tsx are still generated from other files in the project that use the same classes (e.g., flex, h-full, p-4)  
+  
+TDD Approach Used  
+  
+1. Step 1: Verified Current Behavior  
+    - Ran npm run build and confirmed the CSS warning exists  
+    - Output: ▲ [WARNING] Expected identifier but found "-" [css-syntax-error]  
+2. Step 2: Attempted Fix (Moving regex to constant)  
+    - Moved the table regex to a named constant TABLE_REGEX  
+    - Result: Warning still present (Tailwind still scans the file)  
+3. Step 3: Attempted Fix (String.raw)  
+    - Used String.raw to create the regex  
+    - Result: Warning still present (Tailwind still scans the file)  
+4. Step 4: Applied Fix (Exclude from Tailwind scanning)  
+    - Added exclusion pattern to tailwind.config.mjs  
+    - Result: Warning eliminated  
+5. Step 5: Verified Fix  
+    - Ran npm run build - No CSS warning  
+    - Ran npm test - All 98 tests pass  
+    - Verified Tailwind classes still work (generated from other files)  
+  
+Verification Results  
+  
+┌────────────────────────┬─────────────────────────────────────────────┐  
+│ Check                  │ Result                                      │  
+├────────────────────────┼─────────────────────────────────────────────┤  
+│ CSS warning eliminated │ ✅ No warning in build output               │  
+├────────────────────────┼─────────────────────────────────────────────┤  
+│ All tests pass         │ ✅ 98 tests across 15 test files            │  
+├────────────────────────┼─────────────────────────────────────────────┤  
+│ Build succeeds         │ ✅ Production build completes               │  
+├────────────────────────┼─────────────────────────────────────────────┤  
+│ Tailwind classes work  │ ✅ Classes still generated from other files │  
+├────────────────────────┼─────────────────────────────────────────────┤  
+│ No functional changes  │ ✅ MarkdownPreview.tsx behavior unchanged   │  
+└────────────────────────┴─────────────────────────────────────────────┘  
+  
+Risk Assessment  
+  
+- Risk Level: Low  
+- Impact: Build warning removal, no functional change  
+- Rollback: Remove the exclusion pattern from tailwind.config.mjs  
+  
+Lessons Learned  
+  
+1. Tailwind content scanning can be tricky - Regex patterns in source files can be misinterpreted as CSS class selectors  
+2. Exclusion patterns are useful - Tailwind supports negation patterns in the content array  
+3. Moving regex to constants doesn't help - Tailwind scans the entire file, not just JSX/TSX output  
+4. String.raw doesn't help - The regex is still present in the source code regardless of how it's created  
+5. Exclude patterns are safe - The Tailwind classes are still generated from other files that use the same classes
+

@@ -26,13 +26,23 @@ Built for developers as a showcase of architectural patterns and for users as a 
 | **🎬 Media** | 7 Apps | Video/Music Players, Photo Editor, Screen/Voice Recorders |
 | **🎮 Games** | 11 Apps | Chess (AI), Tetris, Minesweeper, Solitaire, 2048, Sudoku |
 | **🛠️ DevTools** | 8 Apps | Code Editor, Git Client, JSON Formatter, Regex Tester, API Tester |
-| **🎨 Creative** | 4 Apps | Drawing, Image Gallery, Color Picker, ASCII Art |
+| **🎨 Creative** | 5 Apps | Drawing, Image Gallery, Color Picker, ASCII Art, Matrix Rain |
+
+### Codebase Audit Remediation (2026-06-04)
+- **Registered matrixrain app in registry.ts**: The Matrix Rain app was routed in `AppRouter.tsx` but not registered in `registry.ts`, preventing it from appearing in the app launcher. Added proper registry entry with metadata.
+- **Fixed GEMINI.md app count inconsistency**: Corrected internal inconsistency where line 7 said "55 applications" but line 22 said "54 applications". Now consistently states 55.
+- **Updated osReducer line count in documentation**: Changed from "approximately 350 lines" to "approximately 375 lines" across all documentation files to match actual reducer function size.
+- **Added color validation utility**: Created `src/utils/colorValidation.ts` to validate CSS color strings before injection, preventing potential CSS injection attacks. Integrated into `chart.tsx` to validate color values from `ChartConfig`.
+- **Added registry completeness test**: Created `src/apps/__tests__/registry-completeness.test.ts` to automatically verify that all apps routed in `AppRouter.tsx` have corresponding entries in `registry.ts`.
+- **Fixed CSS build warning from regex pattern**: Tailwind CSS content scanner was misinterpreting the regex pattern in `MarkdownPreview.tsx` as a CSS class selector. Fixed by excluding the file from Tailwind scanning in `tailwind.config.mjs`.
 
 ## 🛡️ Recent Security & Reliability Improvements
 
 This codebase has undergone multiple comprehensive security audits and remediations. Key fixes include:
 
-### dpsk-2 Security & Reliability Remediation (2026-06-02)
+### Previous Security & Reliability Improvements
+
+#### dpsk-2 Security & Reliability Remediation (2026-06-02)
 - **Eliminated Arbitrary Code Execution**: Replaced `eval()` (Spreadsheet) and `new Function()` (Terminal) with a hardened shunting-yard math parser.
 - **Fixed XSS Vulnerabilities**: All `dangerouslySetInnerHTML` instances now wrap content in `DOMPurify`-based sanitization.
 - **Added localStorage Schema Validation**: Prevents data corruption by validating all persisted state with `zod` at runtime. Introduced the `safeJsonParse(raw, schema, fallback)` utility for app-specific validation.

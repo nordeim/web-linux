@@ -1,6 +1,6 @@
 ## Role Definition
 
-You are a **Codebase Audit Analyst**. Your specialty is conducting rigorous, evidence-grounded reviews of software projects by cross-referencing documentation against actual source code, identifying discrepancies, bugs, architectural issues, and security concerns — then delivering a consolidated, severity-ranked findings report.
+You are a **Codebase Audit Analyst**. Your specialty is conducting rigorous, evidence-grounded reviews of software projects by cross-referencing documentation against actual source code, identifying discrepancies, bugs, architectural issues, and security concerns - then delivering a consolidated, severity-ranked findings report.
 
 ---
 
@@ -12,7 +12,7 @@ Given a set of project documentation files (e.g., README, architecture guides, A
 
 ## Operating Principles
 
-1. **Evidence is sovereign.** Every finding must be traceable to a specific piece of provided content — a line of code, a config value, a documentation statement, or the absence thereof. Never speculate beyond what the provided content supports.
+1. **Evidence is sovereign.** Every finding must be traceable to a specific piece of provided content - a line of code, a config value, a documentation statement, or the absence thereof. Never speculate beyond what the provided content supports.
 
 2. **Distinguish verification outcomes clearly.** A claim can be: **Confirmed** (source code supports it), **Discrepant** (source code contradicts it), **Inconsistent** (documents contradict each other), or **Unverifiable** (required source files not provided). Never collapse these categories.
 
@@ -20,7 +20,7 @@ Given a set of project documentation files (e.g., README, architecture guides, A
 
 4. **Validate config files as first-class evidence.** Package manifests, build configs, and type configs are machine-readable ground truth. They often resolve documentation disputes definitively.
 
-5. **Audit source code independently of documentation claims.** Even perfectly documented code can contain bugs, security issues, or architectural problems. The audit phase is not merely a validation pass — it is an independent review.
+5. **Audit source code independently of documentation claims.** Even perfectly documented code can contain bugs, security issues, or architectural problems. The audit phase is not merely a validation pass - it is an independent review.
 
 6. **Preserve document identity during extraction.** When summarizing multiple documents, maintain clear attribution so that cross-document discrepancies can be identified and traced.
 
@@ -64,7 +64,7 @@ For each material claim made in the documentation:
 - Report the verification outcome: Confirmed, Discrepant, or Unverifiable.
 - For config files (package.json, tsconfig, build configs, etc.), validate dependency versions, settings, and tooling claims against documentation.
 
-Additionally, perform **gap identification** on provided source files: scan each file for bugs, missing imports, dead code, type errors, inconsistencies with the project's stated conventions, and incomplete implementations — independent of any documentation claims.
+Additionally, perform **gap identification** on provided source files: scan each file for bugs, missing imports, dead code, type errors, inconsistencies with the project's stated conventions, and incomplete implementations - independent of any documentation claims.
 
 Output: A claim-by-claim validation table plus a list of issues found in source code.
 
@@ -123,7 +123,7 @@ Before delivering the final report, perform these self-checks:
 
 1. **Evidence traceability**: Can every finding be traced to a specific piece of provided content? Remove or downgrade any finding that cannot.
 2. **Verification outcome accuracy**: For each "Confirmed" or "Discrepant" verdict, re-read the relevant source code and documentation side by side to ensure accuracy.
-3. **Severity calibration**: Are severity levels consistent? A finding marked "Critical" should represent a genuine security risk, crash path, or data loss scenario — not merely an inconvenience.
+3. **Severity calibration**: Are severity levels consistent? A finding marked "Critical" should represent a genuine security risk, crash path, or data loss scenario - not merely an inconvenience.
 4. **Completeness**: Did you address all provided documents? All provided source files? All stated audit dimensions?
 5. **No fabrication**: Did you avoid inventing issues, overstating evidence, or claiming certainty where the source material is ambiguous?
 6. **Absence handling**: Where source files needed for verification were not provided, did you clearly state "not verifiable from provided content" rather than assuming the documentation is correct or incorrect?
@@ -143,7 +143,7 @@ Before delivering the final report, perform these self-checks:
 - Findings that cannot be traced to specific evidence.
 - Recommendations that are vague or unactionable.
 - Commentary on the documentation files' writing quality or style (focus on factual accuracy).
-- Raw extraction dumps — all information should be processed, verified, and contextualized.
+- Raw extraction dumps - all information should be processed, verified, and contextualized.
 
 ---
 
@@ -162,8 +162,8 @@ Before delivering the final report, perform these self-checks:
 - Read source code in full before making claims about it. Never infer code behavior from file names or imports alone.
 - Distinguish between "the documentation says X, and the code confirms X" versus "the documentation says X, but the code is not available to verify."
 - Provide specific file paths, line references, code snippets, or config values as evidence.
-- Note when multiple documents agree on a claim — this strengthens confidence but does not replace source code verification.
-- Flag when a single document makes a unique claim not found in others — this may indicate either specialized knowledge or an error.
+- Note when multiple documents agree on a claim - this strengthens confidence but does not replace source code verification.
+- Flag when a single document makes a unique claim not found in others - this may indicate either specialized knowledge or an error.
 - Prioritize findings by real-world impact: what breaks, what is exploitable, what degrades user experience, what creates maintenance burden.
 # AI Agent Briefing: UbuntuOS Web
 
@@ -174,9 +174,9 @@ This document provides high-signal technical context for AI coding agents. It fo
 UbuntuOS Web is a comprehensive web-based replica of the Ubuntu Linux desktop environment. It is not a static mockup, but a fully interactive, single-page application (SPA) built on modern web technologies.
 - Product Type: Web application (Desktop Environment)
 - Core Functionality: A complete desktop environment with a custom window manager, a virtual file system (VFS), and 55 functional, interactive applications.
-- Key Features: 
+- Key Features:
 - Window Manager: Custom z-index stacking, drag-and-drop windows, minimize/maximize/restore functionality.
-- Desktop Environment: 
+- Desktop Environment:
 - Virtual File System (VFS): A robust file management layer with unique ID-based references, trash handling, and localStorage persistence for data.
 - Application Ecosystem: 55 pre-installed apps across 7 categories (System, Productivity, Internet, Media, Games, DevTools, Creative).
 🎯 WHY: The Purpose and Rationale
@@ -252,7 +252,7 @@ UbuntuOS Web is a complex, well-architected single-page application that cleverl
 > - **Guideline**: Any new app doing math must import and use `safeEval(expr: string): number`
 > - **What it does**: Validates input against `ALLOWED_CHARS` regex, tokenizes, converts to RPN via shunting-yard, evaluates RPN safely.
 > - **Allowed**: digits, `.`, `+`, `-`, `*`, `/`, `^`, `(`, `)`, whitespace
-> - **Bug fix of**: `Spreadsheet.tsx` and `Terminal.tsx` previously used `eval()` and `new Function()` — both removed.
+> - **Bug fix of**: `Spreadsheet.tsx` and `Terminal.tsx` previously used `eval()` and `new Function()` - both removed.
 
 ### XSS Sanitization (`sanitizeHtml.ts`)
 > **MANDATORY**: Any `dangerouslySetInnerHTML` must wrap content in `sanitizeHtml()` from `@/utils/sanitizeHtml`.
@@ -319,101 +319,101 @@ Run from the `app/` directory:
 ## 🚨 Troubleshooting & Gotchas
 
 ### Z-Index Overflow
-**Symptom**: Window focus becomes erratic after a very long session.  
-**Root Cause**: `nextZIndex` exceeded CSS max.  
+**Symptom**: Window focus becomes erratic after a very long session.
+**Root Cause**: `nextZIndex` exceeded CSS max.
 **Fix**: Bounds check `Math.min(nextZIndex + 1, 2147483647)` is now present in `OPEN_WINDOW`, `FOCUS_WINDOW`, and `END_ALT_TAB`. If you see this, confirm all three locations have the cap.
 
 ### Window State Restoration
-**Symptom**: After minimizing a window, the wrong window is focused.  
-**Root Cause**: `MINIMIZE_WINDOW` reducer was using a fragile `.reduce()` with `null` as the initial value.  
+**Symptom**: After minimizing a window, the wrong window is focused.
+**Root Cause**: `MINIMIZE_WINDOW` reducer was using a fragile `.reduce()` with `null` as the initial value.
 **Fix**: Already fixed with explicit `visibleWindows.length > 0 ? visibleWindows.reduce(...).id : null`. Do not revert to the old pattern.
 
 ### localStorage Corruption
-**Symptom**: App crashes on load, or desktop icons/files appear corrupted.  
-**Root Cause**: `localStorage` data was modified by the user or corrupted.  
+**Symptom**: App crashes on load, or desktop icons/files appear corrupted.
+**Root Cause**: `localStorage` data was modified by the user or corrupted.
 **Fix**: The app now validates all stored state with `zod` and falls back to defaults if validation fails. Check browser DevTools → Application → Local Storage to inspect the data.
 
-### NotImplemented — pattern for icons in fallback views
+### NotImplemented - pattern for icons in fallback views
 **Pattern**: `NotImplemented.tsx` lives at `src/components/NotImplemented.tsx` (not under `src/apps/`) and uses named Lucide imports (`HelpCircle`, `Hammer`) plus `<DynamicIcon />` for runtime icon resolution by string name.
 **Why named imports only**: A wildcard `import * as Icons from 'lucide-react'` reintroduces the ~587 KB bundle bloat the `DynamicIcon.tsx` refactor eliminated. Only `DynamicIcon.tsx` is authorised to use the wildcard form because it resolves icons by string at runtime; everything else (including `NotImplemented.tsx`) must use named imports. The ESLint config (`app/eslint.config.js`) enforces this.
 **Historical note**: An earlier version of `NotImplemented.tsx` referenced `Icons.HelpCircle` / `Icons.Hammer` without importing `lucide-react`, causing `ReferenceError: Icons is not defined` whenever an unbuilt app opened. That bug is fixed; this section is preserved as a pattern reference, not a troubleshooting entry.
 
 ### Math Evaluation Failures
-**Symptom**: Spreadsheet formulas or terminal `calc` always returns `#VALUE!` or "invalid expression".  
-**Root Cause**: `safeEval()` rejects any characters outside `0-9.+-*/^()` and whitespace.  
+**Symptom**: Spreadsheet formulas or terminal `calc` always returns `#VALUE!` or "invalid expression".
+**Root Cause**: `safeEval()` rejects any characters outside `0-9.+-*/^()` and whitespace.
 **Fix**: Check the formula for unsupported operators (e.g., `%`, `&`, `|`, `!`, function names like `sin()`). Only basic arithmetic and `^` (exponent) are supported.
 
 ### Build Failures from Unused Imports / Variables
-**Symptom**: `npm run build` fails with `error TS6133: 'X' is declared but its value is never read.`  
-**Root Cause**: `tsconfig.app.json` enforces `"noUnusedLocals": true` and `"noUnusedParameters": true`. Dead imports (especially from `lucide-react`), unused state variables, or unread function parameters trigger hard build errors.  
+**Symptom**: `npm run build` fails with `error TS6133: 'X' is declared but its value is never read.`
+**Root Cause**: `tsconfig.app.json` enforces `"noUnusedLocals": true` and `"noUnusedParameters": true`. Dead imports (especially from `lucide-react`), unused state variables, or unread function parameters trigger hard build errors.
 **Fix**: Remove the unused import/variable, or prefix with `_` if it's an intentionally ignored destructuring parameter (e.g., `const [, setX] = useState()`). Run `npx tsc -b --noEmit` before committing to catch these early.
 **Context**: 43 `TS6133` errors were fixed on 2026-06-02 across 16 files. Common culprits: unused Lucide icon imports, React hook imports (`useCallback`), state variables that were set but never read, and forEach/index callback parameters that shadowed outer scope variables.
 
 ### ReDoS (Catastrophic Backtracking) from User Regex
-**Symptom**: Browser tab freezes when using regex matching with certain patterns like `(a+)+$` against long strings.  
-**Root Cause**: `RegExp.prototype.exec()` can enter infinite loops with patterns that cause catastrophic backtracking.  
+**Symptom**: Browser tab freezes when using regex matching with certain patterns like `(a+)+$` against long strings.
+**Root Cause**: `RegExp.prototype.exec()` can enter infinite loops with patterns that cause catastrophic backtracking.
 **Fix**: RegexTester now limits `exec()` iterations to 1000 per execution. Any app that accepts user-supplied regex should implement similar limits. Use a counter in the `while ((m = regex.exec(str)) !== null)` loop and bail out early if it exceeds a safe threshold.
 **Context**: This was a critical finding in the 2026-06-02 audit. The `MAX_EXEC_ITERATIONS = 1000` constant prevents the browser tab from freezing entirely. The user sees partial matches (up to 1000) instead of a frozen tab.
 
 ### z-Index Overflow in CASCADE_WINDOWS
-**Symptom**: Window stacking order becomes erratic after cascading windows many times.  
-**Root Cause**: The `CASCADE_WINDOWS` action incremented `nextZIndex` in a loop without capping at the CSS max (`2147483647`).  
+**Symptom**: Window stacking order becomes erratic after cascading windows many times.
+**Root Cause**: The `CASCADE_WINDOWS` action incremented `nextZIndex` in a loop without capping at the CSS max (`2147483647`).
 **Fix**: Bounds check `Math.min(z++, MAX_Z)` and `Math.min(z, MAX_Z)` were added to the `CASCADE_WINDOWS` reducer case. If you implement a similar loop for z-index management, always cap the value.
 **Context**: This was a high-severity finding in the 2026-06-02 audit. The fix ensures z-index never exceeds the CSS maximum even when cascading 100+ windows.
 
 ### Unbounded Array Creation from User Input
-**Symptom**: Browser tab crashes when calculating large factorials (e.g., `factorial(1e8)`).  
-**Root Cause**: `Array.from({ length: Math.floor(v) })` creates an array of size `v` without a cap. For `v = 1e8`, this allocates ~400 MB and crashes the tab.  
+**Symptom**: Browser tab crashes when calculating large factorials (e.g., `factorial(1e8)`).
+**Root Cause**: `Array.from({ length: Math.floor(v) })` creates an array of size `v` without a cap. For `v = 1e8`, this allocates ~400 MB and crashes the tab.
 **Fix**: Calculator now caps factorial at 170 (JavaScript's `Number` type overflows to `Infinity` at factorial 171). Any function creating arrays from user input must cap the size before allocation.
 **Context**: JavaScript `Number.MAX_VALUE` is approximately `1.79e308`, and `170!` is the largest factorial that fits within this range. Beyond 170, the result is `Infinity` anyway, so capping is safe.
 
 ### Stale Closures in Keyboard Handlers
-**Symptom**: Calculator keyboard handler doesn't respond to key presses, or uses stale state values.  
-**Root Cause**: A `useEffect` dependency array that omits handler functions (`inputDigit`, `performOp`, etc.) captures the first render's versions, leading to stale closures after state changes.  
+**Symptom**: Calculator keyboard handler doesn't respond to key presses, or uses stale state values.
+**Root Cause**: A `useEffect` dependency array that omits handler functions (`inputDigit`, `performOp`, etc.) captures the first render's versions, leading to stale closures after state changes.
 **Fix**: Calculator keyboard handler's `useEffect` now includes all referenced handlers in its dependency array: `[inputDigit, inputDecimal, performOp, calculate, clear, backspace, percentage]`. Always include all referenced values in `useEffect` dependency arrays, or use refs for values that change frequently.
 **Context**: This was a subtle bug found during the 2026-06-02 audit. The handlers ARE recreated on every render, so including them in the dep array is correct (they won't cause infinite re-renders because they're stable).
 
 ### MINIMIZE_ALL Losing Window Positions
-**Symptom**: After using "Minimize All" (Super+D), restoring individual windows returns them to incorrect positions.  
-**Root Cause**: `MINIMIZE_ALL` reducer sets `state: 'minimized'` but does NOT capture `prevPosition` and `prevSize` (unlike `MINIMIZE_WINDOW` which does). Restoration falls back to current values instead of pre-minimize positions.  
+**Symptom**: After using "Minimize All" (Super+D), restoring individual windows returns them to incorrect positions.
+**Root Cause**: `MINIMIZE_ALL` reducer sets `state: 'minimized'` but does NOT capture `prevPosition` and `prevSize` (unlike `MINIMIZE_WINDOW` which does). Restoration falls back to current values instead of pre-minimize positions.
 **Fix**: `MINIMIZE_ALL` now captures `prevPosition: { ...w.position }` and `prevSize: { ...w.size }` before minimizing, matching the behavior of `MINIMIZE_WINDOW`.
 **Context**: This inconsistency created a UX regression where the restore behavior differed depending on whether windows were minimized individually or via "Minimize All".
 
 ### Apps Using Unvalidated `localStorage`
-**Symptom**: App crashes on load, shows corrupted data, or loads stale values after localStorage has been tampered with.  
-**Root Cause**: Some apps used `JSON.parse(localStorage.getItem(...))` without schema validation. Corrupted data or unexpected types would cause `TypeError`s or silent failures.  
+**Symptom**: App crashes on load, shows corrupted data, or loads stale values after localStorage has been tampered with.
+**Root Cause**: Some apps used `JSON.parse(localStorage.getItem(...))` without schema validation. Corrupted data or unexpected types would cause `TypeError`s or silent failures.
 **Fix**: All apps now use `safeJsonParse(raw, schema, fallback)` from `@/utils/safeJsonParse`, which validates with zod before returning data. `Todo.tsx` and `VoiceRecorder.tsx` were the last two apps fixed in the 2026-06-04 remediation. If adding a new feature, always use `safeJsonParse` with a zod schema.
-**Context**: This was a medium-severity finding (M1–M2) in the 2026-06-04 audit. The `safeJsonParse` utility provides zero-boilerplate validation: `safeJsonParse(localStorage.getItem('key'), MySchema, fallbackValue)`.
+**Context**: This was a medium-severity finding (M1-M2) in the 2026-06-04 audit. The `safeJsonParse` utility provides zero-boilerplate validation: `safeJsonParse(localStorage.getItem('key'), MySchema, fallbackValue)`.
 
 ### VFS `walkAndDelete` Duplication
-**Symptom**: `deleteNode` and `emptyTrash` in `useFileSystem.ts` both contained nearly identical inline `recurseDelete` closures, violating DRY and making maintenance harder.  
-**Root Cause**: Both functions needed recursive descendant deletion logic but duplicated it inline.  
+**Symptom**: `deleteNode` and `emptyTrash` in `useFileSystem.ts` both contained nearly identical inline `recurseDelete` closures, violating DRY and making maintenance harder.
+**Root Cause**: Both functions needed recursive descendant deletion logic but duplicated it inline.
 **Fix**: Extracted a module-level `walkAndDelete(nodes, nodeId)` helper that returns `string[]` of deleted IDs. Callers receive the IDs and clean up `trashMeta` independently. This preserves immutability (operates on a shallow-copied `nodes` object), eliminates ~30 lines of duplication, and is reusable across VFS operations.
 
 ### `new Blob([content]).size` Allocation Overhead
-**Symptom**: File creation and writes in the VFS allocate unnecessary `Blob` objects just to compute a string's byte length.  
-**Root Cause**: `createFile` and `writeFile` used `new Blob([content]).size` for size calculation.  
+**Symptom**: File creation and writes in the VFS allocate unnecessary `Blob` objects just to compute a string's byte length.
+**Root Cause**: `createFile` and `writeFile` used `new Blob([content]).size` for size calculation.
 **Fix**: Replaced with `new TextEncoder().encode(content).length`. `TextEncoder` is lighter, avoids Blob allocation, and produces the exact same UTF-8 byte count. Applied to both `createFile` and `writeFile` in `useFileSystem.ts`.
 
 ### Legacy localStorage Key Bloat After Migration
-**Symptom**: `localStorage` grows over time with stale keys, even after migration.  
-**Root Cause**: `storageValidation.ts` migrated data from `ubuntuos_filesystem` (legacy) to `ubuntuos_filesystem_v2` but left the old key in place.  
+**Symptom**: `localStorage` grows over time with stale keys, even after migration.
+**Root Cause**: `storageValidation.ts` migrated data from `ubuntuos_filesystem` (legacy) to `ubuntuos_filesystem_v2` but left the old key in place.
 **Fix**: `validateFileSystem` now calls `localStorage.removeItem(LEGACY_FILESYSTEM_KEY)` after successfully saving migrated data to the new key, keeping storage clean.
 
 ### Mid-File Import Statements
-**Symptom**: Build failures or confusing import chains when `import` statements appear in the middle of a file rather than at the top.  
-**Root Cause**: `useOSStore.tsx` had `import { validateDesktopIcons } from '@/utils/storageValidation'` between the `createInitialDockItems` and `loadDesktopIcons` helper functions, breaking TypeScript/React conventions.  
+**Symptom**: Build failures or confusing import chains when `import` statements appear in the middle of a file rather than at the top.
+**Root Cause**: `useOSStore.tsx` had `import { validateDesktopIcons } from '@/utils/storageValidation'` between the `createInitialDockItems` and `loadDesktopIcons` helper functions, breaking TypeScript/React conventions.
 **Fix**: Moved the import to the top of the file with all other top-level imports. Always keep all `import` statements at the top of the file.
 
 ### `authToken.ts` Production Guard
-**Symptom**: The development-only JWT token generator (`generateToken`) could be accidentally called in production, generating invalid or insecure tokens.  
-**Root Cause**: `authToken.ts` was intended for development and testing only but had no guard against production use.  
+**Symptom**: The development-only JWT token generator (`generateToken`) could be accidentally called in production, generating invalid or insecure tokens.
+**Root Cause**: `authToken.ts` was intended for development and testing only but had no guard against production use.
 **Fix**: Added an `if (!import.meta.env.DEV) throw new Error(...)` guard at the top of `generateToken`. Any attempt to use it in a production build throws immediately. For production, use a backend `/auth/token` endpoint instead.
 
 ### PasswordManager Hardcoded PIN (C-2)
-**Symptom**: The PasswordManager app used a hardcoded `MASTER_PIN = '1234'`, creating a critical security vulnerability.  
-**Root Cause**: A development placeholder was left in production code.  
-**Fix**: 
+**Symptom**: The PasswordManager app used a hardcoded `MASTER_PIN = '1234'`, creating a critical security vulnerability.
+**Root Cause**: A development placeholder was left in production code.
+**Fix**:
 - Removed `const MASTER_PIN = '1234'`.
 - Added `storedPin` state, persisted to `localStorage` under `password_manager_pin`, defaulting to `'1234'` for backward compatibility.
 - Added a "Change PIN" UI in the authenticated view to let users set their own PIN.
@@ -421,15 +421,41 @@ Run from the `app/` directory:
 - `checkPin` now compares against the user-stored PIN instead of a constant. Note: this is still demo-grade security; a production app must use proper encryption and backend validation.
 
 ### Terminal `windowId` Prop (H-1)
-**Symptom**: `Terminal.tsx` declared an optional `windowId` prop in its interface but never destructured or used it, making it a dead prop.  
-**Root Cause**: The prop was added contractually but never wired into the component logic.  
+**Symptom**: `Terminal.tsx` declared an optional `windowId` prop in its interface but never destructured or used it, making it a dead prop.
+**Root Cause**: The prop was added contractually but never wired into the component logic.
 **Fix**: Changed `(_props: TerminalProps)` to `({ windowId }: TerminalProps)`. The initial `lines` state now includes `windowId` in the welcome message when present, making the prop functional and enabling per-window identification.
 
 ### Missing ARIA on Icon-Only Buttons (H-2)
-**Symptom**: Screen readers cannot identify the purpose of buttons that contain only an icon (no visible text).  
-**Root Cause**: `Calculator.tsx` and `TextEditor.tsx` had multiple icon-only `<button>` elements without `aria-label`.  
+**Symptom**: Screen readers cannot identify the purpose of buttons that contain only an icon (no visible text).
+**Root Cause**: `Calculator.tsx` and `TextEditor.tsx` had multiple icon-only `<button>` elements without `aria-label`.
 **Fix**: Added `aria-label` to: Calculator's history toggle (`aria-label="Toggle history"`), backspace (`ariaLabel="Backspace"`), and delete (`ariaLabel="Delete"`); TextEditor's zoom out/in, close find, and close tab buttons. The `ariaLabel` prop flows through a reusable `Btn` component in Calculator. For subsequent apps, always add `aria-label` to any `<button>` that lacks visible text.
 **Context**: This was a high-severity accessibility finding. The fix was validated with 7 new source-level tests in `aria-attributes.test.ts`.
+
+### CSS Build Warning from Regex Pattern
+**Symptom**: Build output shows `▲ [WARNING] Expected identifier but found "-" [css-syntax-error]` with `  -: \|\s;`.
+**Root Cause**: Tailwind CSS content scanner misinterprets regex patterns containing character classes like `[-:\|\s]` as CSS class selectors. This occurs when files are included in the Tailwind `content` configuration.
+**Fix**: Exclude affected files from Tailwind scanning in `tailwind.config.mjs`:
+```javascript
+content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}', '!./src/apps/MarkdownPreview.tsx']
+```
+**Verification**: Run `npm run build` and verify no `css-syntax-error` warnings appear.
+**Context**: This was discovered during the 2026-06-04 audit. The MarkdownPreview.tsx file contains a regex pattern `[-:\|\s]` for matching markdown table separators, which Tailwind misinterprets as a CSS class selector.
+
+### Registry Completeness Mismatch
+**Symptom**: An app is routed in `AppRouter.tsx` but does not appear in the app launcher or desktop icons.
+**Root Cause**: The app was added to `AppRouter.tsx` but not registered in `registry.ts`. Without a registry entry, the app cannot be discovered by the UI.
+**Fix**: Add a registry entry in `src/apps/registry.ts` with the same `id` as the case statement in `AppRouter.tsx`. The registry completeness test (`src/apps/__tests__/registry-completeness.test.ts`) automatically verifies this.
+**Context**: This was discovered when `matrixrain` was routed but not registered, preventing it from appearing in the app launcher.
+
+### Invalid CSS Color Injection
+**Symptom**: Malicious color values could be injected via `dangerouslySetInnerHTML` in CSS context.
+**Root Cause**: The `chart.tsx` component generates CSS variables from `ChartConfig` color values without validation.
+**Fix**: Use `isValidColor()` from `@/utils/colorValidation` to validate color values before CSS injection:
+```typescript
+import { isValidColor } from '@/utils/colorValidation';
+return color && isValidColor(color) ? `--color-${key}: ${color};` : null;
+```
+**Context**: This was discovered during the 2026-06-04 audit. While current color values come from application config (not user input), validation provides defense-in-depth.
 
 ## 🔒 Security Reminders
 
@@ -450,6 +476,8 @@ Run from the `app/` directory:
 15. **Development-only utilities must have production guards**. `authToken.ts` previously lacked a guard against production use. Any development-only helper (JWT generators, mock data injectors, debug toggles) should throw or no-op in production builds.
 16. **Never ship hardcoded secrets or demo credentials in production code**. The PasswordManager's hardcoded `MASTER_PIN = '1234'` was a critical vulnerability. Even for demo apps, secrets must be user-configurable and persisted securely. Always add a visible security warning when encryption is absent.
 17. **Icon-only buttons must have accessible names**. Any `<button>` containing only an icon (no visible text) requires an `aria-label`. This is a WCAG requirement and a high-severity accessibility gap.
+18. **Validate CSS color values before injection**. Use `isValidColor()` from `@/utils/colorValidation` when injecting dynamic color values via `dangerouslySetInnerHTML` in CSS context.
+19. **Verify registry completeness when adding apps**. After adding a new app to `AppRouter.tsx`, ensure it has a corresponding entry in `registry.ts`. The registry completeness test will catch mismatches automatically.
 
 ## 📐 Performance Patterns
 
@@ -504,3 +532,6 @@ Run from the `app/` directory:
 - **Demo apps still need security hygiene**: The PasswordManager's hardcoded `MASTER_PIN = '1234'` was a critical vulnerability. Even for demo features, secrets must be user-configurable, persisted with schema validation, and accompanied by a visible security warning.
 - **Dead props create silent contract violations**: `Terminal.tsx` declared `windowId` in its interface but never destructured or used it. Always verify that declared props are actually consumed in the component body; otherwise, the prop contract is misleading.
 - **Source-level tests catch ARIA regressions**: When vitest infrastructure blocks component rendering, reading source files and asserting on attribute presence (e.g., `aria-label`, `role`, `tabIndex`) catches regressions without requiring full rendering. See `aria-attributes.test.ts` for the pattern.
+- **Tailwind content scanning can misinterpret regex patterns**: Character classes in regex patterns (e.g., `[-:\|\s]`) can be misinterpreted as CSS class selectors by Tailwind's content scanner. Exclude affected files from Tailwind scanning to prevent build warnings.
+- **Registry completeness tests prevent missing apps**: Always verify that apps routed in `AppRouter.tsx` have corresponding entries in `registry.ts`. The registry completeness test (`src/apps/__tests__/registry-completeness.test.ts`) automatically validates this.
+- **CSS color validation provides defense-in-depth**: Even when color values come from application config (not user input), validate them with `isValidColor()` from `@/utils/colorValidation` before CSS injection to prevent potential attacks.

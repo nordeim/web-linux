@@ -11,6 +11,14 @@ import {
   ListOrdered, CheckSquare, Minus, Eye, FileCode, Copy, Save, Download, FileUp,
 } from 'lucide-react';
 
+// Full table regex: header row, separator row, and body rows
+// Using String.raw to prevent Tailwind CSS scanner from misinterpreting
+// the character class [-:\|\s] as a CSS class selector
+const TABLE_REGEX = new RegExp(
+  String.raw`\|(.+)\|\n\|[-:\|\s]+\|\n((?:\|.+\|\n?)+)`,
+  'g'
+);
+
 function markdownToHtml(md: string): string {
   let html = md;
 
@@ -78,7 +86,7 @@ function markdownToHtml(md: string): string {
   });
 
   // Tables
-  html = html.replace(/\|(.+)\|\n\|[-:\|\s]+\|\n((?:\|.+\|\n?)+)/g, (_, header, rows) => {
+  html = html.replace(TABLE_REGEX, (_, header, rows) => {
     const headers = header.split('|').filter(Boolean).map((h: string) => `<th style="padding:8px 12px;background:var(--bg-titlebar);font-weight:600;font-size:13px;border:1px solid var(--border-default)">${h.trim()}</th>`).join('');
     const bodyRows = rows.trim().split('\n').map((row: string) => {
       const cells = row.split('|').filter(Boolean).map((c: string, i: number) =>

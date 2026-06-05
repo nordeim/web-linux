@@ -57,4 +57,17 @@ describe('Registry Completeness', () => {
     const uniqueIds = [...new Set(appIds)];
     expect(appIds.length).toBe(uniqueIds.length);
   });
+
+  it('should have the correct total number of apps', () => {
+    const registrySource = readSource('../registry.ts');
+
+    const idRegex = /id: '([^']+)'/g;
+    const appIds: string[] = [];
+    let match;
+    while ((match = idRegex.exec(registrySource)) !== null) {
+      appIds.push(match[1]);
+    }
+
+    expect(appIds.length).toBe(56);
+  });
 });

@@ -8,7 +8,7 @@
 [![Tailwind CSS 3.4](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A comprehensive, high-fidelity web-based replica of the Ubuntu Linux desktop environment. This project delivers a fully interactive experience in the browser, featuring a window manager, virtual file system, and 55 functional applications (including a real terminal).
+A comprehensive, high-fidelity web-based replica of the Ubuntu Linux desktop environment. This project delivers a fully interactive experience in the browser, featuring a window manager, virtual file system, and 56 functional applications (including a real terminal).
 
 ## 🌟 Overview
 
@@ -30,7 +30,7 @@ Built for developers as a showcase of architectural patterns and for users as a 
 
 ### Codebase Audit Remediation (2026-06-04)
 - **Registered matrixrain app in registry.ts**: The Matrix Rain app was routed in `AppRouter.tsx` but not registered in `registry.ts`, preventing it from appearing in the app launcher. Added proper registry entry with metadata.
-- **Fixed GEMINI.md app count inconsistency**: Corrected internal inconsistency where line 7 said "55 applications" but line 22 said "54 applications". Now consistently states 55.
+- **Fixed GEMINI.md app count inconsistency**: Corrected internal inconsistency where line 7 said "55 applications" but line 22 said "54 applications". Now consistently states 56.
 - **Updated osReducer line count in documentation**: Changed from "approximately 350 lines" to "approximately 375 lines" across all documentation files to match actual reducer function size.
 - **Added color validation utility**: Created `src/utils/colorValidation.ts` to validate CSS color strings before injection, preventing potential CSS injection attacks. Integrated into `chart.tsx` to validate color values from `ChartConfig`.
 - **Added registry completeness test**: Created `src/apps/__tests__/registry-completeness.test.ts` to automatically verify that all apps routed in `AppRouter.tsx` have corresponding entries in `registry.ts`.
@@ -83,7 +83,7 @@ Key fixes from the comprehensive kimi-3 audit, conducted after the real terminal
 - **Eliminated remaining raw JSON.parse in Todo.tsx and VoiceRecorder.tsx**: Both apps previously used unvalidated `JSON.parse()` for localStorage reads. Now use `safeJsonParse(raw, schema, fallback)` with zod schemas, aligning with the project's security policy and preventing data corruption crashes.
 - **Fixed windowId prop handling**: `Terminal.tsx` now accepts an optional `windowId` prop, and `AppRouter.tsx` passes `windowId` to `<Terminal />` for `real-terminal`. Enables future real terminal coexistence and per-window cleanup.
 - **Removed unused `jose` dependency**: The `jose` JWT library was installed for a planned real terminal feature but was unused. Removed to reduce bundle size and attack surface.
-- **Updated documentation counts**: App count corrected from 54 to 55 (real-terminal added). Test count updated to 81 tests across 13 test files.
+- **Updated documentation counts**: App count corrected from 54 to 56 (real-terminal added, later expanded to 56 total apps). Test count updated to 112 tests across 18 test files.
 
 ### dpsk-2 Phase 3: VFS Refactor, Security Hardening & Accessibility (2026-06-04)
 - **Extracted `walkAndDelete` VFS helper**: Removed duplicated inline `recurseDelete` closures in `deleteNode` and `emptyTrash` within `useFileSystem.ts`. Replaced with a single module-level `walkAndDelete(nodes, nodeId)` function that returns deleted IDs, eliminating ~30 lines of duplication while preserving immutability and trash cleanup behavior.
@@ -185,7 +185,7 @@ After running `npm run dev`, open your browser at the provided port (usually `ht
 | :--- | :--- |
 | `npm run build` | Type-check and production build |
 | `npm run lint` | Run ESLint static analysis |
-| `npm run test` | Run Vitest unit test suite (110 tests, 17 test files) |
+| `npm run test` | Run Vitest unit test suite (112 tests, 18 test files) |
 | `npm run preview` | Local preview of the production build |
 | `tsc -b` | Project-wide type checking |
 
@@ -214,7 +214,7 @@ After running `npm run dev`, open your browser at the provided port (usually `ht
 4. **CI/CD Pipeline**: Automated build + lint + test gates are not yet implemented.
 5. **Unused Local / Import Hygiene**: The `tsconfig.app.json` enforces `"noUnusedLocals": true` and `"noUnusedParameters": true`. Prior build broke with 43 `TS6133` errors across 16 files. Keep imports lean and remove dead code promptly to prevent build regressions.
 6. **ReDoS from User-Crafted Regex**: RegexTester now limits iterations, but apps accepting user regex (e.g., Notes search, Email filters) should also guard against catastrophic backtracking.
-7. **Simulated vs Real Recordings**: ScreenRecorder and VoiceRecorder create placeholder text downloads. Production builds should implement actual `MediaRecorder` API recording or clearly mark as simulated.
+7. **Simulated vs Real Recordings**: VoiceRecorder now records real audio via `getUserMedia` + `MediaRecorder` and provides downloadable `.webm` files. ScreenRecorder still creates a placeholder text download — production builds should implement actual screen capture or clearly mark as simulated.
 8. **Vitest @/ Alias Resolution**: Component tests using `@/` aliases fail in vitest due to module resolution issues. Currently, only utility tests (relative imports) pass consistently. Source-level tests (reading file source strings) are used as a workaround for component validation.
 
 ## 📜 License

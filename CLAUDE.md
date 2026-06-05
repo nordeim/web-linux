@@ -1,6 +1,6 @@
 # UbuntuOS Web
 
-Web-based Linux desktop environment (Ubuntu-style) built with React 19, TypeScript, and Tailwind CSS. Features 55 interactive applications and a virtual file system with localStorage persistence.
+Web-based Linux desktop environment (Ubuntu-style) built with React 19, TypeScript, and Tailwind CSS. Features 56 interactive applications and a virtual file system with localStorage persistence.
 
 ## Foundational Principles
 
@@ -29,7 +29,7 @@ Follow this six-phase workflow for all implementation tasks:
 - **Responsive Design**: Ensure apps handle window resizing correctly.
 
 ### Security
-- **`eval()` / `new Function()``: **FORBIDDEN**. Any math evaluation must use `safeEval()` from `@/utils/safeEval`. This includes spreadsheet formulas, terminal `calc` commands, and any future math features.
+- **`eval()` / `new Function()``: **FORBIDDEN**. Any math evaluation of free-form expression strings must use `safeEval()` from `@/utils/safeEval`. This includes spreadsheet formulas, terminal `calc` commands, and any future app that parses user-supplied arithmetic strings. Fixed calculator-style apps (e.g., Calculator with per-button input) are not required to use `safeEval()` because they dispatch to a fixed set of operator handlers and never evaluate raw user strings.
 - **`dangerouslySetInnerHTML`: **AVOID WHENEVER POSSIBLE**. Prefer React components over `dangerouslySetInnerHTML` for highlighting, match rendering, or any dynamic content. If unavoidable, always wrap user-generated HTML with `sanitizeHtml()` from `@/utils/sanitizeHtml`.
   - **Regex highlighting**: Use `<mark>` React components instead of concatenated HTML strings (as demonstrated in the RegexTester refactor).
   - Markdown: Use `sanitizeMarkdownHtml()` which has a whitelist for common markdown tags.
@@ -88,7 +88,7 @@ Follow this six-phase workflow for all implementation tasks:
 - **Verification**: Run `npm run build` and check for `css-syntax-error` warnings.
 
 ### Code Splitting
-- **React.lazy() + Suspense** reduced initial bundle from ~1 MB to ~360 KB by splitting 55 apps into individual chunks.
+- **React.lazy() + Suspense** reduced initial bundle from ~1 MB to ~360 KB by splitting 56 apps into individual chunks.
 - **Shared DynamicIcon** eliminates ~8× code duplication across Dock, WindowFrame, Desktop, AppLauncher, and other components.
 - **Lucide monolithic import** (`import * as Icons from 'lucide-react'`) still imports the entire library (~587 KB). Use named imports when possible.
 - **`TextEncoder` beats `Blob` for byte counting**. `new TextEncoder().encode(content).length` gives identical UTF-8 byte counts without allocating a `Blob` object. Applied to `createFile` and `writeFile` in `useFileSystem.ts`.
@@ -133,25 +133,25 @@ Follow this six-phase workflow for all implementation tasks:
 
 1. **Migrate VFS from localStorage to IndexedDB** for larger file storage (>5 MB).
 2. **Validate CSS color values before injection**: The `chart.tsx` component now uses `isValidColor()` from `@/utils/colorValidation` to validate color values before CSS injection. Always use this utility when injecting dynamic color values.
-2. **Add `vitest` coverage collection** to track test coverage across all modules.
-3. **Implement CI/CD pipeline** with automated `build`, `lint`, and `test` gates.
-4. **Split `osReducer` into domain-specific reducers** (window management, notifications, desktop icons, etc.).
-5. **Fix vitest `@/` alias resolution** to enable component-level rendering tests. Currently blocked by module resolution; only utility tests (relative imports) and source-level tests pass.
-6. **Enforce import hygiene during code review**: The `noUnusedLocals`/`noUnusedParameters` TypeScript checks catch dead code at build time, but IDE auto-imports can silently add unused imports. Add a pre-commit hook or lint rule to block commits with unused identifiers.
-7. **Replace all remaining `dangerouslySetInnerHTML` usage**: After RegexTester was refactored to use React components, audit all remaining `dangerouslySetInnerHTML` usage and replace with React component rendering where possible.
-8. **Add ReDoS guards to all regex-accepting apps**: TextEditor find bar (now fixed with `countMatchesSafely()`), RegexTester (already has `MAX_EXEC_ITERATIONS = 1000`). Notes search and Email filters use `String.includes()` and are not vulnerable. Audit any app with `new RegExp(userInput)` for missing guards.
-9. **Implement actual MediaRecorder for recorder apps**: ScreenRecorder and VoiceRecorder currently create placeholder text downloads. Production builds should implement the actual `MediaRecorder` API or clearly mark simulated behavior.
-10. **Validate chart color values before CSS injection**: The `chart.tsx` component generates CSS variables from `ChartConfig` color values. While currently from hardcoded config, add hex/rgb/hsl validation if colors ever come from user input.
-11. **Add ESLint rule to block wildcard lucide imports**: Prevent `import * as Icons from 'lucide-react'` everywhere except `DynamicIcon.tsx`. This enforces the named import convention at lint time.
-12. **Add test coverage for MINIMIZE_ALL**: Verify that `prevPosition` and `prevSize` are correctly saved and restored after "Minimize All" action.
-13. **Audit all z-index increment sites**: After finding `END_ALT_TAB` was missing the z-index cap (patched in `OPEN_WINDOW` and `FOCUS_WINDOW` but not here), audit every reducer case that increments z-index to ensure `Math.min(nextZIndex + 1, 2147483647)` is applied consistently.
-14. **Remove unused dependencies immediately**: Dependencies should only be added when actively needed. Regularly audit `package.json` for unused packages and remove them to reduce bundle size and attack surface.
-15. **Propagate windowId through component hierarchy**: When a component needs per-window identity (for cleanup, focus, or container mapping), always pass `windowId` explicitly rather than relying on global state or re-registering inside children.
-16. **Container lifecycle as first-class concern**: Any feature that spawns external resources (Docker containers, PTY processes, file handles) must have explicit, tested teardown paths. Resources orphaned by disconnects, crashes, or unmounts become production incidents.
-16. **Docker container lifecycle must be explicit**: Every `spawn` needs a matching `stop` + `remove`. Always pair resource creation with teardown, even in WebSocket disconnect handlers, to prevent orphaned containers.
-17. **Backend URLs must be configurable**: Hardcoding `ws://localhost:3001` in frontend code will break in any non-localhost deployment. Centralise in a dedicated module with `import.meta.env` fallbacks.
-18. **Never rely on tiny dimensions for reflow**: Using `height: '0.001em'` to "force reflow" just breaks rendering. Use `height: '100%'` or flex-grow instead.
-19. **Reconnect delays need exponential backoff**: A fixed reconnect delay hammers a struggling server. Doubling the delay (capped) is the correct pattern for WebSocket reconnection resilience.
+3. **Add `vitest` coverage collection** to track test coverage across all modules.
+4. **Implement CI/CD pipeline** with automated `build`, `lint`, and `test` gates.
+5. **Split `osReducer` into domain-specific reducers** (window management, notifications, desktop icons, etc.).
+6. **Fix vitest `@/` alias resolution** to enable component-level rendering tests. Currently blocked by module resolution; only utility tests (relative imports) and source-level tests pass.
+7. **Enforce import hygiene during code review**: The `noUnusedLocals`/`noUnusedParameters` TypeScript checks catch dead code at build time, but IDE auto-imports can silently add unused imports. Add a pre-commit hook or lint rule to block commits with unused identifiers.
+8. **Replace all remaining `dangerouslySetInnerHTML` usage**: After RegexTester was refactored to use React components, audit all remaining `dangerouslySetInnerHTML` usage and replace with React component rendering where possible.
+9. **Add ReDoS guards to all regex-accepting apps**: TextEditor find bar (now fixed with `countMatchesSafely()`), RegexTester (already has `MAX_EXEC_ITERATIONS = 1000`). Notes search and Email filters use `String.includes()` and are not vulnerable. Audit any app with `new RegExp(userInput)` for missing guards.
+10. **Implement actual MediaRecorder for ScreenRecorder**: VoiceRecorder now records real audio via `getUserMedia` + `MediaRecorder` and provides downloadable `.webm` files. ScreenRecorder still creates a placeholder text download — production builds should implement actual screen capture or clearly mark as simulated.
+11. **Validate chart color values before CSS injection**: The `chart.tsx` component generates CSS variables from `ChartConfig` color values. While currently from hardcoded config, add hex/rgb/hsl validation if colors ever come from user input.
+12. **Add ESLint rule to block wildcard lucide imports**: Prevent `import * as Icons from 'lucide-react'` everywhere except `DynamicIcon.tsx`. This enforces the named import convention at lint time.
+13. **Add test coverage for MINIMIZE_ALL**: Verify that `prevPosition` and `prevSize` are correctly saved and restored after "Minimize All" action.
+14. **Audit all z-index increment sites**: After finding `END_ALT_TAB` was missing the z-index cap (patched in `OPEN_WINDOW` and `FOCUS_WINDOW` but not here), audit every reducer case that increments z-index to ensure `Math.min(nextZIndex + 1, 2147483647)` is applied consistently.
+15. **Remove unused dependencies immediately**: Dependencies should only be added when actively needed. Regularly audit `package.json` for unused packages and remove them to reduce bundle size and attack surface.
+16. **Propagate windowId through component hierarchy**: When a component needs per-window identity (for cleanup, focus, or container mapping), always pass `windowId` explicitly rather than relying on global state or re-registering inside children.
+17. **Container lifecycle as first-class concern**: Any feature that spawns external resources (Docker containers, PTY processes, file handles) must have explicit, tested teardown paths. Resources orphaned by disconnects, crashes, or unmounts become production incidents.
+18. **Docker container lifecycle must be explicit**: Every `spawn` needs a matching `stop` + `remove`. Always pair resource creation with teardown, even in WebSocket disconnect handlers, to prevent orphaned containers.
+19. **Backend URLs must be configurable**: Hardcoding `ws://localhost:3001` in frontend code will break in any non-localhost deployment. Centralise in a dedicated module with `import.meta.env` fallbacks.
+20. **Never rely on tiny dimensions for reflow**: Using `height: '0.001em'` to "force reflow" just breaks rendering. Use `height: '100%'` or flex-grow instead.
+21. **Reconnect delays need exponential backoff**: A fixed reconnect delay hammers a struggling server. Doubling the delay (capped) is the correct pattern for WebSocket reconnection resilience.
 
 - **VFS traversal helpers (`walkAndDelete`, `recurseMoveNode`) should live in `src/utils/vfsHelpers.ts`**. Keeping them as reusable, independently testable functions prevents code duplication and makes the VFS logic easier to reason about.
 - **`manualChunks` for `lucide-react` undermines per-app bundle splitting**. Forcing a monolithic `lucide` chunk made every page load pay the full ~587 KB cost, which is the exact opposite of the named-import optimization. Removing the `manualChunks` block lets Vite's default strategy do its job.
@@ -182,7 +182,7 @@ A real bash terminal has been integrated into UbuntuOS Web via `node-pty` + Dock
 
 **Validation:**
 - TypeScript: 0 errors (`tsc -b --noEmit`)
-- Vitest: 103 passing tests frontend + 15 backend tests (5 pre-existing test files fail due to `@/` alias issues, unrelated to this feature)
+- Vitest: 112 passing tests frontend + 15 backend tests (component tests using `@/` aliases work when run from the `app/` directory)
 - Vite build: successful, `RealTerminal` chunk generated (296 KB gzipped for xterm.js)
 
 **Files:**

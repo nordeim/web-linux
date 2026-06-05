@@ -1,270 +1,214 @@
-$ git diff app/src/apps/PasswordManager.tsx
-diff --git a/app/src/apps/PasswordManager.tsx b/app/src/apps/PasswordManager.tsx
-index e2eaca2..d5b89ba 100644
---- a/app/src/apps/PasswordManager.tsx
-+++ b/app/src/apps/PasswordManager.tsx
-@@ -5,6 +5,7 @@ import {
+$ git diff app/src/apps/VoiceRecorder.tsx
+diff --git a/app/src/apps/VoiceRecorder.tsx b/app/src/apps/VoiceRecorder.tsx
+index 2fa0995..d71eb2f 100644
+--- a/app/src/apps/VoiceRecorder.tsx
++++ b/app/src/apps/VoiceRecorder.tsx
+@@ -1,10 +1,10 @@
+ // ============================================================
+-// Voice Recorder — Record, playback, waveform visualization
++// Voice Recorder — Record, playback, waveform visualization & download
+ // ============================================================
+ 
+ import { useState, useRef, useEffect, memo } from 'react';
+ import {
+-  Mic, Play, Pause, Square, Trash2
++  Mic, Play, Pause, Square, Trash2, Download
  } from 'lucide-react';
  import { z } from 'zod';
  import { safeJsonParse } from '@/utils/safeJsonParse';
-+import { safeStoredPin, savePin } from '@/utils/pinStorage';
+@@ -16,6 +16,7 @@ const RecordingSchema = z.object({
+   duration: z.number(),
+   date: z.number(),
+   waveformData: z.array(z.number()),
++  blobUrl: z.string().optional(),
+ });
  
- const PasswordEntrySchema = z.object({
-   id: z.string(),
-@@ -52,7 +53,7 @@ export default function PasswordManager() {
-   const [authenticated, setAuthenticated] = useState(false);
-   const [pin, setPin] = useState('');
-   const [pinError, setPinError] = useState(false);
--  const [storedPin, setStoredPin] = useState(() => localStorage.getItem('password_manager_pin') ?? '1234');
-+  const [storedPin, setStoredPin] = useState(() => safeStoredPin());
-   const [showChangePin, setShowChangePin] = useState(false);
-   const [newPinValue, setNewPinValue] = useState('');
-   const [entries, setEntries] = useState<PasswordEntry[]>(loadEntries);
-@@ -78,9 +79,8 @@ export default function PasswordManager() {
-   };
- 
-   const handleChangePin = () => {
--    if (newPinValue.length >= 4) {
-+    if (savePin(newPinValue)) {
-       setStoredPin(newPinValue);
--      localStorage.setItem('password_manager_pin', newPinValue);
-       setShowChangePin(false);
-       setNewPinValue('');
-     }
-@@ -142,7 +142,7 @@ export default function PasswordManager() {
-       <div className="flex items-center gap-2 px-3 py-2 border-b" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-panel)' }}>
-         <Shield size={16} style={{ color: 'var(--accent-primary)' }} />
-         <span className="text-sm font-medium flex-1" style={{ color: 'var(--text-primary)' }}>Passwords</span>
--        <button onClick={() => setAuthenticated(false)} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><Lock size={12} /></button>
-+        <button onClick={() => setAuthenticated(false)} aria-label="Lock" className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><Lock size={12} /></button>
-         <button onClick={() => { setShowChangePin(true); setNewPinValue(''); }} className="px-2 py-1 rounded-md text-xs" style={{ background: 'var(--bg-hover)', color: 'var(--text-secondary)' }}>Change PIN</button>
-         <button onClick={() => { resetForm(); setShowForm(true); }} className="flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs" style={{ background: 'var(--accent-primary)', color: '#fff' }}><Plus size={12} /> Add</button>
-       </div>
-@@ -167,13 +167,13 @@ export default function PasswordManager() {
-         <div className="p-3 border-b" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-panel)' }}>
-           <div className="flex items-center justify-between mb-2">
-             <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{editingId ? 'Edit' : 'New'} Entry</span>
--            <button onClick={() => { setShowForm(false); resetForm(); }} className="p-1 rounded"><X size={14} style={{ color: 'var(--text-secondary)' }} /></button>
-+            <button onClick={() => { setShowForm(false); resetForm(); }} aria-label="Close form" className="p-1 rounded"><X size={14} style={{ color: 'var(--text-secondary)' }} /></button>
-           </div>
-           <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Title / Service name" className="w-full px-2 py-1 rounded-md text-xs outline-none mb-1.5" style={{ background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }} />
-           <input value={username} onChange={e => setUsername(e.target.value)} placeholder="Username / Email" className="w-full px-2 py-1 rounded-md text-xs outline-none mb-1.5" style={{ background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }} />
-           <div className="flex gap-1.5 mb-1.5">
-             <input value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" className="flex-1 px-2 py-1 rounded-md text-xs outline-none" style={{ background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }} />
--            <button onClick={() => setShowGen(!showGen)} className="px-2 py-1 rounded-md" style={{ background: 'var(--bg-hover)', color: 'var(--accent-secondary)' }}><KeyRound size={12} /></button>
-+            <button onClick={() => setShowGen(!showGen)} aria-label="Generate password" className="px-2 py-1 rounded-md" style={{ background: 'var(--bg-hover)', color: 'var(--accent-secondary)' }}><KeyRound size={12} /></button>
-           </div>
-           {showGen && (
-             <div className="p-2 rounded-md mb-1.5" style={{ background: 'var(--bg-window)' }}>
-@@ -211,9 +211,9 @@ export default function PasswordManager() {
-                       {e.url && <span className="text-xs truncate max-w-[120px]" style={{ color: 'var(--text-disabled)' }}>{e.url}</span>}
-                     </div>
-                     <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
--                      <button onClick={() => startEdit(e)} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><Edit2 size={11} /></button>
--                      <button onClick={() => copyToClipboard(e.password)} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><Copy size={11} /></button>
--                      <button onClick={() => setEntries(prev => prev.filter(x => x.id !== e.id))} className="p-1 rounded" style={{ color: 'var(--accent-error)' }}><Trash2 size={11} /></button>
-+                      <button onClick={() => startEdit(e)} aria-label={`Edit ${e.title}`} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><Edit2 size={11} /></button>
-+                      <button onClick={() => copyToClipboard(e.password)} aria-label="Copy password" className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><Copy size={11} /></button>
-+                      <button onClick={() => setEntries(prev => prev.filter(x => x.id !== e.id))} aria-label={`Delete ${e.title}`} className="p-1 rounded" style={{ color: 'var(--accent-error)' }}><Trash2 size={11} /></button>
-                     </div>
-                   </div>
-                   <div className="flex items-center gap-1.5 mb-1">
-@@ -223,10 +223,10 @@ export default function PasswordManager() {
-                     <div className="flex-1 flex items-center gap-1 px-2 py-1 rounded text-xs font-mono" style={{ background: 'var(--bg-window)', color: 'var(--text-primary)' }}>
-                       {isVisible ? e.password : '•'.repeat(Math.min(e.password.length, 20))}
-                     </div>
--                    <button onClick={() => toggleVisibility(e.id)} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}>
-+                    <button onClick={() => toggleVisibility(e.id)} aria-label={isVisible ? "Hide password" : "Show password"} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}>
-                       {isVisible ? <EyeOff size={12} /> : <Eye size={12} />}
-                     </button>
--                    <button onClick={() => copyToClipboard(e.password)} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><Copy size={12} /></button>
-+                    <button onClick={() => copyToClipboard(e.password)} aria-label="Copy password" className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><Copy size={12} /></button>
-                   </div>
-                 </div>
-               );
-(venv) pete@pop-os:/home/project/web-linux
-$ git diff app/src/hooks/useAuthToken.tsx
-diff --git a/app/src/hooks/useAuthToken.tsx b/app/src/hooks/useAuthToken.tsx
-index 6fd4de0..39943b9 100644
---- a/app/src/hooks/useAuthToken.tsx
-+++ b/app/src/hooks/useAuthToken.tsx
-@@ -3,7 +3,7 @@
- 
- import { useCallback } from 'react';
- import { useOS } from '@/hooks/useOSStore';
--import { generateToken as _generateToken, setToken as _setToken, clearToken as _clearToken } from '@/utils/authToken';
-+import { generateToken as _generateToken, clearToken as _clearToken } from '@/utils/authToken';
- 
- export function useAuthToken() {
-   const { state, dispatch } = useOS();
-(venv) pete@pop-os:/home/project/web-linux
-$ git diff app/src/hooks/useFileSystem.ts
-diff --git a/app/src/hooks/useFileSystem.ts b/app/src/hooks/useFileSystem.ts
-index aa89597..2c26f70 100644
---- a/app/src/hooks/useFileSystem.ts
-+++ b/app/src/hooks/useFileSystem.ts
-@@ -5,6 +5,7 @@
- import { useState, useCallback, useEffect } from 'react';
- import type { FileSystemNode, FileSystemState, FileAssociation } from '@/types';
- import { validateFileSystem, saveFileSystem } from '@/utils/storageValidation';
-+import { walkAndDelete, recurseMoveNode } from '@/utils/vfsHelpers';
- 
- const generateId = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
- 
-@@ -97,21 +98,6 @@ function saveFS(state: FileSystemState) {
-   } catch { /* ignore */ }
+ // ---- Types ----
+@@ -25,6 +26,7 @@ interface Recording {
+   duration: number;
+   date: number;
+   waveformData: number[];
++  blobUrl?: string;
  }
  
--// Traversal helper: deletes a node and all descendants, returns deleted IDs
--function walkAndDelete(nodes: Record<string, FileSystemNode>, nodeId: string): string[] {
--  const deleted: string[] = [];
--  const node = nodes[nodeId];
--  if (!node) return deleted;
--  if (node.type === 'folder') {
--    Object.values(nodes)
--      .filter((n) => n.parentId === nodeId)
--      .forEach((n) => deleted.push(...walkAndDelete(nodes, n.id)));
--  }
--  delete nodes[nodeId];
--  deleted.push(nodeId);
--  return deleted;
--}
--
- // ---- Hook ----
- export function useFileSystem() {
-   const [fs, setFs] = useState<FileSystemState>(loadFS);
-@@ -209,20 +195,9 @@ export function useFileSystem() {
- 
-       trashMeta[id] = { originalPath, deletedAt: Date.now() };
- 
--      const recurseMove = (nodeId: string, newParentId: string) => {
--        const node = nodes[nodeId];
--        if (!node) return;
--        nodes[nodeId] = { ...node, parentId: newParentId, modifiedAt: Date.now() };
--        if (node.type === 'folder') {
--          Object.values(nodes)
--            .filter((n) => n.parentId === nodeId)
--            .forEach((n) => recurseMove(n.id, nodeId));
--        }
--      };
--
-       const trashFilesId = Object.values(nodes).find((n) => n.name === 'files' && n.parentId && nodes[n.parentId]?.name === '.trash')?.id;
-       if (trashFilesId) {
--        recurseMove(id, trashFilesId);
-+        recurseMoveNode(nodes, id, trashFilesId);
-       }
- 
-       return { nodes, trashMetadata: trashMeta };
-(venv) pete@pop-os:/home/project/web-linux
-$ git diff app/src/hooks/useOSStore.tsx
-diff --git a/app/src/hooks/useOSStore.tsx b/app/src/hooks/useOSStore.tsx
-index 408ab69..8211d6f 100644
---- a/app/src/hooks/useOSStore.tsx
-+++ b/app/src/hooks/useOSStore.tsx
-@@ -479,8 +479,12 @@ export const OSProvider: React.FC<{ children: React.ReactNode }> = ({ children }
- 
-   // Sync desktop icons to localStorage whenever the icon state changes.
-   // Moved out of the reducer to preserve reducer purity.
-+  // Debounced to avoid rapid writes during drag operations (L-1).
+ type RecorderState = 'idle' | 'recording' | 'paused' | 'playing';
+@@ -36,7 +38,6 @@ const WaveformVisualizer = memo(function WaveformVisualizer({ isActive, isPlayin
    useEffect(() => {
--    localStorage.setItem('ubuntuos_desktop_icons', JSON.stringify(state.desktopIcons));
-+    const timeoutId = setTimeout(() => {
-+      localStorage.setItem('ubuntuos_desktop_icons', JSON.stringify(state.desktopIcons));
-+    }, 300);
-+    return () => clearTimeout(timeoutId);
-   }, [state.desktopIcons]);
+     if (!isActive) {
+       if (waveformData && isPlaying) {
+-        // Replay the recorded waveform
+         setBars(waveformData);
+       } else {
+         setBars(Array(40).fill(4));
+@@ -110,6 +111,8 @@ const formatTime = (seconds: number): string => {
  
-   return (
-(venv) pete@pop-os:/home/project/web-linux
-$ git diff app/src/utils/safeJsonParse.ts
-diff --git a/app/src/utils/safeJsonParse.ts b/app/src/utils/safeJsonParse.ts
-index f221ce1..ba9e950 100644
---- a/app/src/utils/safeJsonParse.ts
-+++ b/app/src/utils/safeJsonParse.ts
-@@ -20,7 +20,6 @@ export function safeJsonParse<T>(
-     const parsed = JSON.parse(raw);
-     const result = schema.safeParse(parsed);
-     if (result.success) return result.data;
--    // eslint-disable-next-line no-console
-     console.warn('safeJsonParse: validation failed', result.error.format());
-     return fallback;
-   } catch {
-(venv) pete@pop-os:/home/project/web-linux
-$ git diff app/vite.config.ts
-diff --git a/app/vite.config.ts b/app/vite.config.ts
-index 241283c..282aac9 100644
---- a/app/vite.config.ts
-+++ b/app/vite.config.ts
-@@ -3,9 +3,9 @@ import react from "@vitejs/plugin-react"
- import { defineConfig } from "vitest/config"
- import { inspectAttr } from 'plugin-inspect-react-code'
+ const generateWaveform = () => Array.from({ length: 40 }, () => Math.random() * 60 + 8);
  
--export default defineConfig({
-+export default defineConfig(({ mode }) => ({
-   base: './',
--  plugins: [inspectAttr(), react()],
-+  plugins: mode === 'production' ? [react()] : [inspectAttr(), react()],
-   server: {
-     port: 3000,
-     proxy: {
-@@ -22,18 +22,10 @@ export default defineConfig({
-   },
-   build: {
-     sourcemap: true,
--    rollupOptions: {
--      output: {
--        manualChunks: {
--          react: ['react', 'react-dom'],
--          lucide: ['lucide-react'],
--        },
--      },
--    },
-   },
-   test: {
-     globals: true,
-     environment: 'jsdom',
-     setupFiles: './vitest.setup.ts',
-   },
--});
-+}));
-(venv) pete@pop-os:/home/project/web-linux
-$ git diff app/package.json
-diff --git a/app/package.json b/app/package.json
-index 13c2b01..c23f438 100644
---- a/app/package.json
-+++ b/app/package.json
-@@ -3,6 +3,9 @@
-   "private": true,
-   "version": "0.0.0",
-   "type": "module",
-+  "engines": {
-+    "node": ">=20"
-+  },
-   "scripts": {
-     "dev": "vite",
-     "build": "tsc -b && vite build",
-@@ -47,7 +50,6 @@
-     "embla-carousel-react": "^8.6.0",
-     "input-otp": "^1.4.2",
-     "lucide-react": "^0.562.0",
--    "next-themes": "^0.4.6",
-     "react": "^19.2.0",
-     "react-day-picker": "^9.13.0",
-     "react-dom": "^19.2.0",
-@@ -55,7 +57,6 @@
-     "react-resizable-panels": "^4.2.2",
-     "react-router": "^7.6.1",
-     "recharts": "^2.15.4",
--    "sonner": "^2.0.7",
-     "tailwind-merge": "^3.4.0",
-     "vaul": "^1.1.2",
-     "zod": "^4.3.5"
-@@ -79,7 +80,6 @@
-     "postcss": "^8.5.6",
-     "tailwindcss": "^3.4.19",
-     "tailwindcss-animate": "^1.0.7",
--    "tw-animate-css": "^1.4.0",
-     "typescript": "~5.9.3",
-     "typescript-eslint": "^8.46.4",
-     "vite": "^7.2.4",
++const generateId = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
++
+ const loadRecordings = (): Recording[] => {
+   const saved = localStorage.getItem('ubuntuos_recordings');
+   if (!saved) return [];
+@@ -125,6 +128,9 @@ export default function VoiceRecorder() {
+   const [_playTime, _setPlayTime] = useState(0);
+   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+   const playTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
++  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
++  const audioChunksRef = useRef<Blob[]>([]);
++  const streamRef = useRef<MediaStream | null>(null);
+ 
+   // Persist recordings
+   useEffect(() => {
+@@ -159,25 +165,63 @@ export default function VoiceRecorder() {
+     };
+   }, [playingId]);
+ 
+-  const startRecording = () => {
+-    setRecorderState('recording');
+-    setElapsed(0);
++  const startRecording = async () => {
++    try {
++      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
++      streamRef.current = stream;
++      const mediaRecorder = new MediaRecorder(stream);
++      mediaRecorderRef.current = mediaRecorder;
++      audioChunksRef.current = [];
++
++      mediaRecorder.ondataavailable = (e) => {
++        if (e.data.size > 0) {
++          audioChunksRef.current.push(e.data);
++        }
++      };
++
++      mediaRecorder.onstop = () => {
++        if (audioChunksRef.current.length === 0) return;
++        const blob = new Blob(audioChunksRef.current, { type: 'audio/ogg; codecs=opus' });
++        const url = URL.createObjectURL(blob);
++        const newRecording: Recording = {
++          id: generateId(),
++          name: `Recording ${recordings.length + 1}`,
++          duration: elapsed,
++          date: Date.now(),
++          waveformData: generateWaveform(),
++          blobUrl: url,
++        };
++        setRecordings((prev) => [newRecording, ...prev]);
++        audioChunksRef.current = [];
++      };
++
++      mediaRecorder.start();
++      setRecorderState('recording');
++      setElapsed(0);
++    } catch {
++      // Silently ignore permission denied / no mic
++    }
+   };
+ 
+   const stopRecording = () => {
++    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
++      mediaRecorderRef.current.stop();
++    }
++    if (streamRef.current) {
++      streamRef.current.getTracks().forEach((track) => track.stop());
++      streamRef.current = null;
++    }
+     setRecorderState('idle');
+-    const newRecording: Recording = {
+-      id: generateId(),
+-      name: `Recording ${recordings.length + 1}`,
+-      duration: elapsed,
+-      date: Date.now(),
+-      waveformData: generateWaveform(),
+-    };
+-    setRecordings((prev) => [newRecording, ...prev]);
+   };
+ 
+   const deleteRecording = (id: string) => {
+-    setRecordings((prev) => prev.filter((r) => r.id !== id));
++    setRecordings((prev) => {
++      const target = prev.find((r) => r.id === id);
++      if (target?.blobUrl) {
++        URL.revokeObjectURL(target.blobUrl);
++      }
++      return prev.filter((r) => r.id !== id);
++    });
+     if (playingId === id) setPlayingId(null);
+   };
+ 
+@@ -205,11 +249,21 @@ export default function VoiceRecorder() {
+         <div className="text-2xl font-mono">{formatTime(elapsed)}</div>
+         <div className="flex items-center gap-3">
+           {recorderState === 'idle' ? (
+-            <button onClick={startRecording} className="p-3 rounded-full" style={{ background: 'var(--accent-error)' }}>
++            <button
++              onClick={startRecording}
++              aria-label="Start recording"
++              className="p-3 rounded-full"
++              style={{ background: 'var(--accent-error)' }}
++            >
+               <Mic size={24} className="text-white" />
+             </button>
+           ) : (
+-            <button onClick={stopRecording} className="p-3 rounded-full" style={{ background: 'var(--accent-error)' }}>
++            <button
++              onClick={stopRecording}
++              aria-label="Stop recording"
++              className="p-3 rounded-full"
++              style={{ background: 'var(--accent-error)' }}
++            >
+               <Square size={24} className="text-white" />
+             </button>
+           )}
+@@ -220,21 +274,39 @@ export default function VoiceRecorder() {
+       <div className="flex flex-col gap-2 flex-1 overflow-y-auto">
+         {recordings.map((recording) => (
+           <div key={recording.id} className="flex items-center gap-3 p-3 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
+-            <button onClick={() => togglePlay(recording)} className="p-2 rounded-full" style={{ background: 'var(--accent-primary)' }}>
+-              {playingId === recording.id ? <Pause size={18} className="text-white" /> : <Play size={18} className="text-white" />}
+-            </button>
+-            <div className="flex-1 min-w-0">
+-              <div className="text-sm font-medium truncate">{recording.name}</div>
+-              <div className="text-xs opacity-50">{formatTime(recording.duration)}</div>
++              <button onClick={() => togglePlay(recording)} className="p-2 rounded-full" style={{ background: 'var(--accent-primary)' }}>
++                {playingId === recording.id ? <Pause size={18} className="text-white" /> : <Play size={18} className="text-white" />}
++              </button>
++              <div className="flex-1 min-w-0">
++                <div className="text-sm font-medium truncate">{recording.name}</div>
++                <div className="text-xs opacity-50">{formatTime(recording.duration)}</div>
++              </div>
++              {recording.blobUrl ? (
++                <a
++                  href={recording.blobUrl}
++                  download={`${recording.name}.webm`}
++                  aria-label="Download recording"
++                  className="p-2 rounded-lg hover:opacity-70 flex items-center justify-center"
++                  style={{ color: 'var(--text-secondary)' }}
++                  onClick={(e) => e.stopPropagation()}
++                >
++                  <Download size={16} />
++                </a>
++              ) : (
++                <span
++                  aria-label="Download recording"
++                  className="p-2 rounded-lg opacity-30 flex items-center justify-center"
++                  style={{ color: 'var(--text-secondary)' }}
++                >
++                  <Download size={16} />
++                </span>
++              )}
++              <button onClick={() => deleteRecording(recording.id)} className="p-2 rounded-lg hover:opacity-70">
++                <Trash2 size={16} className="text-[var(--accent-error)]" />
++              </button>
+             </div>
+-            <button onClick={() => deleteRecording(recording.id)} className="p-2 rounded-lg hover:opacity-70">
+-              <Trash2 size={16} className="text-[var(--accent-error)]" />
+-            </button>
+-          </div>
+         ))}
+       </div>
+     </div>
+   );
+ }
+-
+-const generateId = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
 

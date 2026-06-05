@@ -173,17 +173,17 @@ This document provides high-signal technical context for AI coding agents. It fo
 📌 WHAT: The Project
 UbuntuOS Web is a comprehensive web-based replica of the Ubuntu Linux desktop environment. It is not a static mockup, but a fully interactive, single-page application (SPA) built on modern web technologies.
 - Product Type: Web application (Desktop Environment)
-- Core Functionality: A complete desktop environment with a custom window manager, a virtual file system (VFS), and 55 functional, interactive applications.
+- Core Functionality: A complete desktop environment with a custom window manager, a virtual file system (VFS), and 56 functional, interactive applications.
 - Key Features:
 - Window Manager: Custom z-index stacking, drag-and-drop windows, minimize/maximize/restore functionality.
 - Desktop Environment:
 - Virtual File System (VFS): A robust file management layer with unique ID-based references, trash handling, and localStorage persistence for data.
-- Application Ecosystem: 55 pre-installed apps across 7 categories (System, Productivity, Internet, Media, Games, DevTools, Creative).
+- Application Ecosystem: 56 pre-installed apps across 7 categories (System, Productivity, Internet, Media, Games, DevTools, Creative).
 🎯 WHY: The Purpose and Rationale
 The project serves a dual purpose:
 1. Developer Showcase: It demonstrates advanced architectural patterns in React, such as complex state management without external libraries (using Context + useReducer), and creative solutions to SPA challenges like windowing systems and z-index stacking.
 2. User Toolset: It provides a portable, web-accessible collection of common productivity, utility, and entertainment applications (e.g., Calculator, Terminal, Games, Text Editor).
-The motivation for the architecture stemmed from the complexity of managing 55 individual applications. Eagerly loading all of them would create an unacceptable initial bundle size, and managing state across all these disparate components without a clear architecture would lead to a tangled, unmaintainable codebase.
+The motivation for the architecture stemmed from the complexity of managing 56 individual applications. Eagerly loading all of them would create an unacceptable initial bundle size, and managing state across all these disparate components without a clear architecture would lead to a tangled, unmaintainable codebase.
 🛠️ HOW: Architecture, Tech Stack, and Design
 Core Tech Stack
 Layer	Technology	Purpose
@@ -217,7 +217,7 @@ The project follows a clear separation of concerns, separating the OS shell, app
 4. Application Isolation (Dynamic Routing):
 - Technology: React.lazy() and Suspense.
 - Role: Drastically reduces the initial bundle size.
-- Pattern: Instead of eagarly importing all 55 apps, they are loaded on demand. This reduced the initial bundle from ~1 MB to ~360 KB. NotImplemented.tsx is the only component that cannot be lazy-loaded because it serves as a fallback.
+- Pattern: Instead of eagarly importing all 56 apps, they are loaded on demand. This reduced the initial bundle from ~1 MB to ~360 KB. NotImplemented.tsx is the only component that cannot be lazy-loaded because it serves as a fallback.
 5. Shared Utilities (src/utils/):
 - safeEval.ts: A hardened math expression parser (shunting-yard algorithm) that replaces the dangerous eval() and new Function(). This is mandatory for any math evaluation.
 - sanitizeHtml.ts: A wrapper around DOMPurify to sanitize dangerouslySetInnerHTML content. It also provides sanitizeMarkdownHtml() for markdown tags.
@@ -523,8 +523,8 @@ return color && isValidColor(color) ? `--color-${key}: ${color};` : null;
 ## 📐 Performance Patterns
 
 ### React.lazy + Suspense for Code Splitting
-- **Before**: All 55 apps eagerly imported in `AppRouter.tsx`, creating a ~1 MB initial bundle.
-- **After**: `AppRouter.tsx` uses `React.lazy()` + `Suspense` with `AppSkeleton` fallback. Each app is loaded on demand, producing 60 individual chunks. Initial shell reduced to ~360 KB.
+- **Before**: All 56 apps eagerly imported in `AppRouter.tsx`, creating a ~1 MB initial bundle.
+- **After**: `AppRouter.tsx` uses `React.lazy()` + `Suspense` with `AppSkeleton` fallback. Each app is loaded on demand, producing 57 individual chunks. Initial shell reduced to ~360 KB.
 - **Caveat**: `NotImplemented.tsx` cannot be lazy-loaded (it's the fallback). All other apps are lazy.
 - **Build verification**: `npx vite build` now emits `dist/assets/[AppName]-[hash].js` for each app.
 

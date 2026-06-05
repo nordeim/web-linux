@@ -280,6 +280,21 @@ UbuntuOS Web is a complex, well-architected single-page application that cleverl
 - **`recurseMoveNode` Traversal Helper**: A module-level `recurseMoveNode(nodes, nodeId, newParentId)` function recursively moves a node and all its descendants to a new parent, updating `modifiedAt` on the entire subtree. Extracted from an inline closure inside `moveToTrash` to eliminate ~10 lines of duplication and is now independently testable.
 - **`TextEncoder` for File Size**: `createFile` and `writeFile` use `new TextEncoder().encode(content).length` instead of `new Blob([content]).size`. `TextEncoder` avoids a full Blob allocation, is lighter, and yields an identical UTF-8 byte count.
 
+### Real Terminal (Backend: `backend/src/`, Frontend: `RealTerminal.tsx`)
+> **MANDATORY**: Each terminal window spawns a dedicated, hardened Docker container. PTY ↔ WebSocket bridging enforces container lifecycle integrity.
+> - **Backend Entry Points**:
+>   - `backend/src/index.ts`: Express HTTP + WebSocket upgrade server; `POST /auth/token` issues JWTs scoped to `ubuntuos-ws`.
+>   - `backend/src/websocket.ts`: `WebSocketHandler` class validates JWT from query params, wires PTY I/O to WS messages, and invokes `cleanupExpired()` every 60 s for container teardown.
+>   - `backend/src/docker.ts`: `spawnContainerShell(sessionId, onData)` checks for an existing running container (reconnection) before spawning a fresh one; hardened with `--read-only`, `--cap-drop=ALL`, `--network=none`, `-u 1000:1000`, CPU/memory, and PID limits.
+>   - `backend/src/sessionStore.ts`: In-memory `Map<string, Session>` with `gracePeriodMs` (disconnect grace) and `ttlMs` (total session TTL); `cleanupExpired()` returns expired IDs for container tear-down.
+>   - `backend/src/auth.ts`: `jose`-based HS256 JWT signing/verification. Secret sourced from `JWT_SECRET` env var.
+> - **Frontend Entry Points**:
+>   - `src/apps/RealTerminal.tsx`: xterm.js v5 with `@xterm/addon-fit` (ResizeObserver → `fitAddon.fit()`) and `@xterm/addon-web-links`. WebSocket client reconnects with exponential backoff (1–30 s). Sends `close` on unmount.
+>   - `src/hooks/useAuthToken.tsx`: Dev builds generate JWT locally (`authToken.ts`); production calls `POST /auth/token` via `BACKEND_BASE` URL.
+>   - `src/utils/backendUrl.ts`: Centralises backend URLs via `import.meta.env.VITE_BACKEND_URL` / `VITE_BACKEND_WS` with dev defaults.
+> - **Message Protocol**: `init`, `input`, `output`, `resize`, `error`, `close`, `heartbeat`. Binary data is base64-escaped over JSON for consistent web-safe transport.
+> - **Reconnection**: Docker containers are keyed by session-id name. If a new WebSocket arrives with a live container name, `docker attach` is reused. Grace-period expiry triggers `stopAndRemoveContainer()`.
+
 ## 🛠️ Development Workflow
 
 ### Adding a New App
@@ -318,6 +333,11 @@ Run from the `app/` directory:
 - `src/utils/safeJsonParse.ts`: Generic `JSON.parse` + zod validation utility.
 - `src/utils/storageValidation.ts`: localStorage schema validation for OS-level data.
 - `src/components/GlobalErrorBoundary.tsx`: Error boundary wrapper for apps and shell.
+- `backend/src/index.ts`: Backend HTTP + WebSocket server entry point.
+- `backend/src/websocket.ts`: PTY ↔ WebSocket bridge.
+- `backend/src/docker.ts`: Hardened Docker container spawning.
+- `backend/src/sessionStore.ts`: In-memory session store with grace period / TTL.
+- `backend/src/auth.ts`: JWT generation/verification via `jose`.
 
 ## 🚨 Troubleshooting & Gotchas
 

@@ -99,6 +99,10 @@ your last tool call failed. please try again and continue meticulously
 
 ---
 
+Awesome meticulous job so far. Please keep up the good work. Now, please meticulously review @Code_Review_Audit_xterm_VALIDATED.md , @Validated_Implementation_Plan_Real_Terminal.md and @plan_xterm.md against the actual codebase to check for alignment and to identify the optimal fixes and changes to properly implement the outstanding features for a 'real' terminal that wraps around the Bash shell of the underlying Ubuntu Linux OS. Then meticulously plan to create a detailed execution plan with ToDo list to apply the validated code changes. Review and validate the remediation plan against the codebase again to check for accurate alignment before proceeding to execute it meticulously. Use TDD approach to make code changes.
+
+---
+
 awesome meticulous job so far. please keep up the good work. now, please meticulously review @changes_to_validate.txt and validate the recent code changes as captured by the included `git diff` outputs
 You need to do a rigorous review, validating everything in the diff against the project's stated conventions and security rules.
 
@@ -108,4 +112,52 @@ Review the `git diff` outputs to verify:
 - Does the project still build?
 - Do all tests pass?
 - Are there any leftover files from the failed operations earlier?
+
+yes, please meticulously plan to proceed to complete Phase A to C phase by phase with a detailed ToDo list after re-validation.
+
+The user wants me to proceed through Phase A, B, and C meticulously, with a detailed ToDo list after re-validation. I should:
+1. First re-validate the current state (run tests, TypeScript, check for regressions).
+2. Create a detailed todo list for each phase.
+3. Execute Phase A, B, and C one by one.
+4. Validate after each phase.
+Let me start by re-validating the current state, then create the todo list, then execute.
+I'll begin with a full re-validation of the current state, then create the detailed todo list, and execute each phase.
+# Todos
+Re-validate baseline: TypeScript, tests, build
+Phase A: Fix Docker cleanup (orphaned containers)
+Phase A: Implement reconnection (reattach to existing container)
+Phase A: Wire SESSION_TTL into SessionStore
+Phase B: Fix RealTerminal rendering (height 0.001em)
+Phase B: De-hardcode backend URLs (env var)
+Phase B: Implement actual exponential reconnect backoff
+Phase C: Update AGENTS.md with Real Terminal details
+Phase C: Add nginx.conf for WebSocket proxying
+Phase C: Final validation — full test suite, build, regression check
+Thinking: Let me run the baseline validations first.
+# Frontend TypeScript check
+$ cd /home/project/web-linux/app && npx tsc -b --noEmit 2>&1
+(no output)
+# Backend TypeScript check
+$ cd /home/project/web-linux/backend && npx tsc -b --noEmit 2>&1
+src/index.ts(45,38): error TS2345: Argument of type 'Duplex' is not assignable to parameter of type 'Socket'.
+  Type 'Duplex' is missing the following properties from type 'Socket': destroySoon, connect, resetAndDestroy, setTimeout, and 15 more.
+src/websocket.ts(3,1): error TS6133: 'IncomingHttpHeaders' is declared but its value is never read.
+# Backend tests
+$ npx vitest run 2>&1 | tail -15
+  7|  */
+      8| import { describe, it, expect } from 'vitest';
+      9| import { recurseMoveNode, walkAndDelete } from '@/utils/vfsHelpers';
+       | ^
+     10|
+     11| describe('recurseMoveNode (M-4)', () => {
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+…
+Click to expand
+Thinking: I need to address two backend TypeScript errors:
+1. src/index.ts:45 - Duplex is not assignable to Socket in the handleUpgrade call.
+2. src/websocket.ts:3 - IncomingHttpHeaders is declared but never used.
+I need to read the relevant files to understand the exact context, then fix the TypeScript issues.  Also, the backend tests need to pass TypeScript check before I proceed.  I need to fix these errors.
+I need to fix two backend TypeScript errors before proceeding. Let me read the affected files and fix them.
+→ Read backend/src/index.ts 
+→ Read backend/src/websocket.ts [limit=20]
 

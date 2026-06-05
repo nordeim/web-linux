@@ -8,6 +8,7 @@ import NotImplemented from '@/components/NotImplemented';
 
 const FileManager = lazy(() => import('./FileManager'));
 const Terminal = lazy(() => import('./Terminal'));
+const RealTerminal = lazy(() => import('./RealTerminal'));
 const Calculator = lazy(() => import('./Calculator'));
 const TextEditor = lazy(() => import('./TextEditor'));
 const Settings = lazy(() => import('./Settings'));
@@ -84,7 +85,7 @@ export default function AppRouter({ appId, windowId }: AppRouterProps) {
     switch (appId) {
       case 'filemanager': return <FileManager />;
       case 'terminal': return <Terminal />;
-      case 'real-terminal': return <Terminal windowId={windowId} />;
+      case 'real-terminal': return <RealTerminal windowId={windowId} />;
       case 'calculator': return <Calculator />;
       case 'texteditor': return <TextEditor />;
       case 'settings': return <Settings />;

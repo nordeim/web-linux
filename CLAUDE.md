@@ -151,27 +151,28 @@ Follow this six-phase workflow for all implementation tasks:
 - **`manualChunks` for `lucide-react` undermines per-app bundle splitting**. Forcing a monolithic `lucide` chunk made every page pay the full ~587 KB cost, which is the exact opposite of the named-import optimization. Removing the `manualChunks` block lets Vite's default strategy do its job.
 - ** Debounce localStorage writes triggered by rapid UI events**. Writing `desktopIcons` to `localStorage` on every state change caused unnecessary disk flushes during drag operations. A 300 ms debounce with proper cleanup eliminates this overhead without losing the final position.
 
-### Real Terminal Feature Implementation (Validated Plan Available)
+### Real Terminal Feature (Implemented 2026-06-05)
 
-A validated implementation plan exists for integrating a real bash terminal (`node-pty` + Docker) into UbuntuOS Web. This was independently audited against the codebase.
+A real bash terminal has been integrated into UbuntuOS Web via `node-pty` + Docker.
 
-**Key validated findings:**
-- **No JWT exists**: The login system is purely in-memory (`isAuthenticated: true`). A JWT issuance system must be built first (+2–3 days). Recommended: backend `/auth/token` endpoint (keeps secret server-side). Note: the `jose` package was previously installed but has been removed as it was unused.
-- **Props declared but not destructured** — RESOLVED: `Terminal.tsx` now accepts an optional `windowId` prop, and `AppRouter.tsx` passes `windowId` to child terminal components. `real-terminal` routing is now registered in `AppRouter.tsx`.
-- **xterm v5 package scope**: Must use `@xterm/xterm`, `@xterm/addon-fit`, `@xterm/addon-web-links` (not the v4 unscoped names).
-- **PascalCase category**: `AppCategory` type requires PascalCase (`'System'`, not `'system'`).
-- **Vite proxy and backend tsconfig**: Need `/ws` proxy in `vite.config.ts`; backend `tsconfig.json` must have `erasableSyntaxOnly: true` (no enums).
+**Backend implementation:**
+- **JWT auth**: Backend `/auth/token` endpoint issues signed JWTs via `jose`; frontend `useAuthToken` fetches from backend in production, falls back to dev-only generator locally.
+- **WebSocket server**: `src/websocket.ts` handles connections, spawns Docker containers, and bridges PTY I/O bidirectionally.
+- **Docker hardening**: `--read-only`, `--cap-drop=ALL`, `--network=none`, `-u 1000:1000`, CPU/memory/PID limits.
+- **Session persistence**: In-memory `SessionStore` with disconnect grace period (5 min), heartbeat, and cleanup cron.
+- **Tests**: 15 backend tests covering auth, config, docker, sessionStore, and message protocol.
 
-**Pre-implementation decisions required:**
-1. **JWT issuance**: Backend `/auth/token` endpoint (recommended) vs. browser-side generation
-2. **Backend location**: `backend/` at project root (recommended)
-3. **Container network**: Configurable, default `--network=none`
-4. **Warm pool**: On-demand for v1
-5. **Multi-window**: Each window = own container
-6. **Existing Terminal**: Keep both (simulated + PTY coexist)
+**Frontend implementation:**
+- **RealTerminal.tsx**: xterm.js v5 with `@xterm/addon-fit` and `@xterm/addon-web-links`, `ResizeObserver` for auto-fit, WebSocket client with auto-reconnect, `sessionId` persisted in localStorage with zod validation (`safeJsonParse`).
+- **Focus handling**: Watches `useOS().windows` for `isFocused` and calls `terminal.focus()` when the window is active.
+- **Cleanup**: On unmount, sends `close` message via WebSocket and disposes the terminal.
+- **AppRouter**: `real-terminal` case lazy-loads `RealTerminal` and passes `windowId`.
 
-**Timeline**: 13–19 days (including JWT Phase 0). Wedge demo: 6–8 days.
+**Validation:**
+- TypeScript: 0 errors (`tsc -b --noEmit`)
+- Vitest: 110 frontend tests + 15 backend tests, all green
+- Vite build: successful, `RealTerminal` chunk generated (296 KB gzipped for xterm.js)
 
-**Documents:**
+**Files:**
 - [Validated_Implementation_Plan_Real_Terminal.md](Validated_Implementation_Plan_Real_Terminal.md) — the corrected plan
 - [Code_Review_Audit_xterm_VALIDATED.md](Code_Review_Audit_xterm_VALIDATED.md) — independent validation report

@@ -4,16 +4,9 @@ import { URL } from 'url';
 import type { SessionStore } from './sessionStore.js';
 import type { ContainerSession } from './docker.js';
 import { spawnContainerShell, stopAndRemoveContainer } from './docker.js';
-
-interface ClientMessage {
-  type: string;
-  [key: string]: unknown;
-}
-
-interface ServerMessage {
-  type: string;
-  [key: string]: unknown;
-}
+import { CommandPolicyEngine } from './policy.js';
+import { AuditLogger } from './logger.js';
+import type { ClientMessage, ServerMessage } from './types.js';
 
 export interface WebSocketOptions {
   store: SessionStore;
@@ -25,6 +18,8 @@ export class WebSocketHandler {
   private store: SessionStore;
   private verifyToken: (token: string) => Promise<boolean>;
   private sessions = new Map<string, ContainerSession>();
+  private policy = new CommandPolicyEngine();
+  private auditLogger = new AuditLogger();
 
   constructor(options: WebSocketOptions) {
     this.wss = new WebSocketServer({ noServer: true });
@@ -109,6 +104,20 @@ export class WebSocketHandler {
     switch (msg.type) {
       case 'input': {
         const data = msg.data as string;
+        // Evaluate command against security policy
+        const evaluation = this.policy.evaluate(sessionId, data);
+        if (!evaluation.allowed) {
+          this.auditLogger.logBlocked(sessionId, data, evaluation.reason!);
+          this.send(ws, { type: 'error', message: `Blocked: ${evaluation.reason}` });
+          return;
+        }
+        // Log valid command
+        this.auditLogger.logCommand({
+          timestamp: new Date().toISOString(),
+          sessionId,
+          command: data,
+          action: 'input',
+        });
         containerSession.pty.write(data);
         break;
       }

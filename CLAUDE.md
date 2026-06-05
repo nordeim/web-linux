@@ -118,8 +118,9 @@ Follow this six-phase workflow for all implementation tasks:
 
 ### Testing
 - **TDD is effective for security-critical code**. The `safeEval` tests (24 cases) caught multiple edge cases during development.
-- **Source-level validation as test workaround**: Component-level tests using `@/` aliases fail in vitest due to module resolution issues. Source-level tests (reading file source strings) are used as a workaround for ARIA attribute validation (14 tests in `aria-attributes.test.ts` plus new tests in `pinStorage.test.ts` and `vfsHelpers.test.ts`).
-- **Component rendering tests blocked**: Tests for `WindowFrame`, `DesktopNI`, and `Dock` that import components via `@/` aliases fail due to vitest configuration. Fix requires resolving the alias configuration or using relative imports in tests.
+- **Source-level validation as test workaround**: Component-level tests using `@/` aliases fail in vitest due to module resolution issues. Source-level tests (reading file source strings) are used as a workaround for ARIA attribute validation (26 tests in `aria-attributes.test.ts` plus tests in `pinStorage.test.ts`, `vfsHelpers.test.ts`, and `gameHighscore.test.ts`).
+- **Component rendering tests work**: `NotImplemented.test.tsx` and `VoiceRecorder.test.tsx` successfully use `render()` from `@testing-library/react` with the `@/` alias, demonstrating that vitest alias resolution works for some component tests.
+- **Game highscore validation tests**: 12 tests in `gameHighscore.test.ts` validate the zod schema pattern for game highscores, ensuring corrupted localStorage data falls back gracefully.
 
 ### Refactoring & Maintenance
 - **`walkAndDelete` reduces VFS duplication**. Extracting a single `walkAndDelete` helper eliminated ~30 lines of duplicated inline `recurseDelete` closures in `deleteNode` and `emptyTrash`. Preserving immutability (shallow-copied `nodes` object) while returning deleted IDs allows callers to clean up `trashMeta` independently. **Likewise for `recurseMoveNode`**: The same inline recursion was duplicated in `moveToTrash`. Extracting it to `recurseMoveNode(nodes, nodeId, newParentId)` in `src/utils/vfsHelpers.ts` eliminated another ~10 lines and is now independently testable.
@@ -136,11 +137,11 @@ Follow this six-phase workflow for all implementation tasks:
 3. **Add `vitest` coverage collection** to track test coverage across all modules.
 4. **Implement CI/CD pipeline** with automated `build`, `lint`, and `test` gates.
 5. **Split `osReducer` into domain-specific reducers** (window management, notifications, desktop icons, etc.).
-6. **Fix vitest `@/` alias resolution** to enable component-level rendering tests. Currently blocked by module resolution; only utility tests (relative imports) and source-level tests pass.
+6. **Add ARIA labels to remaining 41 apps**: Browser, Notes, Calendar, Email, and other apps with icon-only buttons need `aria-label` attributes. Follow the pattern in `FileManager.tsx` and `Settings.tsx`.
 7. **Enforce import hygiene during code review**: The `noUnusedLocals`/`noUnusedParameters` TypeScript checks catch dead code at build time, but IDE auto-imports can silently add unused imports. Add a pre-commit hook or lint rule to block commits with unused identifiers.
 8. **Replace all remaining `dangerouslySetInnerHTML` usage**: After RegexTester was refactored to use React components, audit all remaining `dangerouslySetInnerHTML` usage and replace with React component rendering where possible.
 9. **Add ReDoS guards to all regex-accepting apps**: TextEditor find bar (now fixed with `countMatchesSafely()`), RegexTester (already has `MAX_EXEC_ITERATIONS = 1000`). Notes search and Email filters use `String.includes()` and are not vulnerable. Audit any app with `new RegExp(userInput)` for missing guards.
-10. **Implement actual MediaRecorder for ScreenRecorder**: VoiceRecorder now records real audio via `getUserMedia` + `MediaRecorder` and provides downloadable `.webm` files. ScreenRecorder still creates a placeholder text download — production builds should implement actual screen capture or clearly mark as simulated.
+10. **ScreenRecorder**: Now uses real `getDisplayMedia` + `MediaRecorder` API for actual screen capture with `.webm` output.
 11. **Validate chart color values before CSS injection**: The `chart.tsx` component generates CSS variables from `ChartConfig` color values. While currently from hardcoded config, add hex/rgb/hsl validation if colors ever come from user input.
 12. **Add ESLint rule to block wildcard lucide imports**: Prevent `import * as Icons from 'lucide-react'` everywhere except `DynamicIcon.tsx`. This enforces the named import convention at lint time.
 13. **Add test coverage for MINIMIZE_ALL**: Verify that `prevPosition` and `prevSize` are correctly saved and restored after "Minimize All" action.

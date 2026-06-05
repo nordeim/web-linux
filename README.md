@@ -65,6 +65,13 @@ This codebase has undergone multiple comprehensive security audits and remediati
 - **Replaced raw `JSON.parse` in 15 apps**: All apps (`ArchiveManager`, `Calculator`, `Calendar`, `Chat`, `Clock`, `ColorPalette`, `ColorPicker`, `Memory`, `Notes`, `Reminders`, `RssReader`, `ScreenRecorder`, `Settings`, `Spreadsheet`, `TextEditor`) now use `safeJsonParse(raw, schema, fallback)` instead of unvalidated `JSON.parse` for localStorage reads.
 - **Zero remaining raw `JSON.parse` on localStorage**: Final verification confirms no apps use unvalidated localStorage reads.
 
+### Audit Remediation (2026-06-06)
+- **Added zod validation to game highscore stores**: Snake, Sudoku, Tetris, FlappyBird, Minesweeper, and Game2048 now use `safeJsonParse()` with zod schemas for localStorage reads, replacing raw `parseInt()` calls.
+- **Added ARIA labels to FileManager icon-only buttons**: Navigate up, Grid view, List view, New Folder, and New File buttons now have `aria-label` attributes.
+- **Added ARIA labels to Settings icon-only buttons**: Toggle component and accent color buttons now have `aria-label` and `aria-pressed` attributes.
+- **Added 21 new tests**: 12 tests for game highscore validation pattern, 9 tests for FileManager and Settings ARIA attributes.
+- **Fixed README.md test count discrepancy**: Updated from 18 to 19 test files (now 20 with new tests).
+
 ### dpsk-2 Phase 2: Accessibility & Documentation (2026-06-03)
 - **Added ARIA attributes to core components**: Added `aria-label`, `role`, `tabIndex` to `Dock.tsx`, `WindowFrame.tsx`, and `Desktop.tsx` interactive elements.
 - **Added keyboard focus styles**: Global `:focus-visible` and `:focus:not(:focus-visible)` CSS rules in `index.css` for keyboard accessibility.
@@ -185,7 +192,7 @@ After running `npm run dev`, open your browser at the provided port (usually `ht
 | :--- | :--- |
 | `npm run build` | Type-check and production build |
 | `npm run lint` | Run ESLint static analysis |
-| `npm run test` | Run Vitest unit test suite (115 tests, 19 test files) |
+| `npm run test` | Run Vitest unit test suite (136 tests, 20 test files) |
 | `npm run preview` | Local preview of the production build |
 | `tsc -b` | Project-wide type checking |
 
@@ -209,13 +216,13 @@ After running `npm run dev`, open your browser at the provided port (usually `ht
 ## ⚠️ Known Issues & Recommendations
 
 1. **VFS localStorage Limit**: The virtual file system uses `localStorage`, which has a ~5 MB limit. For large file storage, consider migrating to IndexedDB.
-2. **Accessibility - Remaining Work**: Core shell components (Dock, WindowFrame, Desktop) and the Calculator, TextEditor, and PasswordManager apps now have ARIA labels. Games and media apps may still need keyboard navigation and ARIA labels. Run a Lighthouse accessibility audit for details.
+2. **Accessibility - Remaining Work**: Core shell components (Dock, WindowFrame, Desktop), Calculator, TextEditor, PasswordManager, FileManager, and Settings now have ARIA labels. 41 other apps with icon-only buttons still need ARIA labels. Run a Lighthouse accessibility audit for details.
 3. **Split osReducer**: The `osReducer` is approximately 375 lines and handles window, dock, notification, context menu, icon, theme, and alt-tab logic. Now `export`ed for testing. Consider splitting into domain-specific reducers.
 4. **CI/CD Pipeline**: Automated build + lint + test gates are not yet implemented.
 5. **Unused Local / Import Hygiene**: The `tsconfig.app.json` enforces `"noUnusedLocals": true` and `"noUnusedParameters": true`. Prior build broke with 43 `TS6133` errors across 16 files. Keep imports lean and remove dead code promptly to prevent build regressions.
-6. **ReDoS from User-Crafted Regex**: RegexTester now limits iterations, but apps accepting user regex (e.g., Notes search, Email filters) should also guard against catastrophic backtracking.
-7. **Simulated vs Real Recordings**: VoiceRecorder now records real audio via `getUserMedia` + `MediaRecorder` and provides downloadable `.webm` files. ScreenRecorder still creates a placeholder text download — production builds should implement actual screen capture or clearly mark as simulated.
-8. **Vitest @/ Alias Resolution**: Component tests using `@/` aliases fail in vitest due to module resolution issues. Currently, only utility tests (relative imports) pass consistently. Source-level tests (reading file source strings) are used as a workaround for component validation.
+6. **ReDoS from User-Crafted Regex**: RegexTester and TextEditor now limit iterations. Apps accepting user regex (e.g., Notes search, Email filters) use `String.includes()` and are not vulnerable. Audit any app with `new RegExp(userInput)` for missing guards.
+7. **ScreenRecorder**: Now uses real `getDisplayMedia` + `MediaRecorder` API for actual screen capture with `.webm` output.
+8. **Game Highscore Validation**: All 7 game apps now use zod validation for highscore localStorage reads. Pattern: `safeJsonParse(val ?? '0', HighScoreSchema, 0)`.
 
 ## 📜 License
 

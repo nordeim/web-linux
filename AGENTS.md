@@ -498,6 +498,24 @@ return color && isValidColor(color) ? `--color-${key}: ${color};` : null;
 ```
 **Context**: This was discovered during the 2026-06-04 audit. While current color values come from application config (not user input), validation provides defense-in-depth.
 
+### Game Highscore localStorage Without Zod Validation
+**Symptom**: Game apps (Snake, Sudoku, Tetris, FlappyBird, Minesweeper, Game2048) used `parseInt(localStorage.getItem(...))` without schema validation.
+**Root Cause**: Simple numeric highscore values were considered low-risk and not converted to zod validation during the initial localStorage remediation.
+**Fix**: All 7 game apps now use `safeJsonParse(val ?? '0', HighScoreSchema, 0)` with `z.number().int().min(0)` schema. This ensures consistency with the project's security policy and prevents corrupted data from causing unexpected behavior.
+**Context**: While `parseInt` returns `NaN` for corrupted data (which evaluates to `0` in numeric context), this is inconsistent with the project's security policy. The fix was applied on 2026-06-06.
+
+### Missing ARIA Labels on Icon-Only Buttons
+**Symptom**: Screen readers cannot identify the purpose of buttons that contain only an icon (no visible text).
+**Root Cause**: Only Calculator, TextEditor, PasswordManager, ScreenRecorder, and VoiceRecorder were audited for ARIA labels. 41 other apps with icon-only buttons were missed.
+**Fix**: Added `aria-label` attributes to FileManager.tsx (5 buttons: navigate up, grid view, list view, new folder, new file) and Settings.tsx (Toggle component and accent color buttons with `aria-pressed`). Follow this pattern for remaining apps.
+**Context**: This was identified during the 2026-06-06 audit. Source-level tests in `aria-attributes.test.ts` validate ARIA presence without requiring full DOM rendering.
+
+### Documentation Test Count Discrepancy
+**Symptom**: README.md stated "18 test files" while CLAUDE.md and status_23.md stated "19 test files".
+**Root Cause**: README.md was not updated when the MINIMIZE_ALL test was added.
+**Fix**: Updated README.md to reflect accurate counts. Current state: 136 tests across 20 test files (as of 2026-06-06).
+**Context**: Always update ALL documentation files when adding tests. The count is now 136 tests, 20 test files.
+
 ## 🔒 Security Reminders
 
 1. Any new app that evaluates math must use `safeEval()`.
@@ -519,6 +537,9 @@ return color && isValidColor(color) ? `--color-${key}: ${color};` : null;
 17. **Icon-only buttons must have accessible names**. Any `<button>` containing only an icon (no visible text) requires an `aria-label`. This is a WCAG requirement and a high-severity accessibility gap.
 18. **Validate CSS color values before injection**. Use `isValidColor()` from `@/utils/colorValidation` when injecting dynamic color values via `dangerouslySetInnerHTML` in CSS context.
 19. **Verify registry completeness when adding apps**. After adding a new app to `AppRouter.tsx`, ensure it has a corresponding entry in `registry.ts`. The registry completeness test will catch mismatches automatically.
+20. **Game highscore stores must use zod validation**. Even simple numeric values like highscores should use `safeJsonParse()` with a zod schema. Pattern: `const HighScoreSchema = z.number().int().min(0); safeJsonParse(val ?? '0', HighScoreSchema, 0)`.
+21. **Keep documentation test counts in sync**. When adding tests, update README.md, CLAUDE.md, and status_23.md. Current count: 136 tests, 20 test files.
+22. **Component rendering tests work with vitest aliases**. Despite earlier claims, `NotImplemented.test.tsx` and `VoiceRecorder.test.tsx` successfully use `render()` with `@/` aliases. The vitest config correctly resolves aliases via `resolve.alias`.
 
 ## 📐 Performance Patterns
 
@@ -584,3 +605,8 @@ return color && isValidColor(color) ? `--color-${key}: ${color};` : null;
 - **Backend URLs must be configurable**: Hardcoding `ws://localhost:3001` in both `useAuthToken.tsx` and `RealTerminal.tsx` would break in any non-localhost deployment. Centralising in `backendUrl.ts` with `import.meta.env` fallbacks is the correct pattern.
 - **`height: '0.001em'` is not a reflow hack**: Using extremely small dimensions to "force reflow" just breaks rendering. Use `height: '100%'` or flex-grow instead.
 - **Reconnect delays need jitter**: A fixed 1 s reconnect delay hammers a struggling server. Exponential backoff (doubling, capped) is the correct pattern for WebSocket reconnection.
+- **Game highscore stores need zod validation**: Seven game apps (Snake, Sudoku, Tetris, FlappyBird, Minesweeper, Game2048, Memory) previously used `parseInt(localStorage.getItem(...))` without validation. While `parseInt` returns `NaN` for corrupted data (which evaluates to `0` in numeric context), this is inconsistent with the project's security policy. All now use `safeJsonParse(val ?? '0', HighScoreSchema, 0)` with zod schemas.
+- **ARIA labels pattern for icon-only buttons**: Icon-only buttons (buttons containing only an icon, no visible text) require `aria-label` attributes for screen reader accessibility. Follow the pattern in `FileManager.tsx` and `Settings.tsx`: add `aria-label="Descriptive label"` to each icon-only button. Toggle buttons should also have `aria-pressed={booleanValue}`.
+- **Source-level tests validate ARIA without rendering**: The `aria-attributes.test.ts` file uses `readFileSync` to read component source files and assert on `aria-label` presence. This pattern works when vitest infrastructure blocks component rendering. Current test count: 26 tests across Dock, WindowFrame, Desktop, Calculator, TextEditor, FileManager, and Settings.
+- **Component rendering tests DO work with vitest aliases**: Despite earlier documentation claiming `@/` alias resolution blocks component tests, `NotImplemented.test.tsx` and `VoiceRecorder.test.tsx` successfully use `render()` from `@testing-library/react`. The vitest config in `vitest.config.ts` correctly configures the `@` alias via `resolve.alias`.
+- **Documentation test counts must be kept in sync**: README.md, CLAUDE.md, and status_23.md all document test counts. When adding tests, update ALL documentation files. The current count is 136 tests across 20 test files.

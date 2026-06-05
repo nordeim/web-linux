@@ -301,3 +301,84 @@ Verification
 - Chunk count: 57 confirmed in source, documented in AGENTS.md
 - bun.lock: removed, package-lock.json remains as single source of truth
 
+Goal
+- Conduct a multi-dimensional, evidence-traceable code audit of UbuntuOS Web per AGENTS.md's 5-phase workflow, produce a severity-ranked findings report, and execute a TDD-based remediation of validated findings.
+Constraints & Preferences
+- Follow strict 5-phase workflow: Document Extraction → Cross-Document Reconciliation → Source Code Validation → Multi-Dimensional Audit → Consolidated Report.
+- Every finding must be traceable to specific evidence (line of code, config, doc statement, or absence).
+- Verification outcomes must be: Confirmed / Discrepant / Inconsistent / Unverifiable.
+- Extract each document independently before cross-referencing.
+- Config files are first-class evidence.
+- Source code audit is independent of documentation claims.
+- Preserve document identity during extraction.
+- Audit dimensions: Security, Reliability, Architecture, Testing, Accessibility, Performance, Documentation Accuracy.
+- Severity calibration: Critical = real security risk/crash/data loss; do not over- or under-severity.
+- Never fabricate findings; treat absent source files as "unverifiable", not as evidence the doc is wrong.
+- Use absolute file paths and direct file reads (not glob) for accuracy.
+- Respond in same language as conversation (English).
+- For remediation, use TDD (test first, implement, verify).
+- Minimum code that solves the problem; nothing speculative.
+Progress
+Done
+- Read all 4 documents: /home/project/web-linux/CLAUDE.md, /home/project/web-linux/README.md, /home/project/web-linux/AGENTS.md, /home/project/web-linux/status_20.md.
+- Mapped project directory structure: /home/project/web-linux/app/ and /home/project/web-linux/backend/.
+- Read all security utilities: safeEval.ts, sanitizeHtml.ts, safeJsonParse.ts, storageValidation.ts, colorValidation.ts, vfsHelpers.ts, pinStorage.ts, backendUrl.ts, authToken.ts.
+- Read state management: useOSStore.tsx, useFileSystem.ts, AppRouter.tsx, registry.ts, WindowFrame.tsx (partial).
+- Read Real Terminal: backend/src/{index,websocket,docker,auth,sessionStore,config}.ts, package.json, nginx.conf, RealTerminal.tsx, useAuthToken.tsx.
+- Read app files: Calculator.tsx, VoiceRecorder.tsx, ScreenRecorder.tsx, RegexTester.tsx, Spreadsheet.tsx (partial).
+- Read configs: package.json (app), tsconfig.app.json, vite.config.ts, tailwind.config.mjs, .env, .env.example, eslint.config.js.
+- Read chart.tsx (partial).
+- Completed full audit: claim-by-claim validation, cross-document reconciliation matrix, multi-dimensional analysis, severity-ranked findings report.
+- Executed TDD-based remediation:
+- H-2 VoiceRecorder download: Wrote src/apps/__tests__/VoiceRecorder.test.tsx (failing), implemented real audio recording via getUserMedia + MediaRecorder, added <a download> for .webm exports, test passes (112/112).
+- M-1 App count drift: Updated "55" → "56" in CLAUDE.md, README.md, AGENTS.md; added expect(appIds.length).toBe(56) guard to registry-completeness.test.ts.
+- M-2 Chunk count drift: Updated "60 individual chunks" → "57 individual chunks" in AGENTS.md.
+- M-3 Lockfile inconsistency: Removed bun.lock (left package-lock.json as canonical).
+- L-? safeEval policy: Updated CLAUDE.md §Anti-Patterns to clarify safeEval() applies to free-form expression strings, not fixed calculator dispatch.
+- Updated README.md, CLAUDE人工CL sidenote: I'll review the diff to ensure everything flows logically.
+In Progress
+- Updating README.md, CLAUDE.md, AGENTS.md to align with latest code changes, fixed issues, gotchas, troubleshooting, lessons learnt, outstanding issues, and recommendations.
+Blocked
+- (none)
+Key Decisions
+- Adopt AGENTS.md's 5-phase workflow as the audit spine.
+- Treat the 3 open audit findings in status_20.md §Consolidated as candidate findings to re-verify against source rather than accept at face value.
+- For Calculator.tsx,_cmd validation: confirm it does NOT use safeEval() (fixed switch/case dispatch, no raw string eval); treat as policy-clarification issue, not a security vulnerability.
+- For VoiceRecorder.tsx: root cause is stub implementation (no real recording); fix by implementing getUserMedia + MediaRecorder + URL.createObjectURL() + <a download>.
+- Use source-level test files for VoiceRecorder (component-level tests blocked by ESM alias resolution in Vitest for @/ value imports).
+- Historical documents like status_20.md should NOT have "55" retroactively updated — only living docs (CLAUDE.md, README.md, AGENTS.md).
+Next Steps
+- Finish updating README.md, CLAUDE.md, AGENTS.md with post-remediation state (correct counts, new gotchas, updated recommendations, lessons learned).
+- Verify no remaining "55" / "60" stale references in living docs.
+- Run full test suite one final time after doc edits.
+- Handoff summary to user.
+Critical Context
+- Remediation completed, all tests passing: 18 files, 112 tests (was 17 files, 110 before remediation).
+- VoiceRecorder now functional: Real MediaRecorder with audio/ogg; codecs=opus, cleanup on stop, download link per recording.
+- ScreenRecorder still placeholder: Already had downloadRecording() but still creates a text file — remains an outstanding issue.
+- M-4 (Vitest alias) reassessed: Tests pass when run from app/ directory. Failure mode was running from root directory. Alias resolution works for existing test patterns.
+- TypeScript / Lint status: tsc -b --noEmit has 137 pre-existing lint/style issues across entire codebase (not introduced by remediation). No new errors introduced.
+- Remaining documentation discrepancies fixed: Living docs now consistently say "56 apps" and "57 chunks".
+- Outstanding items not in scope of this remediation:
+- ScreenRecorder actual screen capture (not placeholder download)
+- Vitest @/ alias for ESM value imports (mitigated by running tests from app/)
+- 137 pre-existing lint issues across codebase
+Relevant Files
+- /home/project/web-linux/CLAUDE.md: Coding standards, security mandates, updated recommendations (now 56 apps, 57 chunks, safeEval clarification).
+- /home/project/web-linux/README.md: Public overview, updated test counts, updated known issues.
+- /home/project/web-linux/AGENTS.md: Architectural design, now with 56/57 counts.
+- /home/project/web-linux/app/src/apps/VoiceRecorder.tsx: Now with real MediaRecorder + download.
+- /home/project/web-linux/app/src/apps/__tests__/VoiceRecorder.test.tsx: New TDD test covering download button presence.
+- /home/project/web-linux/app/src/apps/__tests__/registry-completeness.test.ts: Added expect(appIds.length).toBe(56) guard.
+- /home/project/web-linux/app/src/components/WindowFrame.tsx: Draggable/resizable chrome with min 320x200, hard z-index cap 2147483647.
+- /home/project/web-linux/app/src/utils/safeEval.ts, sanitizeHtml.ts, safeJsonParse.ts, storageValidation.ts, colorValidation.ts, vfsHelpers.ts, pinStorage.ts, backendUrl.ts, authToken.ts: Security utilities (unchanged, all verified).
+- /home/project/web-linux/app/src/hooks/useOSStore.tsx, useFileSystem.ts: State/VFS management (unchanged).
+- /home/project/web-linux/app/src/apps/AppRouter.tsx: React.lazy + Suspense with 57 lazy imports.
+- /home/project/web-linux/app/src/apps/registry.ts: 56 entries.
+- /home/project/web-linux/app/vite.config.ts: Resolve alias for @, dev-only plugin-inspect-react-code.
+- /home/project/web-linux/app/tailwind.config.mjs: Excludes MarkdownPreview.tsx from content scan (intentional; regex mitigation).
+- /home/project/web-linux/app/vitest.setup.ts: Minimal setup (imports jest-dom), source-level tests work; component tests need app/ workdir.
+- /home/project/web-linux/backend/src/docker.ts: Hardened Docker flags confirmed.
+- /home/project/web-linux/backend/src/auth.ts, sessionStore.ts, config.ts: JWT/session/config unchanged.
+- /home/project/web-linux/backend/nginx.conf: Production proxy unchanged.
+

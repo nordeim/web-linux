@@ -1,5 +1,5 @@
 // ============================================================
-// App Registry — All 55 Apps
+// App Registry — All 56 Apps
 // ============================================================
 
 import type { AppDefinition } from '@/types';

@@ -1,6 +1,6 @@
 // ============================================================
 // App Router — Maps appId to component using React.lazy + Suspense
-// Eliminates eager imports of all 55 apps into a single bundle.
+// Eliminates eager imports of all 56 apps into a single bundle.
 // ============================================================
 
 import { lazy, Suspense } from 'react';

@@ -99,6 +99,10 @@ your last tool call failed. please try again and continue meticulously
 
 ---
 
+please meticulously review @status_23.md and validate it against the current codebase to check for alignment and to identify outstanding issues and gaps, then meticulously plan to create a detailed remediation plan with ToDo list to resolve and fix the identified/outstanding issues and gaps. Review and validate the remediation plan against the codebase again to check for accurate alignment before proceeding to execute it meticulously. use TDD approach to make code changes. 
+
+---
+
 please meticulously plan to create a detailed `Project_Architecture_Document.md` (PAD) for the project codebase. Meticulously plan and create the detailed comprehensive `Project Architecture Document` with file hierarchy diagram with listing of key files and their description, mermaid diagrams to show the application flowcharts and the database schema. Review and validate the PAD against the project planning documents and the actual codebase. Finally, create a detailed and comprehensive `Project_Architecture_Document.md` in the project root folder, as the single source-of-truth handbook to fully initialize new developer or another coding agent to be able to handle new PRs independently. 
 
 ---

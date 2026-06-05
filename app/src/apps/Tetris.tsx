@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { z } from 'zod';
+import { safeJsonParse } from '@/utils/safeJsonParse';
 
 const COLS = 10;
 const ROWS = 20;
@@ -33,9 +35,11 @@ function rotatePiece(shape: number[][]): number[][] {
   return result;
 }
 
+const HighScoreSchema = z.number().int().min(0);
+
 function getHighScore(): number {
   const val = localStorage.getItem('tetris_highscore');
-  return val ? parseInt(val, 10) : 0;
+  return safeJsonParse(val ?? '0', HighScoreSchema, 0);
 }
 function setHighScore(score: number) {
   const current = getHighScore();

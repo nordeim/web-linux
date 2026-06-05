@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { RotateCcw, Trophy } from 'lucide-react';
+import { z } from 'zod';
+import { safeJsonParse } from '@/utils/safeJsonParse';
 
 const GRAVITY = 0.5;
 const FLAP_POWER = -8;
@@ -20,8 +22,10 @@ export default function FlappyBird() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [gameState, setGameState] = useState<'menu' | 'playing' | 'over'>('menu');
   const [score, setScore] = useState(0);
+  const HighScoreSchema = z.number().int().min(0);
   const [highScore, setHighScore] = useState(() => {
-    try { return parseInt(localStorage.getItem('flappy_highscore') || '0', 10); } catch { return 0; }
+    const val = localStorage.getItem('flappy_highscore');
+    return safeJsonParse(val ?? '0', HighScoreSchema, 0);
   });
 
   // Game refs (avoid re-renders during game loop)

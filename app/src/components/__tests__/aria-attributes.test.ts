@@ -112,6 +112,50 @@ describe('Accessibility - ARIA Attributes in Source', () => {
       expect(source).toContain('aria-label="Close tab"');
     });
   });
+
+  describe('FileManager.tsx', () => {
+    const source = readSource('../../apps/FileManager.tsx');
+
+    it('has aria-label on navigate up button', () => {
+      expect(source).toContain('aria-label="Go to parent folder"');
+    });
+
+    it('has aria-label on grid view button', () => {
+      expect(source).toContain('aria-label="Grid view"');
+    });
+
+    it('has aria-label on list view button', () => {
+      expect(source).toContain('aria-label="List view"');
+    });
+
+    it('has aria-label on new folder button', () => {
+      expect(source).toContain('aria-label="New Folder"');
+    });
+
+    it('has aria-label on new file button', () => {
+      expect(source).toContain('aria-label="New File"');
+    });
+  });
+
+  describe('Settings.tsx', () => {
+    const source = readSource('../../apps/Settings.tsx');
+
+    it('has aria-label on Toggle component', () => {
+      expect(source).toContain('aria-label={ariaLabel || (value ?');
+    });
+
+    it('has aria-pressed on Toggle component', () => {
+      expect(source).toContain('aria-pressed={value}');
+    });
+
+    it('has aria-label on accent color buttons', () => {
+      expect(source).toContain('aria-label={`Accent color: ${c.name}`}');
+    });
+
+    it('has aria-pressed on accent color buttons', () => {
+      expect(source).toContain('aria-pressed={state.theme.accent === c.value}');
+    });
+  });
 });
 
 describe('Accessibility - Focus Visible Styles', () => {

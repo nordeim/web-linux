@@ -173,6 +173,7 @@ export default function FileManager() {
             onClick={navigateUp}
             className="w-7 h-7 rounded flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] disabled:opacity-30"
             disabled={!currentNode?.parentId}
+            aria-label="Go to parent folder"
           >
             <ArrowUp size={14} />
           </button>
@@ -213,6 +214,7 @@ export default function FileManager() {
               onClick={() => setViewMode('grid')}
               className="w-7 h-7 rounded flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
               style={{ background: viewMode === 'grid' ? 'var(--bg-hover)' : 'transparent' }}
+              aria-label="Grid view"
             >
               <Grid3x3 size={14} />
             </button>
@@ -220,6 +222,7 @@ export default function FileManager() {
               onClick={() => setViewMode('list')}
               className="w-7 h-7 rounded flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
               style={{ background: viewMode === 'list' ? 'var(--bg-hover)' : 'transparent' }}
+              aria-label="List view"
             >
               <List size={14} />
             </button>
@@ -230,6 +233,7 @@ export default function FileManager() {
             onClick={() => { setIsCreatingFolder(true); setTimeout(() => inputRef.current?.focus(), 50); }}
             className="w-7 h-7 rounded flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
             title="New Folder"
+            aria-label="New Folder"
           >
             <FolderPlus size={14} />
           </button>
@@ -237,6 +241,7 @@ export default function FileManager() {
             onClick={() => { setIsCreatingFile(true); setTimeout(() => inputRef.current?.focus(), 50); }}
             className="w-7 h-7 rounded flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]"
             title="New File"
+            aria-label="New File"
           >
             <FilePlus size={14} />
           </button>

@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { RotateCcw, Undo2 } from 'lucide-react';
+import { z } from 'zod';
+import { safeJsonParse } from '@/utils/safeJsonParse';
 
 const GRID_SIZE = 4;
 
@@ -21,9 +23,11 @@ function getDefaultTileColor(value: number) {
   return value > 2048 ? { bg: '#3C3A32', text: '#fff' } : (TILE_COLORS[value] || { bg: '#3C3A32', text: '#fff' });
 }
 
+const HighScoreSchema = z.number().int().min(0);
+
 function getHighScore(): number {
   const val = localStorage.getItem('2048_highscore');
-  return val ? parseInt(val, 10) : 0;
+  return safeJsonParse(val ?? '0', HighScoreSchema, 0);
 }
 function saveHighScore(score: number) {
   const current = getHighScore();

@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Lightbulb, Eraser, Pencil, RotateCcw, Clock } from 'lucide-react';
+import { z } from 'zod';
+import { safeJsonParse } from '@/utils/safeJsonParse';
 
 type CellValue = number | null;
 interface Cell {
@@ -27,9 +29,11 @@ const DIFFICULTIES = [
   { name: 'Expert', cells: 22 },
 ];
 
+const BestTimeSchema = z.number().int().min(0).nullable();
+
 function getBestTime(diff: number): number | null {
   const val = localStorage.getItem(`sudoku_best_${diff}`);
-  return val ? parseInt(val, 10) : null;
+  return safeJsonParse(val ?? 'null', BestTimeSchema, null);
 }
 function setBestTime(diff: number, time: number) {
   const current = getBestTime(diff);

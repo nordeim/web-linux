@@ -56,7 +56,7 @@ const WALLPAPERS = [
   { id: '/wallpaper-tech.jpg', name: 'Tech' },
 ];
 
-const Toggle: React.FC<{ value: boolean; onChange: (v: boolean) => void }> = ({ value, onChange }) => (
+const Toggle: React.FC<{ value: boolean; onChange: (v: boolean) => void; ariaLabel?: string }> = ({ value, onChange, ariaLabel }) => (
   <button
     onClick={() => onChange(!value)}
     className="relative h-6 rounded-full transition-colors duration-150"
@@ -64,6 +64,8 @@ const Toggle: React.FC<{ value: boolean; onChange: (v: boolean) => void }> = ({ 
       width: 40,
       background: value ? 'var(--accent-primary)' : 'var(--border-default)',
     }}
+    aria-label={ariaLabel || (value ? 'Toggle off' : 'Toggle on')}
+    aria-pressed={value}
   >
     <div
       className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-all duration-150"
@@ -165,6 +167,8 @@ const Settings: React.FC = () => {
                       boxShadow: state.theme.accent === c.value ? `0 0 0 3px white, 0 0 0 5px ${c.value}` : 'none',
                     }}
                     title={c.name}
+                    aria-label={`Accent color: ${c.name}`}
+                    aria-pressed={state.theme.accent === c.value}
                   />
                 ))}
               </div>

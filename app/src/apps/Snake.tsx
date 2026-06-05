@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { z } from 'zod';
+import { safeJsonParse } from '@/utils/safeJsonParse';
 
 const GRID_SIZE = 20;
 const CELL_SIZE = 18;
@@ -11,9 +13,11 @@ interface Position {
 
 type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
 
+const HighScoreSchema = z.number().int().min(0);
+
 function getHighScore(): number {
   const val = localStorage.getItem('snake_highscore');
-  return val ? parseInt(val, 10) : 0;
+  return safeJsonParse(val ?? '0', HighScoreSchema, 0);
 }
 function setHighScore(score: number) {
   const current = getHighScore();

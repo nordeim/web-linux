@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Bomb, Clock, Flag } from 'lucide-react';
+import { z } from 'zod';
+import { safeJsonParse } from '@/utils/safeJsonParse';
 
 type CellState = 'hidden' | 'revealed' | 'flagged' | 'questioned';
 interface Cell {
@@ -55,9 +57,11 @@ function createBoard(rows: number, cols: number, mines: number, safeRow?: number
   return board;
 }
 
+const BestTimeSchema = z.number().int().min(0).nullable();
+
 function getBestTime(diff: number): number | null {
   const val = localStorage.getItem(`minesweeper_best_${diff}`);
-  return val ? parseInt(val, 10) : null;
+  return safeJsonParse(val ?? 'null', BestTimeSchema, null);
 }
 function setBestTime(diff: number, time: number) {
   const current = getBestTime(diff);

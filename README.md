@@ -100,6 +100,16 @@ Key fixes from the comprehensive kimi-3 audit, conducted after the real terminal
 - **Added ARIA labels to icon-only buttons (H-2)**: Added `aria-label` attributes to icon-only buttons in `Calculator.tsx` (history toggle, backspace, delete) and `TextEditor.tsx` (zoom in/out, close find, close tab) to improve screen-reader accessibility.
 - **Added automated ARIA source-level tests**: Added 7 new source-level tests (`Calculator.tsx` ×3, `TextEditor.tsx` ×4) to `aria-attributes.test.ts`, bringing the suite to 81 tests. These tests verify `aria-label` presence in component source files without requiring full DOM rendering.
 
+### kilo-2 Audit Remediation (2026-06-05)
+- **Removed `manualChunks: { lucide: ... }` from `vite.config.ts` ` (H-2)**: The `manualChunks` configuration forced `lucide-react` into a single vendor chunk, undermining the named-import bundle-size optimization. Removed the `manualChunks` block entirely, restoring per-app chunking benefits.
+- **Made `plugin-inspect-react-code` dev-only (L-4)**: `inspectAttr()` is now excluded from production builds by switching `vite.config.ts` to use `defineConfig(({ mode }) => ({...}))` and conditionally including the plugin only when `mode !== 'production'`.
+- **Added zod-validated PIN storage for PasswordManager (M-7)**: `PasswordManager.tsx` no longer reads `password_manager_pin` via raw `localStorage.getItem()`. Instead, it uses `safeStoredPin()` and `saveșin()` from the new `src/utils/pinStorage.ts` module, which validates PINs against `z.string().regex(/^\d{4}$/)`. Corrupted or non-4-digit values gracefully fall back to the default `'1234'`.
+- **Extracted `recurseMoveNode` from inline closure (M-4)**: The `recurseMove` closure was duplicated inline inside `useFileSystem.moveToTrash`. Extracted to `src/utils/vfsHelpers.ts` alongside the existing `walkAndDelete` helper, eliminating ~10 lines of duplication and making the helper independently testable. 
+- **Debounced `desktopIcons` persistence (L-1)**: The `useEffect` in `OSProvider` that writes `desktopIcons` to `localStorage` on every state change now wraps the write in a 300 ms debounce with a cleanup handler. This prevents rapid re-serialization during drag operations.
+- **Added ARIA labels to PasswordManager icon-only buttons (M-5)**: Added `aria-label` attributes to 8 icon-only buttons in `PasswordManager.tsx` (Lock, Close form, Generate password, Edit, Copy password, Delete, Hide/Show password) to improve screen-reader accessibility.
+- **Removed unused dependencies and lint artifacts (L-6, L-7, L-8)**: Removed `next-themes`, `sonner`, and `tw-animate-css` from `package.json` (unused in `src/`). Removed dead `eslint-disable` directive in `safeJsonParse.ts`. Removed unused `_setToken` import from `useAuthToken.tsx`.
+- **Added `engines` field to `package.json` (L-3)**: Enforces `node >= 20`, matching the documented prerequisite.
+
 See [REMEDIATION.md](REMEDIATION.md) for the full security audit report, [REMEDIATION_MIMO2.md](REMEDIATION_MIMO2.md) for the prior code review audit remediation, and [REMEDIATION_KIMI2.md](REMEDIATION_KIMI2.md) for the latest code review audit. See [REMEDIATION_PLAN.md](REMEDIATION_PLAN.md) for the active remediation tracking, and [Code_Review_Audit_kimi-3.md](Code_Review_Audit_kimi-3.md) for the latest audit findings.
 
 ## 🎯 Real Terminal Feature Plan
@@ -162,7 +172,7 @@ After running `npm run dev`, open your browser at the provided port (usually `ht
 | :--- | :--- |
 | `npm run build` | Type-check and production build |
 | `npm run lint` | Run ESLint static analysis |
-| `npm run test` | Run Vitest unit test suite (98 tests, 15 test files) |
+| `npm run test` | Run Vitest unit test suite (110 tests, 17 test files) |
 | `npm run preview` | Local preview of the production build |
 | `tsc -b` | Project-wide type checking |
 
@@ -186,7 +196,7 @@ After running `npm run dev`, open your browser at the provided port (usually `ht
 ## ⚠️ Known Issues & Recommendations
 
 1. **VFS localStorage Limit**: The virtual file system uses `localStorage`, which has a ~5 MB limit. For large file storage, consider migrating to IndexedDB.
-2. **Accessibility - Remaining Work**: Core shell components (Dock, WindowFrame, Desktop) and the Calculator and TextEditor apps now have ARIA labels. Games and media apps may still need keyboard navigation and ARIA labels. Run a Lighthouse accessibility audit for details.
+2. **Accessibility - Remaining Work**: Core shell components (Dock, WindowFrame, Desktop) and the Calculator, TextEditor, and PasswordManager apps now have ARIA labels. Games and media apps may still need keyboard navigation and ARIA labels. Run a Lighthouse accessibility audit for details.
 3. **Split osReducer**: The `osReducer` is approximately 375 lines and handles window, dock, notification, context menu, icon, theme, and alt-tab logic. Now `export`ed for testing. Consider splitting into domain-specific reducers.
 4. **CI/CD Pipeline**: Automated build + lint + test gates are not yet implemented.
 5. **Unused Local / Import Hygiene**: The `tsconfig.app.json` enforces `"noUnusedLocals": true` and `"noUnusedParameters": true`. Prior build broke with 43 `TS6133` errors across 16 files. Keep imports lean and remove dead code promptly to prevent build regressions.

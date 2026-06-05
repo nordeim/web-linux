@@ -118,11 +118,11 @@ Follow this six-phase workflow for all implementation tasks:
 
 ### Testing
 - **TDD is effective for security-critical code**. The `safeEval` tests (24 cases) caught multiple edge cases during development.
-- **Source-level validation as test workaround**: Component-level tests using `@/` aliases fail in vitest due to module resolution issues. Source-level tests (reading file source strings) are used as a workaround for ARIA attribute validation (14 tests in `aria-attributes.test.ts`).
-- **Component rendering tests blocked**: Tests for `WindowFrame`, `Desktop`, and `Dock` that import components via `@/` aliases fail due to vitest configuration. Fix requires resolving the alias configuration or using relative imports in tests.
+- **Source-level validation as test workaround**: Component-level tests using `@/` aliases fail in vitest due to module resolution issues. Source-level tests (reading file source strings) are used as a workaround for ARIA attribute validation (14 tests in `aria-attributes.test.ts` plus new tests in `pinStorage.test.ts` and `vfsHelpers.test.ts`).
+- **Component rendering tests blocked**: Tests for `WindowFrame`, `DesktopNI`, and `Dock` that import components via `@/` aliases fail due to vitest configuration. Fix requires resolving the alias configuration or using relative imports in tests.
 
 ### Refactoring & Maintenance
-- **`walkAndDelete` reduces VFS duplication**. Extracting a single `walkAndDelete` helper eliminated ~30 lines of duplicated inline `recurseDelete` closures in `deleteNode` and `emptyTrash`. Preserving immutability (shallow-copied `nodes` object) while returning deleted IDs allows callers to clean up `trashMeta` independently.
+- **`walkAndDelete` reduces VFS duplication**. Extracting a single `walkAndDelete` helper eliminated ~30 lines of duplicated inline `recurseDelete` closures in `deleteNode` and `emptyTrash`. Preserving immutability (shallow-copied `nodes` object) while returning deleted IDs allows callers to clean up `trashMeta` independently. **Likewise for `recurseMoveNode`**: The same inline recursion was duplicated in `moveToTrash`. Extracting it to `recurseMoveNode(nodes, nodeId, newParentId)` in `src/utils/vfsHelpers.ts` eliminated another ~10 lines and is now independently testable.
 - **`TextEncoder` is lighter than `Blob` for byte counting**. `new TextEncoder().encode(content).length` produces the same UTF-8 byte count as `new Blob([content]).size` without allocating a full `Blob` object. This micro-optimization matters for frequently called operations like `writeFile`.
 - **Legacy localStorage keys must be cleaned after migration**. After migrating data from `ubuntuos_filesystem` → `ubuntuos_filesystem_v2`, the old key was left in place, causing storage bloat. Always delete the legacy key after confirming a successful migration.
 - **Mid-file imports break conventions and readability**. `useOSStore.tsx` had an `import` between helper functions, which is confusing and violates TypeScript/React style. Always keep all `import` statements at the top of the file.
@@ -147,11 +147,9 @@ Follow this six-phase workflow for all implementation tasks:
 13. **Audit all z-index increment sites**: After finding `END_ALT_TAB` was missing the z-index cap (patched in `OPEN_WINDOW` and `FOCUS_WINDOW` but not here), audit every reducer case that increments z-index to ensure `Math.min(nextZIndex + 1, 2147483647)` is applied consistently.
 14. **Remove unused dependencies immediately**: The `jose` package was installed but unused for days. Dependencies should only be added when actively needed. Regularly audit `package.json` for unused packages and remove them to reduce bundle size and attack surface.
 15. **Propagate windowId through component hierarchy**: When a component needs per-window identity (for cleanup, focus, or container mapping), always pass `windowId` explicitly rather than relying on global state or re-registering inside children.
-16. **Extract shared traversal helpers to reduce duplication**. The `walkAndDelete` helper in `useFileSystem.ts` eliminated ~30 lines of duplicated inline closures. When you see the same recursive pattern in two places, extract it.
-17. **Clean up legacy keys after data migrations**. Migrating `localStorage` data without removing the old key causes storage bloat. Delete the legacy key immediately after confirming the migration succeeded.
-18. **Keep all imports at the top of the file**. Mid-file `import` statements (e.g., `useOSStore.tsx` had one between helper functions) violate TypeScript/React conventions and confuse readers. 
-19. **Give development-only code an explicit guard**. Any utility intended only for dev/test (JWT generators, mock data, debug flags) should throw in production. This prevents accidental misuse in production builds.
-20. **Demo features need visible security warnings**. When security features (e.g., password manager, encryption) are simulated or use weak defaults, always show a prominent warning banner. Users should not mistake demo-grade security for production-grade protection.
+- **VFS traversal helpers (`walkAndDelete`, `recurseMoveNode`) should live in `src/utils/vfsHelpers.ts`**. Keeping them as reusable, independently testable functions prevents code duplication and makes the VFS logic easier to reason about.
+- **`manualChunks` for `lucide-react` undermines per-app bundle splitting**. Forcing a monolithic `lucide` chunk made every page pay the full ~587 KB cost, which is the exact opposite of the named-import optimization. Removing the `manualChunks` block lets Vite's default strategy do its job.
+- ** Debounce localStorage writes triggered by rapid UI events**. Writing `desktopIcons` to `localStorage` on every state change caused unnecessary disk flushes during drag operations. A 300 ms debounce with proper cleanup eliminates this overhead without losing the final position.
 
 ### Real Terminal Feature Implementation (Validated Plan Available)
 

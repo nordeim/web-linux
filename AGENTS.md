@@ -448,6 +448,24 @@ Run from the `app/` directory:
 **Root Cause**: The prop was added contractually but never wired into the component logic.
 **Fix**: Changed `(_props: TerminalProps)` to `({ windowId }: TerminalProps)`. The initial `lines` state now includes `windowId` in the welcome message when present, making the prop functional and enabling per-window identification.
 
+### Docker Container Orphaning (CRITICAL — Fixed 2026-06-05)
+**Symptom**: Docker containers keep accumulating on the host with `docker ps -a`, consuming disk and memory even after terminal sessions end.
+**Root Cause**: `WebSocketHandler.endSession()` killed the PTY process but never stopped or removed the Docker container. Closing a terminal tab only disconnected the WebSocket, leaving the container running.
+**Fix**: Added `stopAndRemoveContainer(containerId)` to `docker.ts`, which calls `docker.stop({ t: 2 })` and `docker.remove({ force: true })`. `endSession()` now calls this before deleting the session from the map. Grace-period expiry also triggers `stopAndRemoveContainer()`.
+**Context**: Every WebSocket session spawns a container; without cleanup, the host would eventually run out of disk or hit Docker's max container limit.
+
+### RealTerminal Rendering Bug (Fixed 2026-06-05)
+**Symptom**: The Real Terminal opens but shows a blank/black screen with no visible terminal.
+**Root Cause**: `RealTerminal.tsx` set `height: '0.001em'` (intended to "force reflow"), which made the `<div>` too small for xterm.js to render into.
+**Fix**: Changed to `height: '100%'`.
+**Lesson**: Never rely on tiny dimensions to force reflow — use `minHeight` or `flex-grow` if needed.
+
+### Exponential Backoff Mislabeling (Fixed 2026-06-05)
+**Symptom**: WebSocket reconnection used a fixed 1 s delay regardless of how many reconnects occurred, hammering the server during outages.
+**Root Cause**: Comment said "1–30 s exponential backoff" but code used `setTimeout(connect, 1000)`.
+**Fix**: Implemented actual exponential backoff with a cap: `Math.min(delay * 2, 30000)`. Added `reconnectTimer` ref to prevent stacking reconnects.
+**Context**: Prevents server overload when the backend is temporarily down or Docker is slow to spawn.
+
 ### Missing ARIA on Icon-Only Buttons (H-2)
 **Symptom**: Screen readers cannot identify the purpose of buttons that contain only an icon (no visible text).
 **Root Cause**: `Calculator.tsx` and `TextEditor.tsx` had multiple icon-only `<button>` elements without `aria-label`.
@@ -494,7 +512,7 @@ return color && isValidColor(color) ? `--color-${key}: ${color};` : null;
 10. **Remove dead code immediately**, not just comment it out. `Desktop.tsx` retained a commented `import * as Icons from 'lucide-react'` line that served no purpose and violated build hygiene.
 11. **Source-level tests are valid for accessibility regression detection**. When vitest infrastructure blocks component rendering, reading source files and asserting on ARIA attribute presence catches regressions. See `aria-attributes.test.ts` for the pattern.
 12. **Audit all z-index increment sites for the overflow cap**. After `END_ALT_TAB` was found missing the z-index cap (while `OPEN_WINDOW` and `FOCUS_WINDOW` had it), establish a pattern of auditing every point that increments z-index when changes are made. The cap is `Math.min(nextZIndex + 1, 2147483647)`.
-13. **Remove unused dependencies before they accumulate**. The `jose` JWT library was installed but unused, increasing bundle size and potential attack surface. Dependencies should only be added when actively needed; remove them if plans change.
+13. **Remove unused dependencies before they accumulate**. Dependencies should only be added when actively needed; remove them if plans change to reduce bundle size and attack surface.
 14. **Propagate windowId through the component hierarchy explicitly**. When a component's child needs per-window identity (cleanup, focus, or container mapping), always pass `windowId` as a prop. Do not rely on child components re-registering or deriving window identity from global state.
 15. **Development-only utilities must have production guards**. `authToken.ts` previously lacked a guard against production use. Any development-only helper (JWT generators, mock data injectors, debug toggles) should throw or no-op in production builds.
 16. **Never ship hardcoded secrets or demo credentials in production code**. The PasswordManager's hardcoded `MASTER_PIN = '1234'` was a critical vulnerability. Even for demo apps, secrets must be user-configurable and persisted securely. Always add a visible security warning when encryption is absent.
@@ -562,3 +580,7 @@ return color && isValidColor(color) ? `--color-${key}: ${color};` : null;
 - **`manualChunks` for `lucide-react` undermines per-app code splitting**: The `vite.config.ts` had a `manualChunks` block that forced `lucide-react` into a single vendor chunk. This made every page load pay the full ~587 KB library cost, defeating the purpose of named imports. Removing the block restores per-app bundle optimization.
 - **Debounce `localStorage` writes triggered by rapid UI events**: The `desktopIcons` state was persisted in a `useEffect` that fired on every state change, including rapid drag events. A 300 ms debounce with appropriate cleanup prevents unnecessary disk flushes and UI stutter.
 - **`pinStorage` provides zero-boilerplate validation for simple localStorage values**: The PasswordManager's PIN is now read/written through `safeStoredPin()` and `savePin()` in `src/utils/pinStorage.ts`, which validates against `z.string().regex(/^\d{4}$/)`. This guarantees a valid 4-digit PIN and removes the need for the component to handle validation logic.
+- **Docker container lifecycle must be explicit**: Every `spawn` needs a matching `stop` + `remove`. The initial `docker.ts` implementation missed this, leaving orphaned containers. Always pair resource creation with teardown, even in WebSocket disconnect handlers.
+- **Backend URLs must be configurable**: Hardcoding `ws://localhost:3001` in both `useAuthToken.tsx` and `RealTerminal.tsx` would break in any non-localhost deployment. Centralising in `backendUrl.ts` with `import.meta.env` fallbacks is the correct pattern.
+- **`height: '0.001em'` is not a reflow hack**: Using extremely small dimensions to "force reflow" just breaks rendering. Use `height: '100%'` or flex-grow instead.
+- **Reconnect delays need jitter**: A fixed 1 s reconnect delay hammers a struggling server. Exponential backoff (doubling, capped) is the correct pattern for WebSocket reconnection.

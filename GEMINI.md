@@ -18,19 +18,21 @@ Comprehensive, high-fidelity web-based replica of the Ubuntu Linux desktop envir
 
 ### Architectural Pillars
 - **OS Store (`src/hooks/useOSStore.tsx`)**: Centralized state management using `useReducer` and React Context. Handles window stacking (z-index), focus, notifications, and desktop state.
-- **Virtual File System (`src/hooks/useFileSystem.ts`)**: ID-based file management with `localStorage` persistence. Supports associations, trash, and directory traversal.
+- **Virtual File System (`src/hooks/useFileSystem.ts`)**: ID-based file management with `localStorage` persistence. Utilizes refactored traversal helpers in `src/utils/vfsHelpers.ts` (`walkAndDelete`, `recurseMoveNode`) to maintain DRY principles.
 - **Application Routing (`src/apps/AppRouter.tsx`)**: Implements `React.lazy()` and `Suspense` to code-split 55 applications, significantly reducing initial bundle size (~360 KB initial).
-- **Security Utilities (`src/utils/`)**:
-  - `safeEval.ts`: Hardened math parser replacing `eval()` for Spreadsheet and Terminal.
-  - `sanitizeHtml.ts`: DOMPurify wrappers for safe HTML injection.
-  - `storageValidation.ts`: Zod-based schema validation for all `localStorage` reads.
+- **Real Terminal**: Hybrid implementation with a Node.js backend (`backend/src/`) using `node-pty` + Docker for hardened bash sessions, and an `xterm.js` frontend (`RealTerminal.tsx`) communicating via WebSockets and JWT authentication.
+
+### Security Utilities (`src/utils/`)
+- **`safeEval.ts`**: Hardened math parser replacing `eval()` for Spreadsheet and Terminal.
+- **`sanitizeHtml.ts`**: DOMPurify wrappers for safe HTML injection.
+- **`storageValidation.ts`**: Zod-based schema validation for all `localStorage` reads.
+- **`colorValidation.ts`**: Reusable `isValidColor` check to prevent CSS injection in dynamic styling (e.g., charts).
 
 ---
 
 ## Building and Running
 
-Commands must be executed from the `app/` directory.
-
+### Frontend (`app/`)
 | Command | Action |
 | :--- | :--- |
 | `npm run dev` | Start Vite development server (usually at `localhost:3000`) |
@@ -39,6 +41,13 @@ Commands must be executed from the `app/` directory.
 | `npm run test` | Run Vitest unit tests |
 | `npm run preview` | Preview the production build locally |
 
+### Backend (`backend/`)
+| Command | Action |
+| :--- | :--- |
+| `npm run dev` | Start the Express/WebSocket server (usually at `localhost:3001`) |
+| `npm run build` | Compile TypeScript for the backend |
+| `npm run test` | Run backend Vitest tests (auth, docker, session) |
+
 ---
 
 ## Development Conventions
@@ -46,8 +55,9 @@ Commands must be executed from the `app/` directory.
 ### 🛡️ Security & Reliability
 - **No Arbitrary Execution**: `eval()` and `new Function()` are strictly **forbidden**. Use `safeEval()` for math evaluation.
 - **Mandatory Sanitization**: Always wrap `dangerouslySetInnerHTML` content in `sanitizeHtml()` or `sanitizeMarkdownHtml()`.
+- **CSS Variable Injection**: Use `isValidColor()` from `@/utils/colorValidation.ts` when injecting dynamic color values to prevent CSS injection.
 - **Schema Validation**: Never use unvalidated `JSON.parse` on `localStorage` data. Use `safeJsonParse(raw, schema, fallback)` or the `validate*` utilities in `storageValidation.ts`.
-- **ReDoS Protection**: Any app accepting user-supplied regex must limit `exec()` iterations (cap at 1000).
+- **ReDoS Protection**: Any app accepting user-supplied regex must limit `exec()` iterations (cap at 1000). Use `countMatchesSafely()` in `TextEditor.tsx`.
 
 ### 🏗️ Code Quality & Performance
 - **TypeScript Strictness**: Avoid `any`. Define explicit interfaces for all props and state.

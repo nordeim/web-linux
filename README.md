@@ -103,11 +103,17 @@ Key fixes from the comprehensive kimi-3 audit, conducted after the real terminal
 ### kilo-3 Real Terminal Implementation (2026-06-05)
 - **Implemented full-stack bash terminal with PTY support**: Backend Node.js server with WebSocket, Docker container spawning, JWT auth, and PTY bridge via `node-pty`.
 - **RealTerminal.tsx**: xterm.js v5 frontend with `ResizeObserver`, WebSocket auto-reconnect, sessionId localStorage persistence (zod-validated), and focus handling via `useOS`.
-- **JWT authentication**: Backend `/auth/token` endpoint issues signed JWTs via `jose` library; frontend `useAuthToken` hook fetches from backend in production, falls back to dev-only generator locally.
+- **JWT authentication**: Backend `/auth/token` endpoint issues signed JWTs via `jose` library; frontend `useAuthToken` fetches from backend in production, falls back to dev-only generator locally.
 - **Docker hardening**: Containers spawned with `--read-only`, `--cap-drop=ALL`, `--network=none`, `-u 1000:1000`, CPU/memory/PID limits.
 - **Session persistence**: Disconnect grace period (5 min), heartbeat, auto-reconnect with exponential backoff, cleanup on unmount.
+- **Backend URL centralisation**: Created `src/utils/backendUrl.ts` to resolve backend URLs from `import.meta.env` with dev defaults, eliminating hardcoded `localhost:3001` strings.
 
-### kilo-2 Audit Remediation (2026-06-05)
+### kilo-3 Remediation (2026-06-05)
+- **Fixed Docker container orphaning (CRITICAL)**: `endSession()` in `websocket.ts` previously killed the PTY but never stopped/removed the Docker container. Added `stopAndRemoveContainer()` to `docker.ts` and called it in `endSession()`, preventing resource leaks.
+- **Implemented reconnection (HIGH)**: `startSession()` now checks `this.sessions.get(sessionId)` and reuses the existing container/PTY if a session already exists, preserving bash state across browser refreshes.
+- **Wired `SESSION_TTL` into `SessionStore`**: Added `ttlMs` option to `SessionStore`; `cleanupExpired()` now removes sessions that exceed both grace period and total TTL.
+- **Fixed RealTerminal rendering bug**: Changed `height: '0.001em'` to `height: '100%'` to ensure the terminal is visible.
+- **Implemented exponential reconnect backoff**: Reconnect delay now doubles (capped at 30 s) instead of using a fixed 1 s delay.
 - **Removed `manualChunks: { lucide: ... }` from `vite.config.ts` ` (H-2)**: The `manualChunks` configuration forced `lucide-react` into a single vendor chunk, undermining the named-import bundle-size optimization. Removed the `manualChunks` block entirely, restoring per-app chunking benefits.
 - **Made `plugin-inspect-react-code` dev-only (L-4)**: `inspectAttr()` is now excluded from production builds by switching `vite.config.ts` to use `defineConfig(({ mode }) => ({...}))` and conditionally including the plugin only when `mode !== 'production'`.
 - **Added zod-validated PIN storage for PasswordManager (M-7)**: `PasswordManager.tsx` no longer reads `password_manager_pin` via raw `localStorage.getItem()`. Instead, it uses `safeStoredPin()` and `saveșin()` from the new `src/utils/pinStorage.ts` module, which validates PINs against `z.string().regex(/^\d{4}$/)`. Corrupted or non-4-digit values gracefully fall back to the default `'1234'`.

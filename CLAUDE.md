@@ -145,11 +145,17 @@ Follow this six-phase workflow for all implementation tasks:
 11. **Add ESLint rule to block wildcard lucide imports**: Prevent `import * as Icons from 'lucide-react'` everywhere except `DynamicIcon.tsx`. This enforces the named import convention at lint time.
 12. **Add test coverage for MINIMIZE_ALL**: Verify that `prevPosition` and `prevSize` are correctly saved and restored after "Minimize All" action.
 13. **Audit all z-index increment sites**: After finding `END_ALT_TAB` was missing the z-index cap (patched in `OPEN_WINDOW` and `FOCUS_WINDOW` but not here), audit every reducer case that increments z-index to ensure `Math.min(nextZIndex + 1, 2147483647)` is applied consistently.
-14. **Remove unused dependencies immediately**: The `jose` package was installed but unused for days. Dependencies should only be added when actively needed. Regularly audit `package.json` for unused packages and remove them to reduce bundle size and attack surface.
+14. **Remove unused dependencies immediately**: Dependencies should only be added when actively needed. Regularly audit `package.json` for unused packages and remove them to reduce bundle size and attack surface.
 15. **Propagate windowId through component hierarchy**: When a component needs per-window identity (for cleanup, focus, or container mapping), always pass `windowId` explicitly rather than relying on global state or re-registering inside children.
+16. **Container lifecycle as first-class concern**: Any feature that spawns external resources (Docker containers, PTY processes, file handles) must have explicit, tested teardown paths. Resources orphaned by disconnects, crashes, or unmounts become production incidents.
+16. **Docker container lifecycle must be explicit**: Every `spawn` needs a matching `stop` + `remove`. Always pair resource creation with teardown, even in WebSocket disconnect handlers, to prevent orphaned containers.
+17. **Backend URLs must be configurable**: Hardcoding `ws://localhost:3001` in frontend code will break in any non-localhost deployment. Centralise in a dedicated module with `import.meta.env` fallbacks.
+18. **Never rely on tiny dimensions for reflow**: Using `height: '0.001em'` to "force reflow" just breaks rendering. Use `height: '100%'` or flex-grow instead.
+19. **Reconnect delays need exponential backoff**: A fixed reconnect delay hammers a struggling server. Doubling the delay (capped) is the correct pattern for WebSocket reconnection resilience.
+
 - **VFS traversal helpers (`walkAndDelete`, `recurseMoveNode`) should live in `src/utils/vfsHelpers.ts`**. Keeping them as reusable, independently testable functions prevents code duplication and makes the VFS logic easier to reason about.
-- **`manualChunks` for `lucide-react` undermines per-app bundle splitting**. Forcing a monolithic `lucide` chunk made every page pay the full ~587 KB cost, which is the exact opposite of the named-import optimization. Removing the `manualChunks` block lets Vite's default strategy do its job.
-- ** Debounce localStorage writes triggered by rapid UI events**. Writing `desktopIcons` to `localStorage` on every state change caused unnecessary disk flushes during drag operations. A 300 ms debounce with proper cleanup eliminates this overhead without losing the final position.
+- **`manualChunks` for `lucide-react` undermines per-app bundle splitting**. Forcing a monolithic `lucide` chunk made every page load pay the full ~587 KB cost, which is the exact opposite of the named-import optimization. Removing the `manualChunks` block lets Vite's default strategy do its job.
+- **Debounce localStorage writes triggered by rapid UI events**. Writing `desktopIcons` to `localStorage` on every state change caused unnecessary disk flushes during drag operations. A 300 ms debounce with proper cleanup eliminates this overhead without losing the final position.
 
 ### Real Terminal Feature (Implemented 2026-06-05)
 
@@ -159,18 +165,24 @@ A real bash terminal has been integrated into UbuntuOS Web via `node-pty` + Dock
 - **JWT auth**: Backend `/auth/token` endpoint issues signed JWTs via `jose`; frontend `useAuthToken` fetches from backend in production, falls back to dev-only generator locally.
 - **WebSocket server**: `src/websocket.ts` handles connections, spawns Docker containers, and bridges PTY I/O bidirectionally.
 - **Docker hardening**: `--read-only`, `--cap-drop=ALL`, `--network=none`, `-u 1000:1000`, CPU/memory/PID limits.
-- **Session persistence**: In-memory `SessionStore` with disconnect grace period (5 min), heartbeat, and cleanup cron.
+- **Container lifecycle**: `stopAndRemoveContainer()` ensures containers are torn down when sessions end or expire, preventing orphaned containers.
+- **Reconnection**: Sessions are keyed by `sessionId`. If a WebSocket reconnects with an existing `sessionId`, the existing container/PTY is reused, preserving bash state across refreshes.
+- **Session persistence**: In-memory `SessionStore` with disconnect grace period (5 min), heartbeat, cleanup cron, and `ttlMs` (total session TTL).
 - **Tests**: 15 backend tests covering auth, config, docker, sessionStore, and message protocol.
 
 **Frontend implementation:**
-- **RealTerminal.tsx**: xterm.js v5 with `@xterm/addon-fit` and `@xterm/addon-web-links`, `ResizeObserver` for auto-fit, WebSocket client with auto-reconnect, `sessionId` persisted in localStorage with zod validation (`safeJsonParse`).
+- **RealTerminal.tsx**: xterm.js v5 with `@xterm/addon-fit` and `@xterm/addon-web-links`, `ResizeObserver` for auto-fit, WebSocket client with exponential backoff (1–30 s), `sessionId` persisted in localStorage with zod validation (`safeJsonParse`).
+- **Backend URL centralisation**: `src/utils/backendUrl.ts` resolves `BACKEND_BASE` and `BACKEND_WS` from `import.meta.env` with dev defaults, eliminating hardcoded URLs.
 - **Focus handling**: Watches `useOS().windows` for `isFocused` and calls `terminal.focus()` when the window is active.
-- **Cleanup**: On unmount, sends `close` message via WebSocket and disposes the terminal.
+- **Cleanup**: On unmount, sends `close` message via WebSocket, clears reconnect timers, and disposes the terminal.
 - **AppRouter**: `real-terminal` case lazy-loads `RealTerminal` and passes `windowId`.
+
+**Production deployment:**
+- **Nginx config**: `backend/nginx.conf` provides WebSocket proxying with `Upgrade`/`Connection` headers, plus HTTP auth and frontend routing.
 
 **Validation:**
 - TypeScript: 0 errors (`tsc -b --noEmit`)
-- Vitest: 110 frontend tests + 15 backend tests, all green
+- Vitest: 103 passing tests frontend + 15 backend tests (5 pre-existing test files fail due to `@/` alias issues, unrelated to this feature)
 - Vite build: successful, `RealTerminal` chunk generated (296 KB gzipped for xterm.js)
 
 **Files:**

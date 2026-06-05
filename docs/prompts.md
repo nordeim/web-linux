@@ -111,6 +111,10 @@ Awesome meticulous job so far. Please keep up the good work. Now, please meticul
 
 ---
 
+awesome meticulous job so far. please keep up the good work. now, please meticulously review and audit the RealTerminal implementation of the codebase against the planning documents @Code_Review_Audit_xterm_VALIDATED.md ,               @Validated_Implementation_Plan_Real_Terminal.md and @plan_xterm.md 
+
+---
+
 awesome meticulous job so far. please keep up the good work. now, please meticulously review @changes_to_validate.txt and validate the recent code changes as captured by the included `git diff` outputs
 You need to do a rigorous review, validating everything in the diff against the project's stated conventions and security rules.
 

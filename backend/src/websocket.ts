@@ -95,9 +95,9 @@ export class WebSocketHandler {
     });
 
     ws.on('close', () => {
+      this.store.disconnect(sessionId);
       void this.endSession(sessionId);
     });
-    this.store.disconnect(sessionId);
   }
 
   private handleMessage(

@@ -34,6 +34,8 @@ export default function RealTerminal({ windowId }: RealTerminalProps) {
   const reconnectDelay = useRef(1000);
   const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const heartbeatInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+
   const connect = useCallback(() => {
     const sessionId = getOrCreateSessionId();
     const token = state.auth.authToken ?? '';
@@ -42,6 +44,12 @@ export default function RealTerminal({ windowId }: RealTerminalProps) {
 
     ws.onopen = () => {
       reconnectDelay.current = 1000; // Reset backoff on successful connection
+      // Start heartbeat to keep session alive
+      heartbeatInterval.current = setInterval(() => {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ type: 'heartbeat' }));
+        }
+      }, 30000);
     };
 
     ws.onmessage = (event) => {
@@ -56,6 +64,11 @@ export default function RealTerminal({ windowId }: RealTerminalProps) {
     };
 
     ws.onclose = () => {
+      // Clear heartbeat on disconnect
+      if (heartbeatInterval.current) {
+        clearInterval(heartbeatInterval.current);
+        heartbeatInterval.current = null;
+      }
       // Exponential backoff capped at 30 s
       if (reconnectTimer.current) return;
       reconnectTimer.current = setTimeout(() => {
@@ -115,6 +128,11 @@ export default function RealTerminal({ windowId }: RealTerminalProps) {
 
     return () => {
       resizeObserver.disconnect();
+      // Clear heartbeat on unmount
+      if (heartbeatInterval.current) {
+        clearInterval(heartbeatInterval.current);
+        heartbeatInterval.current = null;
+      }
       if (wsRef.current?.readyState === WebSocket.OPEN) {
         wsRef.current.send(JSON.stringify({ type: 'close' }));
         wsRef.current.close();

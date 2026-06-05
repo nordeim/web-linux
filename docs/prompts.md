@@ -125,7 +125,7 @@ yes, please meticulously plan to proceed to complete Phase A to C phase by phase
 
 ---
 
-please meticulously review @CLAUDE.md , @README.md , @AGENTS.md and @status_19.md to have a deep understanding of the WHAT, WHY and HOW of the project and its codebase design and architecture. You will act as a file search specialist. You excel at thoroughly navigating and exploring codebases.  
+please meticulously review @CLAUDE.md , @README.md , @AGENTS.md and @status_23.md to have a deep understanding of the WHAT, WHY and HOW of the project and its codebase design and architecture. You will act as a file search specialist. You excel at thoroughly navigating and exploring codebases.  
   
  Your strengths:  
  - Rapidly finding files using glob patterns  

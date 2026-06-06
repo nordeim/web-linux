@@ -52,7 +52,7 @@ if [ "$1" = "--run" ]; then
     echo ""
     
     docker run -it --rm \
-        -p 80:80 \
+        -p 80:8080 \
         -p 3001:3001 \
         -v /var/run/docker.sock:/var/run/docker.sock \
         -e JWT_SECRET="dev-secret-change-in-production" \
@@ -63,7 +63,7 @@ else
     echo ""
     echo "  # Using docker run:"
     echo "  docker run -d \\"
-    echo "    -p 80:80 \\"
+    echo "    -p 80:8080 \\"
     echo "    -p 3001:3001 \\"
     echo "    -v /var/run/docker.sock:/var/run/docker.sock \\"
     echo "    -e JWT_SECRET=your-secret-here \\"

@@ -43,7 +43,7 @@ export class CommandPolicyEngine {
    * Evaluate a command against the policy.
    * Returns whether the command is allowed and why.
    */
-  evaluate(sessionId: string, command: string): CommandRestrictionResult {
+  evaluate(_sessionId: string, command: string): CommandRestrictionResult {
     // Check command length
     if (command.length > this.policy.maxCommandLength) {
       return {

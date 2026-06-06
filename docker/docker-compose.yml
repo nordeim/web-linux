@@ -1,0 +1,65 @@
+# =============================================================================
+# UbuntuOS Web — Docker Compose Configuration
+# =============================================================================
+# Single-container deployment with Docker-in-Docker support
+# =============================================================================
+
+services:
+  ubuntuos:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+      args:
+        - NODE_ENV=production
+    container_name: ubuntuos-web
+    restart: unless-stopped
+    
+    # ---- Ports ----
+    ports:
+      - "${APP_PORT:-8080}:8080"
+      - "${BACKEND_PORT:-3001}:3001"
+    
+    # ---- Environment Variables ----
+    environment:
+      - NODE_ENV=production
+      - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
+      - DOCKER_IMAGE=${DOCKER_IMAGE:-ubuntuos-terminal:latest}
+      - SESSION_TTL=${SESSION_TTL:-3600}
+      - GRACE_PERIOD=${GRACE_PERIOD:-300}
+    
+    # ---- Docker Socket (for terminal containers) ----
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    
+    # ---- Resource Limits ----
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+    
+    # ---- Health Check ----
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    
+    # ---- Logging ----
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    # ---- Network ----
+    networks:
+      - ubuntuos-network
+
+networks:
+  ubuntuos-network:
+    driver: bridge

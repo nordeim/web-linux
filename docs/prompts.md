@@ -131,6 +131,10 @@ awesome meticulous job so far. please keep up the good work. now, please meticul
 
 ---
 
+please meticulously plan to create the necessary Docker container config files with the following structure to fully deploy the project 'UbuntuOS Web' application as a single Docker container. Use the official Docker image `node:24-alpine` as the base image for the `Dockerfile`.
+
+---
+
 awesome meticulous job so far. please keep up the good work. now, please meticulously review @changes_to_validate.txt and validate the recent code changes as captured by the included `git diff` outputs
 You need to do a rigorous review, validating everything in the diff against the project's stated conventions and security rules.
 

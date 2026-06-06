@@ -1,0 +1,63 @@
+# =============================================================================
+# UbuntuOS Web — Docker Ignore File
+# =============================================================================
+# Excludes files from Docker build context
+# =============================================================================
+
+# ---- Dependencies ----
+**/node_modules
+**/.npm
+**/.yarn
+
+# ---- Build Outputs ----
+**/dist
+**/build
+**/.next
+**/.nuxt
+
+# ---- Development Files ----
+**/.git
+**/.gitignore
+**/.env
+**/.env.local
+**/.env.*.local
+
+# ---- IDE Files ----
+**/.vscode
+**/.idea
+**/*.swp
+**/*.swo
+**/*~
+
+# ---- Test Files ----
+**/__tests__
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+**/coverage
+**/.coverage
+
+# ---- Documentation ----
+**/*.md
+**/LICENSE
+**/CHANGELOG
+
+# ---- Docker Files (avoid recursion) ----
+docker/.env.docker
+docker/docker-compose.yml
+
+# ---- OS Files ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Logs ----
+**/*.log
+**/logs
+
+# ---- Temporary Files ----
+**/tmp
+**/temp
+**/*.tmp
+**/*.temp

@@ -115,6 +115,10 @@ awesome meticulous job so far. please keep up the good work. now, please meticul
 
 ---
 
+please meticulously review @status_24.md and validate it against the codebase, then meticulously plan to create a remediation plan with a detailed ToDo list to complete the remaining outstanding tasks like updating README.md, CLAUDE.md and AGENTS.md files.
+
+---
+
 awesome meticulous job so far. please keep up the good work. now, please meticulously review @changes_to_validate.txt and validate the recent code changes as captured by the included `git diff` outputs
 You need to do a rigorous review, validating everything in the diff against the project's stated conventions and security rules.
 

@@ -110,6 +110,9 @@ Follow this six-phase workflow for all implementation tasks:
 - **Unbounded array creation from user input crashes browsers**. The Calculator factorial function previously created an array of size `Math.floor(v)` without a cap, allowing input like `1e8` to crash the tab. Always cap input-dependent allocations (factorial capped at 170, where JavaScript `Number` overflows to `Infinity`).
 - **Development-only utilities must have production guards**. `authToken.ts` previously lacked a guard against production use. Any development-only helper (JWT generators, mock data injectors, debug toggles) should throw immediately when `import.meta.env.PROD` is true, preventing accidental misuse.
 - **Demo apps still need security hygiene**. The PasswordManager's hardcoded `MASTER_PIN = '1234'` was a critical vulnerability. Even for demo features, secrets must be user-configurable, persisted with schema validation, and accompanied by a visible security warning.
+- **Security infrastructure must be wired into the main code path**. The Phase 3 security files (`types.ts`, `logger.ts`, `policy.ts`) were created but not imported or used by `websocket.ts`. Command filtering and audit logging were effectively disabled despite files existing. Always verify that security modules are actually integrated, not just present in the codebase.
+- **Never call `disconnect()` during connection setup**. `websocket.ts` called `this.store.disconnect(sessionId)` at the end of the connection setup method, immediately marking new sessions as disconnected and triggering premature cleanup. Move lifecycle methods (connect, disconnect, cleanup) to the correct event handlers (`ws.on('close')`, `ws.on('error')`).
+- **Client heartbeat prevents premature session timeout**. The server expected periodic heartbeats but the client never sent them. Add a heartbeat interval (e.g., every 30 seconds) and clear it on disconnect/unmount to keep sessions alive.
 
 ### State Management
 - **Monolithic reducers are hard to maintain**. The `osReducer` is approximately 375 lines and violates separation of concerns. Consider splitting into domain-specific reducers or switching to a state management library with selectors.
@@ -169,7 +172,7 @@ A real bash terminal has been integrated into UbuntuOS Web via `node-pty` + Dock
 - **Container lifecycle**: `stopAndRemoveContainer()` ensures containers are torn down when sessions end or expire, preventing orphaned containers.
 - **Reconnection**: Sessions are keyed by `sessionId`. If a WebSocket reconnects with an existing `sessionId`, the existing container/PTY is reused, preserving bash state across refreshes.
 - **Session persistence**: In-memory `SessionStore` with disconnect grace period (5 min), heartbeat, cleanup cron, and `ttlMs` (total session TTL).
-- **Tests**: 15 backend tests covering auth, config, docker, sessionStore, and message protocol.
+- **Tests**: 33 backend tests (9 test files) covering auth, config, docker, sessionStore, message protocol, logger, and policy.
 
 **Frontend implementation:**
 - **RealTerminal.tsx**: xterm.js v5 with `@xterm/addon-fit` and `@xterm/addon-web-links`, `ResizeObserver` for auto-fit, WebSocket client with exponential backoff (1–30 s), `sessionId` persisted in localStorage with zod validation (`safeJsonParse`).
@@ -183,7 +186,7 @@ A real bash terminal has been integrated into UbuntuOS Web via `node-pty` + Dock
 
 **Validation:**
 - TypeScript: 0 errors (`tsc -b --noEmit`)
-- Vitest: 112 passing tests frontend + 15 backend tests (component tests using `@/` aliases work when run from the `app/` directory)
+- Vitest: 136 passing tests frontend + 33 backend tests (169 total). Component tests using `@/` aliases work when run from the `app/` directory.
 - Vite build: successful, `RealTerminal` chunk generated (296 KB gzipped for xterm.js)
 
 **Files:**

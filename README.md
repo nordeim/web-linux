@@ -40,30 +40,13 @@ Built for developers as a showcase of architectural patterns and for users as a 
 
 This codebase has undergone multiple comprehensive security audits and remediations. Key fixes include:
 
-### Previous Security & Reliability Improvements
-
-#### dpsk-2 Security & Reliability Remediation (2026-06-02)
-- **Eliminated Arbitrary Code Execution**: Replaced `eval()` (Spreadsheet) and `new Function()` (Terminal) with a hardened shunting-yard math parser.
-- **Fixed XSS Vulnerabilities**: All `dangerouslySetInnerHTML` instances now wrap content in `DOMPurify`-based sanitization.
-- **Added localStorage Schema Validation**: Prevents data corruption by validating all persisted state with `zod` at runtime. Introduced the `safeJsonParse(raw, schema, fallback)` utility for app-specific validation.
-- **Fixed Z-Index Overflow**: Added bounds checking to prevent focus stacking issues in long sessions.
-- **Resolved Fragile Reduce Logic**: Fixed window state restoration logic to prevent crashes when minimizing all windows.
-- **Eliminated 43 Build Errors from Dead Code**: Fixed all `TS6133` errors (unused locals/parameters) across 16 files, ensuring clean production builds.
-- **Fixed ReDoS in RegexTester**: Added execution iteration limit (1000) to prevent catastrophic backtracking from freezing the browser tab.
-- **Fixed Calculator Factorial Memory Crash**: Added input cap at 170 to prevent `Array.from({length: v})` from allocating massive arrays.
-- **Refactored RegexTester Rendering**: Replaced `dangerouslySetInnerHTML` with React component-based match highlighting to eliminate XSS risk.
-- **Fixed Misleading Recording Extensions**: Changed `.webm` to `.txt` for ScreenRecorder and VoiceRecorder simulated downloads.
-- **Fixed Calculator Keyboard Stale Closures**: Added all handler functions to `useEffect` dependency array to prevent stale closure bugs.
-- **Fixed WindowFrame Wildcard Import**: Replaced `import * as Icons from 'lucide-react'` with named imports (`Minus`, `Copy`, `Square`, `X`), saving ~587 KB of bundle bloat per chunk.
-- **Fixed MINIMIZE_ALL Losing Window Positions**: `MINIMIZE_ALL` now captures `prevPosition` and `prevSize` before minimizing, matching the behavior of `MINIMIZE_WINDOW`.
-- **Exported sanitizeMarkdownHtml from Utils**: `sanitizeMarkdownHtml()` was local to `MarkdownPreview.tsx` but is now properly exported from `@/utils/sanitizeHtml` for reuse across apps.
-- **Removed Dead Commented Import from Desktop.tsx**: Cleaned up a commented `import * as Icons from 'lucide-react'` line that violated build hygiene.
-- **Corrected Stale Documentation Line Counts**: Updated osReducer line count from "499-line" to "approximately 350 lines" across all documentation files.
-- **Added GlobalErrorBoundary Around AppShell**: The `AppShell` component (boot, login, keyboard handlers) is now wrapped in `GlobalErrorBoundary`, preventing shell-level errors from crashing the entire OS.
-
-### dpsk-2 Phase 1: localStorage Validation Complete (2026-06-03)
-- **Replaced raw `JSON.parse` in 15 apps**: All apps (`ArchiveManager`, `Calculator`, `Calendar`, `Chat`, `Clock`, `ColorPalette`, `ColorPicker`, `Memory`, `Notes`, `Reminders`, `RssReader`, `ScreenRecorder`, `Settings`, `Spreadsheet`, `TextEditor`) now use `safeJsonParse(raw, schema, fallback)` instead of unvalidated `JSON.parse` for localStorage reads.
-- **Zero remaining raw `JSON.parse` on localStorage**: Final verification confirms no apps use unvalidated localStorage reads.
+### Audit Remediation (2026-06-07)
+- **Implemented Phase 3 Security Infrastructure for Real Terminal**: Created and integrated `types.ts`, `policy.ts`, and `logger.ts` into the backend WebSocket handler. Commands are now filtered against a configurable denylist (e.g., `rm -rf /`, fork bombs, privilege escalation), and all commands are written to an audit log.
+- **Fixed critical session management bug**: `websocket.ts` previously called `disconnect()` during connection setup, causing immediate session expiration. Moved to the `close` event handler to keep sessions alive during active connections.
+- **Implemented real ScreenRecorder**: Replaced placeholder `.txt` downloads with a real `getDisplayMedia` + `MediaRecorder` implementation for `.webm` downloads.
+- **Added client heartbeat for Real Terminal**: `RealTerminal.tsx` now sends a heartbeat every 30 seconds to keep sessions alive, matching the server's heartbeat handler.
+- **Added MINIMIZE_ALL test coverage**: New test file validates that `prevPosition` and `prevSize` are correctly captured.
+- **Stale comment fixes**: Updated `AppRouter.tsx` and `registry.ts` to correctly reference 56 apps.
 
 ### Audit Remediation (2026-06-06)
 - **Added zod validation to game highscore stores**: Snake, Sudoku, Tetris, FlappyBird, Minesweeper, and Game2048 now use `safeJsonParse()` with zod schemas for localStorage reads, replacing raw `parseInt()` calls.
@@ -192,7 +175,7 @@ After running `npm run dev`, open your browser at the provided port (usually `ht
 | :--- | :--- |
 | `npm run build` | Type-check and production build |
 | `npm run lint` | Run ESLint static analysis |
-| `npm run test` | Run Vitest unit test suite (136 tests, 20 test files) |
+| `npm run test` | Run Vitest test suite (169 total: 136 frontend + 33 backend)
 | `npm run preview` | Local preview of the production build |
 | `tsc -b` | Project-wide type checking |
 

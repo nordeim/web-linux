@@ -1,216 +1,115 @@
-# Comprehensive Remediation Plan: Post-Audit Fixes & Documentation Alignment
+# UbuntuOS Web — Audit Remediation Plan
 
-**Date:** 2026-06-02
-**Scope:** Address all issues and gaps identified during validation of `status_5.md` and `status_6.md`
-**Status:** Planning Phase
-
----
-
-## Executive Summary
-
-This remediation plan addresses **5 categories** of issues discovered during the validation of `status_5.md` (mimo-2 remediation) and `status_6.md` (kimi-2 remediation):
-
-1. **🔴 Critical Fixes** (1 item): Missing `GlobalErrorBoundary` around `AppShell`
-2. **🟡 Documentation Inconsistencies** (3 items): CONSISTENT.md, AGENTS.md, README.md misalignment
-3. **🟡 Cross-Document Gaps** (4 items): Missing security rules, recommendations, lessons learned
-4. **🟡 Mischaracterization Corrections** (2 items): osReducer.test.ts, Calculator stale closure
-5. **🟢 Deferred Items** (2 items): useOS() optimization, handleMenuAction refactor
-
-**Total Items:** 12
-**Estimated Effort:** 2-3 hours
-**Risk Level:** Low (all changes are localized, no architecture changes)
+**Date:** 2026-06-06
+**Auditor:** Claw Code
+**Approach:** TDD (Test-Driven Development)
+**Source:** AUDIT_REPORT.md findings
 
 ---
 
-## Phase 1: Critical Fixes
+## 1. Re-Evaluation Summary
 
-### C1: Add GlobalErrorBoundary Around AppShell
+All 10 findings from the audit report have been re-against the current codebase. All confirmed as accurate:
 
-**Priority:** 🔴 Critical
-**File:** `app/src/App.tsx`
-**Problem:** The `AppShell` component (lines 19-203) is NOT wrapped in `GlobalErrorBoundary`. If any error occurs during boot, login, or shell rendering, the entire OS crashes. The existing `GlobalErrorBoundary` only wraps `AppRouter` inside `WindowManager` (individual app level), not the shell level.
-**Impact:** A single error in `BootSequence`, `LoginScreen`, or any shell-level component crashes the entire UbuntuOS web app with a white screen.
-**Fix:**
-```tsx
-// In App.tsx, wrap AppShell with GlobalErrorBoundary
-function App() {
-  return (
-    <OSProvider>
-      <GlobalErrorBoundary>
-        <AppShell />
-      </GlobalErrorBoundary>
-    </OSProvider>
-  );
-}
-```
-**Verification:**
-- Build passes (`npm run build`)
-- TypeScript compiles (`npx tsc -b --noEmit`)
-- Simulate an error in BootSequence (e.g., `throw new Error('test')`) and verify the error boundary catches it
+| # | Finding | Status | Root Cause |
+|---|---------|--------|-----------|
+| D1 | `vitest.config.ts` listed but doesn't exist | ✅ Confirmed | File hierarchy copied from template; test config lives in `vite.config.ts` |
+| D3 | MatrixRain listed as DevTools | ✅ Confirmed | Copy/paste error in Appendix A |
+| D4 | ColorPalette listed as Creative | ✅ Confirmed | Copy/paste swap with MatrixRain |
+| D5 | `countMatchesSafely()` in RegexTester | ✅ Confirmed | Text added before audit; location never corrected |
+| D2 | `storageValidation.test.ts` missing | ✅ Confirmed | Test infrastructure added; specific test never created |
+| D6 | Backend modules: 8 vs 9 | ✅ Confirmed | Arithmetic error in doc summary |
+| B1/B2 | `generateId()` uses `Math.random()` | ✅ Confirmed | Good enough for UI but not cryptographically random |
+| B3 | MINIMIZE_ALL doesn't update z-index | ✅ Confirmed | Actually correct behavior — no active window after minimize all |
 
 ---
 
-## Phase 2: Documentation Inconsistencies
+## 2. Detailed Remediation Plan
 
-### D1: Create CONSISTENT.md — Single Source of Truth
+### Phase 1: Documentation Fixes (Project_Architecture_Document.md)
 
-**Priority:** 🟡 High
-**File:** `CONSISTENT.md` (new)
-**Problem:** Findings, fixes, and recommendations are scattered across `CLAUDE.md`, `AGENTS.md`, `README.md`, `REMEDIATION.md`, `REMEDIATION_MIMO2.md`, `REMEDIATION_KIMI2.md`, `status_5.md`, `status_6.md`, and `STATUS_AUDIT_REPORT.md`. Future agents cannot determine which document to trust.
-**Fix:** Create `CONSISTENT.md` that:
-1. Lists ALL findings from all audits with their current status
-2. Links to the exact line in source code
-3. Notes which document claimed what (for traceability)
-4. Is updated atomically with each change
+### Task 1.1: Fix `vitest.config.ts` claim
+**File:** `Project_Architecture_Document.md` Section 2
+**Fix:** Remove `vitest.config.ts` from file hierarchy. Add note: `Test config embedded in vite.config.ts`
+**Test:** Assert file does not reference `vitest.config.ts` as standalone file
 
-### D2: Fix AGENTS.md — Remove or Correct status_5.md Claims
+### Task 1.2: Fix MatrixRain & ColorPalette in Appendix A
+**File:** `Project_Architecture_Document.md` Appendix A
+**Fix:** Move MatrixRain from DevTools → Creative; move ColorPalette from Creative → DevTools
+**Test:** Assert MatrixRain in Creative, ColorPalette in DevTools
 
-**Priority:** 🟡 High
-**File:** `AGENTS.md`
-**Problems:**
-1. **Missing security rules:** No mention of ReDoS protection, unbounded array creation
-2. **Missing gotchas:** No mention of CASCADE_WINDOWS z-index issue, Calculator keyboard stale closures
-3. **Missing lessons:** No mention of `eval()` lesson, `dangerouslySetInnerHTML` lesson
-4. **Inconsistent with CLAUDE.md:** AGENTS.md doesn't reference the same security improvements as CLAUDE.md
+### Task 1.3: Fix `countMatchesSafely()` location
+**File:** `Project_Architecture_Document.md` Section 6.2
+**Fix:** Change location from `apps/RegexTester.tsx` to `apps/TextEditor.tsx`
+**Test:** Assert text says `TextEditor.tsx` not `RegexTester.tsx`
 
-**Fix:**
-- Add ReDoS and unbounded array rules to "Anti-Patterns to Avoid"
-- Add CASCADE_WINDOWS and keyboard stale closure to "Troubleshooting & Gotchas"
-- Add `eval()` and `dangerouslySetInnerHTML` lessons to "Lessons Learned"
-- Ensure all items in AGENTS.md have exact matches in CLAUDE.md
+### Task 1.4: Fix backend module count
+**File:** `Project_Architecture_Document.md` Summary metrics
+**Fix:** Change 8 → 9
+**Test:** Assert count is 9
 
-### D3: Fix README.md — Add Missing Documentation Links
+### Task 1.5: Fix line counts in Appendix B
+**File:** `Project_Architecture_Document.md` Appendix B
+**Fix:** Update ~350→309, ~80→62, ~200→180, ~100→94
+**Test:** Assert line counts match actual
 
-**Priority:** 🟡 High
-**File:** `README.md`
-**Problems:**
-1. Missing links to `REMEDIATION_KIMI2.md` and `STATUS_AUDIT_REPORT.md`
-2. "Known Issues & Recommendations" only has 6 items, should have 8
-3. Missing mention of `CONSISTENT.md` when created
+### Phase 2: Create Missing Test File (TDD)
 
-**Fix:**
-- Add `REMEDIATION_KIMI2.md` and `STATUS_AUDIT_REPORT.md` to Documentation table
-- Add items #7 (ReDoS) and #8 (Simulated recordings) to Known Issues
-- Reference `CONSISTENT.md` as the authoritative audit status document
+### Task 2.1: Write `storageValidation.test.ts`
+**File:** `app/src/utils/__tests__/storageValidation.test.ts`
+**Test Cases:**
+- `validateDesktopIcons()` returns defaults when localStorage empty
+- `validateDesktopIcons()` returns parsed data when localStorage has valid data
+- `validateDesktopIcons()` returns defaults when localStorage has corrupted data
+- `validateFileSystem()` returns defaults when localStorage empty
+- `validateFileSystem()` returns parsed data when localStorage has valid data
+- `validateFileSystem()` returns defaults when localStorage has corrupted data
+- `saveDesktopIcons()` writes to localStorage
+- `saveFileSystem()` writes to localStorage
 
----
+### Phase 3: Code Improvements (TDD)
 
-## Phase 3: Cross-Document Gaps
-
-### G1: Missing Security Rules in All Documents
-
-**Priority:** 🟡 High
-**Affected:** `CLAUDE.md`, `AGENTS.md`, `README.md`
-**Problem:** The ReDoS fix and unbounded array fix are only mentioned in REMEDIATION files, not in the main documentation.
-**Fix:** Add to all three:
-- **ReDoS:** "Any app accepting user-supplied regex must limit `exec()` iterations to prevent catastrophic backtracking (e.g., 1000 iterations)."
-- **Unbounded Arrays:** "Any function creating arrays from user input (e.g., factorial) must cap input size (e.g., 170 for factorial)."
-
-### G2: Missing Recommendations
-
-**Priority:** 🟡 Medium
-**Affected:** `CLAUDE.md`
-**Problem:** Recommendations #7-9 (ReDoS guards, replace remaining dangerouslySetInnerHTML, MediaRecorder implementation) are only in CLAUDE.md, not in AGENTS.md or README.md.
-**Fix:** Add to AGENTS.md "Outstanding Issues" and README.md "Known Issues & Recommendations"
-
-### G3: Missing Lessons Learned
-
-**Priority:** 🟡 Medium
-**Affected:** `AGENTS.md`
-**Problem:** Lessons from kimi-2 remediation (ReDoS, unbounded arrays, `dangerouslySetInnerHTML` refactor) are not in AGENTS.md.
-**Fix:** Add to AGENTS.md "Lessons Learned" section
-
-### G4: Missing Troubleshooting Tips
-
-**Priority:** 🟡 Medium
-**Affected:** `AGENTS.md`
-**Problem:** Troubleshooting tips for ReDoS, unbounded arrays, and CASCADE_WINDOWS z-index are not in AGENTS.md.
-**Fix:** Add to AGENTS.md "Troubleshooting & Gotchas" section
+### Task 3.1: Improve `generateId()`
+**File:** `app/src/hooks/useOSStore.tsx`, `app/src/hooks/useFileSystem.ts`
+**Current:** `let idCounter = 0; const generateId = () => ...` — not crypto-random, resets on hot reload
+**Fix:** Use `crypto.randomUUID()` + timestamp for collision-resistant IDs
+**Test:** Assert all IDs are unique even across 1000 calls
 
 ---
 
-## Phase 4: Mischaracterization Corrections
-
-### M1: Fix osReducer.test.ts Mischaracterization in status_6.md
-
-**Priority:** 🟡 Medium
-**File:** `app/src/hooks/__tests__/osReducer.test.ts` (no code change needed, but document the correction)
-**Problem:** `status_6.md` claims `osReducer.test.ts` says `osReducer` is "not exported" but the file literally says "exported directly."
-**Fix:** Document in `CONSISTENT.md` that this was a misread. No code changes needed.
-
-### M2: Fix Calculator "Stale Closure" Fix Characterization
-
-**Priority:** 🟡 Medium
-**File:** `app/src/apps/Calculator.tsx`
-**Problem:** The dependency array in Calculator.tsx (`[inputDigit, inputDecimal, performOp, calculate, clear, backspace, percentage]`) already includes all handler functions. The "fix" claimed in `status_6.md` (Fix 6) is actually a no-op because there was no bug.
-**Fix:** Document in `CONSISTENT.md` that the dependency array was already correct. No code changes needed.
-
----
-
-## Phase 5: Deferred Items (No Action Needed, Document Only)
-
-### DF1: useOS() Broad Subscription Optimization
-
-**Status:** Deferred (not a bug, architectural improvement)
-**Reason:** `AppShell` subscribes to full OS state. Fixing this requires splitting the monolithic reducer, creating selectors, and updating all consumers. Significant refactor beyond scope.
-**Documentation:** Note in `CONSISTENT.md` as "deferred architectural improvement"
-
-### DF2: handleMenuAction Refactor
-
-**Status:** Deferred (not a bug, architectural improvement)
-**Reason:** Functionally correct. Moving to hook/reducer would be cleaner but doesn't fix a bug.
-**Documentation:** Note in `CONSISTENT.md` as "deferred architectural improvement"
-
----
-
-## Execution Order
+## 3. Execution Order
 
 ```
-Phase 1 (Critical):
-  1.1 C1: Add GlobalErrorBoundary around AppShell in App.tsx
-  1.2 Verify: Build passes, TypeScript compiles
+Phase 1: Documentation Fixes
+  ├── Task 1.1: Fix vitest.config.ts (5 min)
+  ├── Task 1.2: Fix MatrixRain/ColorPalette (5 min)
+  ├── Task 1.3: Fix countMatchesSafely location (3 min)
+  ├── Task 1.4: Fix backend module count (1 min)
+  └── Task 1.5: Fix line counts (3 min)
 
-Phase 2 (Documentation):  
-  2.1 D1: Create CONSISTENT.md
-  2.2 D2: Update AGENTS.md with missing rules, gotchas, lessons
-  2.3 D3: Update README.md with missing links and issues
-  2.4 Verify: Cross-document consistency
+Phase 2: Create Missing Test (TDD)
+  ├── Step 1: Write test file (15 min)
+  ├── Step 2: Run tests (fail) (2 min)
+  ├── Step 3: source code is correct — tests should pass (verify) (2 min)
+  └── Step 4: Run tests (pass) (2 min)
 
-Phase 3 (Cross-Document Gaps):
-  3.1 G1: Add ReDoS and unbounded array rules to all docs
-  3.2 G2: Propagate recommendations #7-9 to all docs
-  3.3 G3: Add lessons learned to AGENTS.md
-  3.4 G4: Add troubleshooting tips to AGENTS.md
-  3.5 Verify: All docs tell the same story
-
-Phase 4 (Corrections):
-  4.1 M1: Document osReducer.test.ts misread in CONSISTENT.md
-  4.2 M2: Document Calculator "fix" was no-op in CONSISTENT.md
-
-Phase 5 (Deferred):
-  5.1 Document DF1 and DF2 in CONSISTENT.md
-
-Phase 6 (Final Verification):
-  6.1 Run `npx tsc -b --noEmit`
-  6.2 Run `npm run build`
-  6.3 Verify all documents are consistent
-  6.4 Commit all changes
+Phase 3: generateId Improvement (TDD)
+  ├── Step 1: Write test for generateId uniqueness (5 min)
+  ├── Step 2: Run test (fail if not implemented) (2 min)
+  ├── Step 3: Implement crypto.randomUUID() + timestamp fix (5 min)
+  └── Step 4: Run test (pass) (2 min)
 ```
 
 ---
 
-## Verification Checklist
+## 4. Validation Checklist
 
-Before marking this plan complete, verify:
-
-- [ ] `App.tsx` has `GlobalErrorBoundary` wrapping `AppShell`
-- [ ] TypeScript compiles (`npx tsc -b --noEmit`)
-- [ ] Production build succeeds (`npm run build`)
-- [ ] `CONSISTENT.md` exists and lists all findings
-- [ ] `AGENTS.md` has ReDoS, unbounded array rules
-- [ ] `AGENTS.md` has CASCADE_WINDOWS, keyboard stale closure gotchas
-- [ ] `AGENTS.md` has `eval()`, `dangerouslySetInnerHTML`, ReDoS, unbounded array lessons
-- [ ] `README.md` has all 8 known issues
-- [ ] `README.md` links to `REMEDIATION_KIMI2.md` and `STATUS_AUDIT_REPORT.md`
-- [ ] All three docs have identical security rules
-- [ ] No contradictions between any two documents
+- [ ] D1 fixed: No reference to `vitest.config.ts` as standalone file
+- [ ] D2 fixed: `storageValidation.test.ts` exists and passes
+- [ ] D3/D4 fixed: MatrixRain in Creative, ColorPalette in DevTools
+- [ ] D5 fixed: `countMatchesSafely()` in TextEditor, not RegexTester
+- [ ] D6 fixed: Backend modules show 9, not 8
+- [ ] B1/B2 fixed: `generateId()` uses `crypto.randomUUID()`
+- [ ] B3 verified: MINIMIZE_ALL z-index behavior confirmed correct (no change)
+- [ ] New tests added: storageValidation.test.ts (8 tests)
+- [ ] Existing tests still pass: 169/169

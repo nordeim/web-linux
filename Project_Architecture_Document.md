@@ -44,7 +44,7 @@
 | Frontend Test Files | 20 |
 | Backend Test Files | 9 |
 | Total Tests | 169 |
-| Backend Modules | 8 (index, config, auth, docker, websocket, sessionStore, policy, logger, types) |
+| Backend Modules | 9 (index, config, auth, docker, websocket, sessionStore, policy, logger, types) |
 
 ---
 
@@ -63,7 +63,6 @@
 │   ├── 📄 package.json                   # Dependencies & scripts
 │   ├── 📄 tsconfig.app.json              # TypeScript config (strict, erasableSyntaxOnly)
 │   ├── 📄 vite.config.ts                 # Vite config with /ws proxy
-│   ├── 📄 vitest.config.ts               # Test configuration
 │   ├── 📄 tailwind.config.mjs            # Tailwind configuration
 │   ├── 📄 index.html                     # Entry HTML
 │   │
@@ -561,7 +560,7 @@ interface DesktopIcon {
 | `validateDesktopIcons()` | `utils/storageValidation.ts` | Desktop icon persistence |
 | `validateFileSystem()` | `utils/storageValidation.ts` | VFS persistence |
 | `isValidColor()` | `utils/colorValidation.ts` | CSS color validation |
-| `countMatchesSafely()` | `apps/RegexTester.tsx` | ReDoS prevention |
+| `countMatchesSafely()` | `apps/TextEditor.tsx` | ReDoS prevention |
 
 ### 6.3 Backend Security
 
@@ -829,8 +828,8 @@ npm run docker:test     # Validates image works
 | Internet | 7 | Browser, Email, Chat, Weather, RssReader, FtpClient, NetworkTools |
 | Media | 7 | MusicPlayer, VideoPlayer, ImageViewer, PhotoEditor, VoiceRecorder, ScreenRecorder, MediaConverter |
 | Games | 11 | Minesweeper, Snake, Tetris, TicTacToe, Game2048, Sudoku, Chess, Memory, Pong, Solitaire, FlappyBird |
-| DevTools | 8 | CodeEditor, JsonFormatter, RegexTester, MarkdownPreview, GitClient, ApiTester, Base64Tool, MatrixRain |
-| Creative | 5 | ColorPalette, Drawing, ColorPicker, ImageGallery, AsciiArt |
+| DevTools | 8 | CodeEditor, JsonFormatter, RegexTester, MarkdownPreview, GitClient, ApiTester, Base64Tool, ColorPalette |
+| Creative | 5 | MatrixRain, Drawing, ColorPicker, ImageGallery, AsciiArt |
 
 ---
 
@@ -840,15 +839,15 @@ npm run docker:test     # Validates image works
 |------|-------|---------|
 | `useOSStore.tsx` | ~530 | OS state engine (reducer + context) |
 | `useFileSystem.ts` | ~300 | VFS operations |
-| `WindowFrame.tsx` | ~350 | Window chrome (drag/resize) |
+| `WindowFrame.tsx` | ~310 | Window chrome (drag/resize) |
 | `AppRouter.tsx` | ~150 | Lazy loading router |
 | `registry.ts` | ~540 | App metadata for all 56 apps |
 | `types/index.ts` | ~250 | All TypeScript definitions |
 | `safeEval.ts` | ~150 | Math parser (Shunting-Yard) |
-| `sanitizeHtml.ts` | ~80 | XSS prevention |
+| `sanitizeHtml.ts` | ~62 | XSS prevention |
 | `storageValidation.ts` | ~100 | localStorage validation |
-| `websocket.ts` | ~200 | PTY ↔ WebSocket bridge |
-| `docker.ts` | ~100 | Container lifecycle |
+| `websocket.ts` | ~180 | PTY ↔ WebSocket bridge |
+| `docker.ts` | ~94 | Container lifecycle |
 
 ---
 

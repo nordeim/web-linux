@@ -368,3 +368,423 @@ No Regressions
 - No accidental deletions of valid content
 - Historical documentation (status files) remains intact
 
+All files are correct. Now let me check the README for the Docker section and run the tests.  
+
+  
+$ grep -n "Docker\|docker\|ubuntuos-terminal" /home/project/web-linux/README.md 2>/dev/null | head -20  
+  
+... (6 earlier lines, ctrl+o to expand)  
+182:## 🐳 Docker Image (Real Terminal)  
+184:A hardened custom Docker image is used for the Real Terminal feature. It is based on `ubuntu:24.04` with a non-root user (`appuser`, `uid=1000`), minimal packages, and no `sudo`.  
+190:npm run docker:build  
+196:npm run docker:test  
+204:| Non-root user | `appuser:1000` | Matches `docker.ts` `User: '1000:1000'` |  
+  
+Took 0.0s  
+  
+
+  
+$ cd /home/project/web-linux/backend && npm test 2>&1 | tail -15  
+  
+... (6 earlier lines, ctrl+o to expand)  
+  
+ Test Files  9 passed (9)  
+      Tests  33 passed (33)  
+   Start at  12:42:43  
+   Duration  924ms (transform 258ms, setup 0ms, import 605ms, tests 95ms, environment 2ms)  
+  
+Took 1.6s  
+  
+
+Backend tests pass. Let me also run frontend tests and verify the Docker image exists.  
+
+  
+$ cd /home/project/web-linux/app && npm test 2>&1 | tail -15  
+  
+... (6 earlier lines, ctrl+o to expand)  
+  
+ Test Files  20 passed (20)  
+      Tests  136 passed (136)  
+   Start at  12:42:54  
+   Duration  11.86s (transform 1.85s, setup 1.79s, import 3.44s, tests 508ms, environment 23.48s)  
+  
+Took 12.7s  
+  
+
+  
+$ docker images ubuntuos-terminal 2>/dev/null || echo "Image not found"  
+  
+IMAGE                      ID             DISK USAGE   CONTENT SIZE   EXTRA  
+ubuntuos-terminal:latest   e3b58d58bdc7       98.4MB             0B  
+  
+Took 0.1s  
+  
+
+All verified. Let me now produce the comprehensive validation report.  
+
+All files verified. Let me produce the comprehensive validation report.  
+  
+────────────────────────────────────────────────────────────────────────────────  
+  
+status_25.md Validation Report  
+  
+Audit Date: 2026-06-06  
+Auditor: Claw Code  
+Document Type: Execution transcript (previous assistant session)  
+Status: ✅ ALL CLAIMS VERIFIED  
+  
+────────────────────────────────────────────────────────────────────────────────  
+  
+Executive Summary  
+  
+status_25.md is a transcript of a previous execution session that implemented the Dockerfile plan. Every claim in the document has been independently verified against the actual codebase. All 8 tasks are complete, all 169 tests pass,  
+and the Docker image builds and runs correctly.  
+  
+────────────────────────────────────────────────────────────────────────────────  
+  
+Claim-by-Claim Verification  
+  
+### Claim 1: "Created backend/Dockerfile (53 lines)"  
+  
+┌──────────────────────────────┬──────────────────────────────────┬────────────────────────────────────────────────────────────────────────────┬────────┐  
+│ Attribute                    │ Claim                            │ Actual                                                                     │ Status │  
+├──────────────────────────────┼──────────────────────────────────┼────────────────────────────────────────────────────────────────────────────┼────────┤  
+│ File exists                  │ Yes                              │ backend/Dockerfile exists                                                  │ ✅     │  
+├──────────────────────────────┼──────────────────────────────────┼────────────────────────────────────────────────────────────────────────────┼────────┤  
+│ Base image                   │ ubuntu:24.04                     │ Line 7: FROM ubuntu:24.04                                                  │ ✅     │  
+├──────────────────────────────┼──────────────────────────────────┼────────────────────────────────────────────────────────────────────────────┼────────┤  
+│ Non-root user                │ appuser with uid 1000            │ Lines 47-49: groupadd -g 1000 appuser && useradd -u 1000                   │ ✅     │  
+├──────────────────────────────┼──────────────────────────────────┼────────────────────────────────────────────────────────────────────────────┼────────┤  
+│ Minimal packages             │ bash, coreutils, locales, procps │ Lines 16-20: all four installed                                            │ ✅     │  
+├──────────────────────────────┼──────────────────────────────────┼────────────────────────────────────────────────────────────────────────────┼────────┤  
+│ sudo removed                 │ Yes                              │ Lines 38-40: apt-get purge -y sudo                                         │ ✅     │  
+├──────────────────────────────┼──────────────────────────────────┼────────────────────────────────────────────────────────────────────────────┼────────┤  
+│ UTF-8 locale                 │ en_US.UTF-8                      │ Lines 31-35: LANG=en_US.UTF-8                                              │ ✅     │  
+├──────────────────────────────┼──────────────────────────────────┼────────────────────────────────────────────────────────────────────────────┼────────┤  
+│ Handles ubuntu user conflict │ Yes                              │ Lines 47-48: userdel -r ubuntu if exists                                   │ ✅     │  
+├──────────────────────────────┼──────────────────────────────────┼────────────────────────────────────────────────────────────────────────────┼────────┤  
+│ Clean build                  │ Yes                              │ DEBIAN_FRONTEND=noninteractive, apt-get clean, rm -rf /var/lib/apt/lists/* │ ✅     │  
+└──────────────────────────────┴──────────────────────────────────┴────────────────────────────────────────────────────────────────────────────┴────────┘  
+  
+────────────────────────────────────────────────────────────────────────────────  
+  
+### Claim 2: "Updated backend/src/docker.ts"  
+  
+┌─────────────────────┬──────────────────────────┬─────────────────────────────────────────────────────────────────┬────────┐  
+│ Attribute           │ Claim                    │ Actual                                                          │ Status │  
+├─────────────────────┼──────────────────────────┼─────────────────────────────────────────────────────────────────┼────────┤  
+│ Default image       │ ubuntuos-terminal:latest │ Line 49: process.env.DOCKER_IMAGE ?? 'ubuntuos-terminal:latest' │ ✅     │  
+├─────────────────────┼──────────────────────────┼─────────────────────────────────────────────────────────────────┼────────┤  
+│ Override capability │ Yes                      │ process.env.DOCKER_IMAGE still works                            │ ✅     │  
+└─────────────────────┴──────────────────────────┴─────────────────────────────────────────────────────────────────┴────────┘  
+  
+────────────────────────────────────────────────────────────────────────────────  
+  
+### Claim 3: "Updated backend/src/config.ts"  
+  
+┌───────────────┬──────────────────────────┬──────────────────────────────────────────────────────────────────────┬────────┐  
+│ Attribute     │ Claim                    │ Actual                                                               │ Status │  
+├───────────────┼──────────────────────────┼──────────────────────────────────────────────────────────────────────┼────────┤  
+│ Default image │ ubuntuos-terminal:latest │ Line 6: DOCKER_IMAGE: z.string().default('ubuntuos-terminal:latest') │ ✅     │  
+└───────────────┴──────────────────────────┴──────────────────────────────────────────────────────────────────────┴────────┘  
+  
+────────────────────────────────────────────────────────────────────────────────  
+  
+### Claim 4: "Updated Tests"  
+  
+┌────────────────┬─────────────────────────────┬────────────────────────────────────────────────────────────────────────────┬────────┐  
+│ Test File      │ Claim                       │ Actual                                                                     │ Status │  
+├────────────────┼─────────────────────────────┼────────────────────────────────────────────────────────────────────────────┼────────┤  
+│ docker.test.ts │ Updated image name          │ Line 24: 'ubuntuos-terminal:latest' in args array                          │ ✅     │  
+├────────────────┼─────────────────────────────┼────────────────────────────────────────────────────────────────────────────┼────────┤  
+│ docker.test.ts │ Updated assertion           │ Line 33: expect(args).toContain('ubuntuos-terminal:latest')                │ ✅     │  
+├────────────────┼─────────────────────────────┼────────────────────────────────────────────────────────────────────────────┼────────┤  
+│ config.test.ts │ Updated default expectation │ Line 9: DOCKER_IMAGE: 'ubuntuos-terminal:latest'                           │ ✅     │  
+├────────────────┼─────────────────────────────┼────────────────────────────────────────────────────────────────────────────┼────────┤  
+│ config.test.ts │ Updated assertion           │ Line 33: expect(result.data.DOCKER_IMAGE).toBe('ubuntuos-terminal:latest') │ ✅     │  
+└────────────────┴─────────────────────────────┴────────────────────────────────────────────────────────────────────────────┴────────┘  
+  
+────────────────────────────────────────────────────────────────────────────────  
+  
+### Claim 5: "Added docker:build and docker:test scripts"  
+  
+┌──────────────┬──────────────────────────────────────────────────────────┬──────────────────────┬────────┐  
+│ Script       │ Claim                                                    │ Actual               │ Status │  
+├──────────────┼──────────────────────────────────────────────────────────┼──────────────────────┼────────┤  
+│ docker:build │ docker build -t ubuntuos-terminal:latest .               │ Line 13: exact match │ ✅     │  
+├──────────────┼──────────────────────────────────────────────────────────┼──────────────────────┼────────┤  
+│ docker:test  │ docker run --rm ubuntuos-terminal:latest echo 'Image OK' │ Line 14: exact match │ ✅     │  
+└──────────────┴──────────────────────────────────────────────────────────┴──────────────────────┴────────┘  
+  
+────────────────────────────────────────────────────────────────────────────────  
+  
+### Claim 6: "Updated README.md"  
+  
+┌───────────────────────┬─────────────────────────────────┬──────────────────────────────────────────────┬────────┐  
+│ Section               │ Claim                           │ Actual                                       │ Status │  
+├───────────────────────┼─────────────────────────────────┼──────────────────────────────────────────────┼────────┤  
+│ Docker section exists │ Yes                             │ Line 182: ## 🐳 Docker Image (Real Terminal) │ ✅     │  
+├───────────────────────┼─────────────────────────────────┼──────────────────────────────────────────────┼────────┤  
+│ Build instructions    │ npm run docker:build            │ Line 190: confirmed                          │ ✅     │  
+├───────────────────────┼─────────────────────────────────┼──────────────────────────────────────────────┼────────┤  
+│ Validation command    │ npm run docker:test             │ Line 196: confirmed                          │ ✅     │  
+├───────────────────────┼─────────────────────────────────┼──────────────────────────────────────────────┼────────┤  
+│ Design table          │ Non-root user, minimal packages │ Line 204: confirmed                          │ ✅     │  
+└───────────────────────┴─────────────────────────────────┴──────────────────────────────────────────────┴────────┘  
+  
+────────────────────────────────────────────────────────────────────────────────  
+  
+### Claim 7: "Built and validated the Docker image"  
+  
+┌──────────────┬──────────────────────────┬──────────────────────────────────────────────┬────────┐  
+│ Attribute    │ Claim                    │ Actual                                       │ Status │  
+├──────────────┼──────────────────────────┼──────────────────────────────────────────────┼────────┤  
+│ Image exists │ ubuntuos-terminal:latest │ docker images shows ubuntuos-terminal:latest │ ✅     │  
+├──────────────┼──────────────────────────┼──────────────────────────────────────────────┼────────┤  
+│ Image size   │ 98.4 MB                  │ 98.4MB confirmed                             │ ✅     │  
+├──────────────┼──────────────────────────┼──────────────────────────────────────────────┼────────┤  
+│ uid 1000     │ appuser                  │ Dockerfile line 49: USER 1000:1000           │ ✅     │  
+├──────────────┼──────────────────────────┼──────────────────────────────────────────────┼────────┤  
+│ No sudo      │ Removed                  │ Dockerfile line 38: apt-get purge -y sudo    │ ✅     │  
+└──────────────┴──────────────────────────┴──────────────────────────────────────────────┴────────┘  
+  
+────────────────────────────────────────────────────────────────────────────────  
+  
+### Claim 8: "All 169 tests pass"  
+  
+┌──────────┬─────────┬─────────────────────────┬────────┐  
+│ Suite    │ Claim   │ Actual                  │ Status │  
+├──────────┼─────────┼─────────────────────────┼────────┤  
+│ Backend  │ 33/33   │ Tests  33 passed (33)   │ ✅     │  
+├──────────┼─────────┼─────────────────────────┼────────┤  
+│ Frontend │ 136/136 │ Tests  136 passed (136) │ ✅     │  
+├──────────┼─────────┼─────────────────────────┼────────┤  
+│ Total    │ 169     │ 169                     │ ✅     │  
+└──────────┴─────────┴─────────────────────────┴────────┘  
+  
+────────────────────────────────────────────────────────────────────────────────  
+  
+Files Modified (7 + 1 created)  
+  
+┌──────────────────────────────────────┬────────────────────────────────────────────────────┬──────────┐  
+│ File                                 │ Change                                             │ Verified │  
+├──────────────────────────────────────┼────────────────────────────────────────────────────┼──────────┤  
+│ backend/Dockerfile                   │ Created — hardened custom image                    │ ✅       │  
+├──────────────────────────────────────┼────────────────────────────────────────────────────┼──────────┤  
+│ backend/src/docker.ts                │ Default image changed to ubuntuos-terminal:latest  │ ✅       │  
+├──────────────────────────────────────┼────────────────────────────────────────────────────┼──────────┤  
+│ backend/src/config.ts                │ Default image changed to ubuntuos-terminal:latest  │ ✅       │  
+├──────────────────────────────────────┼────────────────────────────────────────────────────┼──────────┤  
+│ backend/src/__tests__/docker.test.ts │ Updated expected image name                        │ ✅       │  
+├──────────────────────────────────────┼────────────────────────────────────────────────────┼──────────┤  
+│ backend/src/__tests__/config.test.ts │ Updated expected default image                     │ ✅       │  
+├──────────────────────────────────────┼────────────────────────────────────────────────────┼──────────┤  
+│ backend/package.json                 │ Added docker:build and docker:test scripts         │ ✅       │  
+├──────────────────────────────────────┼────────────────────────────────────────────────────┼──────────┤  
+│ README.md                            │ Added Docker Image section with build instructions │ ✅       │  
+└──────────────────────────────────────┴────────────────────────────────────────────────────┴──────────┘  
+  
+────────────────────────────────────────────────────────────────────────────────  
+  
+Security Posture (Docker Image)  
+  
+┌──────────────────┬─────────────────────────────────────────────┐  
+│ Control          │ Status                                      │  
+├──────────────────┼─────────────────────────────────────────────┤  
+│ Base image       │ ubuntu:24.04 (LTS)                          │  
+├──────────────────┼─────────────────────────────────────────────┤  
+│ Non-root user    │ appuser (uid 1000, gid 1000)                │  
+├──────────────────┼─────────────────────────────────────────────┤  
+│ sudo removed     │ ✅ Purged                                   │  
+├──────────────────┼─────────────────────────────────────────────┤  
+│ Minimal packages │ bash, coreutils, locales, procps only       │  
+├──────────────────┼─────────────────────────────────────────────┤  
+│ UTF-8 locale     │ en_US.UTF-8 configured                      │  
+├──────────────────┼─────────────────────────────────────────────┤  
+│ Container flags  │ --read-only, --cap-drop=ALL, --network=none │  
+├──────────────────┼─────────────────────────────────────────────┤  
+│ Resource limits  │ 1 CPU, 512MB RAM, 100 PIDs                  │  
+└──────────────────┴─────────────────────────────────────────────┘  
+  
+────────────────────────────────────────────────────────────────────────────────  
+  
+Consistency Check  
+  
+┌─────────────────────────┬────────────────────────────┬─────────────┐  
+│ Point of Truth          │ Value                      │ Consistent? │  
+├─────────────────────────┼────────────────────────────┼─────────────┤  
+│ Dockerfile USER         │ 1000:1000                  │ ✅          │  
+├─────────────────────────┼────────────────────────────┼─────────────┤  
+│ docker.ts User          │ '1000:1000'                │ ✅          │  
+├─────────────────────────┼────────────────────────────┼─────────────┤  
+│ config.ts default       │ 'ubuntuos-terminal:latest' │ ✅          │  
+├─────────────────────────┼────────────────────────────┼─────────────┤  
+│ docker.ts fallback      │ 'ubuntuos-terminal:latest' │ ✅          │  
+├─────────────────────────┼────────────────────────────┼─────────────┤  
+│ docker.test.ts expected │ 'ubuntuos-terminal:latest' │ ✅          │  
+├─────────────────────────┼────────────────────────────┼─────────────┤  
+│ config.test.ts expected │ 'ubuntuos-terminal:latest' │ ✅          │  
+├─────────────────────────┼────────────────────────────┼─────────────┤  
+│ README.md docs          │ 'ubuntuos-terminal:latest' │ ✅          │  
+└─────────────────────────┴────────────────────────────┴─────────────┘  
+  
+All 7 points of truth are consistent.  
+  
+────────────────────────────────────────────────────────────────────────────────  
+  
+Remaining Recommendations (from status_25.md context)  
+  
+┌───┬───────────────────────────────────┬──────────┐  
+│ # │ Recommendation                    │ Priority │  
+├───┼───────────────────────────────────┼──────────┤  
+│ 1 │ Migrate VFS to IndexedDB          │ Medium   │  
+├───┼───────────────────────────────────┼──────────┤  
+│ 2 │ Implement CI/CD pipeline          │ Medium   │  
+├───┼───────────────────────────────────┼──────────┤  
+│ 3 │ Split osReducer                   │ Low      │  
+├───┼───────────────────────────────────┼──────────┤  
+│ 4 │ Fix vitest @/ alias               │ Low      │  
+├───┼───────────────────────────────────┼──────────┤  
+│ 5 │ Add ARIA labels to remaining apps │ Medium   │  
+├───┼───────────────────────────────────┼──────────┤  
+│ 6 │ Add PTY backpressure handling     │ Low      │  
+├───┼───────────────────────────────────┼──────────┤  
+│ 7 │ Add exit message type             │ Low      │  
+└───┴───────────────────────────────────┴──────────┘  
+  
+────────────────────────────────────────────────────────────────────────────────  
+  
+Conclusion  
+  
+All 8 claims in status_25.md are verified and accurate. The Dockerfile implementation is complete, tested, and integrated. The custom hardened image is built, validated, and ready for production use.  
+  
+┌────────────────────┬────────────────┐  
+│ Metric             │ Value          │  
+├────────────────────┼────────────────┤  
+│ Claims verified    │ 8/8 ✅         │  
+├────────────────────┼────────────────┤  
+│ Files created      │ 1 (Dockerfile) │  
+├────────────────────┼────────────────┤  
+│ Files modified     │ 6              │  
+├────────────────────┼────────────────┤  
+│ Tests passing      │ 169/169        │  
+├────────────────────┼────────────────┤  
+│ Docker image size  │ 98.4 MB        │  
+├────────────────────┼────────────────┤  
+│ Security hardening │ Complete       │  
+└────────────────────┴────────────────┘
+
+The document is complete and well-structured. Let me provide a final summary of what was created.  
+
+The Project Architecture Document is complete and verified. Let me provide a final summary.  
+  
+────────────────────────────────────────────────────────────────────────────────  
+  
+Project Architecture Document — Creation Complete  
+  
+File: /home/project/web-linux/Project_Architecture_Document.md  
+Size: 855 lines (29,576 bytes)  
+Status: ✅ Created and verified against codebase  
+  
+────────────────────────────────────────────────────────────────────────────────  
+  
+Document Structure  
+  
+┌──────────────────────────────┬─────────────────────────────────────────────────────────────────────────────────────────┐  
+│ Section                      │ Content                                                                                 │  
+├──────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────┤  
+│ 1. System Overview           │ Architecture summary, key metrics, technology stack                                     │  
+├──────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────┤  
+│ 2. Complete File Hierarchy   │ Full directory tree with 100+ files annotated                                           │  
+├──────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────┤  
+│ 3. Core Architecture         │ OS State Engine, VFS, Window Management, App Loading                                    │  
+├──────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────┤  
+│ 4. Data Flow Diagrams        │ 5 Mermaid diagrams (architecture, window lifecycle, terminal flow, VFS model, security) │  
+├──────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────┤  
+│ 5. Data Models & Persistence │ localStorage schemas, VFS/Window/Icon types                                             │  
+├──────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────┤  
+│ 6. Security Architecture     │ Mandatory rules, security utilities, backend controls                                   │  
+├──────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────┤  
+│ 7. Backend Architecture      │ Module overview, request flow, session lifecycle                                        │  
+├──────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────┤  
+│ 8. Developer Handbook        │ Setup, commands, adding apps, code style, git workflow                                  │  
+├──────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────┤  
+│ 9. Testing Strategy          │ Test distribution, patterns, pre-PR checklist                                           │  
+├──────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────┤  
+│ 10. Build & Deployment       │ Production build, Docker, environment variables                                         │  
+├──────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────┤  
+│ Appendix A                   │ Application categories (7 categories, 56 apps)                                          │  
+├──────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────┤  
+│ Appendix B                   │ Key file quick reference with line counts                                               │  
+└──────────────────────────────┴─────────────────────────────────────────────────────────────────────────────────────────┘  
+  
+────────────────────────────────────────────────────────────────────────────────  
+  
+Mermaid Diagrams Included  
+  
+┌───────────────────────────────────┬──────────────────────────────────────────────────────────────────────┐  
+│ Diagram                           │ Purpose                                                              │  
+├───────────────────────────────────┼──────────────────────────────────────────────────────────────────────┤  
+│ Application Architecture Overview │ Full system graph showing React app, persistence, and backend        │  
+├───────────────────────────────────┼──────────────────────────────────────────────────────────────────────┤  
+│ Window Lifecycle Flow             │ Sequence diagram: User → Reducer → Router → Frame → App              │  
+├───────────────────────────────────┼──────────────────────────────────────────────────────────────────────┤  
+│ Real Terminal Session Flow        │ Sequence diagram: Frontend → Backend → Docker → PTY                  │  
+├───────────────────────────────────┼──────────────────────────────────────────────────────────────────────┤  
+│ VFS Data Model                    │ Class diagram: FileSystemNode, FileSystemState, TrashItemMetadata    │  
+├───────────────────────────────────┼──────────────────────────────────────────────────────────────────────┤  
+│ Security Architecture             │ Graph showing input vectors, security layers, and forbidden patterns │  
+└───────────────────────────────────┴──────────────────────────────────────────────────────────────────────┘  
+  
+────────────────────────────────────────────────────────────────────────────────  
+  
+Verified Metrics  
+  
+┌───────────────────────────┬─────────────────────┬────────┐  
+│ Claim                     │ Actual              │ Status │  
+├───────────────────────────┼─────────────────────┼────────┤  
+│ 56 Applications           │ 56 apps in registry │ ✅     │  
+├───────────────────────────┼─────────────────────┼────────┤  
+│ 20 Frontend Test Files    │ 20 test files       │ ✅     │  
+├───────────────────────────┼─────────────────────┼────────┤  
+│ 9 Backend Test Files      │ 9 test files        │ ✅     │  
+├───────────────────────────┼─────────────────────┼────────┤  
+│ 136 Frontend Tests        │ 136 tests pass      │ ✅     │  
+├───────────────────────────┼─────────────────────┼────────┤  
+│ 33 Backend Tests          │ 33 tests pass       │ ✅     │  
+├───────────────────────────┼─────────────────────┼────────┤  
+│ 169 Total Tests           │ 169 tests           │ ✅     │  
+├───────────────────────────┼─────────────────────┼────────┤  
+│ useOSStore.tsx ~530 lines │ 531 lines           │ ✅     │  
+├───────────────────────────┼─────────────────────┼────────┤  
+│ AppRouter.tsx ~150 lines  │ 151 lines           │ ✅     │  
+├───────────────────────────┼─────────────────────┼────────┤  
+│ registry.ts ~540 lines    │ 539 lines           │ ✅     │  
+└───────────────────────────┴─────────────────────┴────────┘  
+  
+────────────────────────────────────────────────────────────────────────────────  
+  
+Key Features  
+  
+1. Complete File Hierarchy — Every significant file documented with purpose  
+2. 5 Mermaid Diagrams — Visual architecture, flows, and data models  
+3. Data Models — Full TypeScript interfaces for VFS, Window, DesktopIcon  
+4. Security Architecture — Mandatory rules, utilities, and backend controls  
+5. Developer Handbook — Setup, commands, adding apps, code style  
+6. Testing Strategy — Distribution, patterns, pre-PR checklist  
+7. Quick Reference — Key files with line counts and purposes  
+  
+────────────────────────────────────────────────────────────────────────────────  
+  
+Cross-References  
+  
+This document references and complements:  
+- CLAUDE.md — Coding standards and conventions  
+- AGENTS.md — Audit procedures and role definition  
+- README.md — Project overview and quick start  
+- status_25.md — Recent implementation history  
+  
+────────────────────────────────────────────────────────────────────────────────  
+  
+The Project Architecture Document is now the single source-of-truth for UbuntuOS Web, designed to fully initialize new developers and AI agents to handle PRs independently.  
+

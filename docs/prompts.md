@@ -123,6 +123,14 @@ awesome meticulous job so far. please keep up the good work. now, please meticul
 
 ---
 
+please meticulously review the codebase against your remediation audit findings.
+
+---
+
+awesome meticulous job so far. please keep up the good work. now, please meticulously review @Project_Architecture_Document.md and update it to accurately align with the codebase. Meticulously plan and create the detailed comprehensive `Project Architecture Document` with file hierarchy diagram with listing of key files and their description, mermaid diagrams to show the application flowcharts and the database schema. Review and validate the PAD against the project planning documents and the actual codebase. Finally, create a detailed and comprehensive `Project_Architecture_Document.md` in the project root folder, as the single source-of-truth handbook to fully initialize new developer or another coding agent to be able to handle new PRs independently.
+
+---
+
 awesome meticulous job so far. please keep up the good work. now, please meticulously review @changes_to_validate.txt and validate the recent code changes as captured by the included `git diff` outputs
 You need to do a rigorous review, validating everything in the diff against the project's stated conventions and security rules.
 

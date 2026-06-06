@@ -119,6 +119,10 @@ please meticulously review @status_24.md and validate it against the codebase, t
 
 ---
 
+awesome meticulous job so far. please keep up the good work. now, please meticulously review and validate @plan_Dockerfile.md against the codebase to ensure alignment before proceding to create a detailed execution plan with ToDo list and then execute.
+
+---
+
 awesome meticulous job so far. please keep up the good work. now, please meticulously review @changes_to_validate.txt and validate the recent code changes as captured by the included `git diff` outputs
 You need to do a rigorous review, validating everything in the diff against the project's stated conventions and security rules.
 

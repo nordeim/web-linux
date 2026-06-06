@@ -6,7 +6,7 @@ describe('config', () => {
     const result = ConfigSchema.safeParse({
       PORT: '3001',
       JWT_SECRET: 'my-secret',
-      DOCKER_IMAGE: 'ubuntu:24.04',
+      DOCKER_IMAGE: 'ubuntuos-terminal:latest',
       SESSION_TTL: '3600',
       GRACE_PERIOD: '300',
     });
@@ -29,7 +29,7 @@ describe('config', () => {
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.PORT).toBe(3001);
-      expect(result.data.DOCKER_IMAGE).toBe('ubuntu:24.04');
+      expect(result.data.DOCKER_IMAGE).toBe('ubuntuos-terminal:latest');
     }
   });
 });

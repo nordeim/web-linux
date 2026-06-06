@@ -46,7 +46,7 @@ export async function spawnContainerShell(
   }
 
   const container = await docker.createContainer({
-    Image: process.env.DOCKER_IMAGE ?? 'ubuntu:24.04',
+    Image: process.env.DOCKER_IMAGE ?? 'ubuntuos-terminal:latest',
     Cmd: ['bash'],
     name: containerName,
     HostConfig: {

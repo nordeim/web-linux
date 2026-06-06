@@ -15,7 +15,7 @@ describe('docker spawn configuration', () => {
       '--cpus=1',
       '--memory=512m',
       '--pids-limit=100',
-      'ubuntu:24.04',
+      'ubuntuos-terminal:latest',
       'bash',
     ];
 
@@ -24,7 +24,7 @@ describe('docker spawn configuration', () => {
     expect(args).toContain('--network=none');
     expect(args).toContain('-u');
     expect(args).toContain('1000:1000');
-    expect(args).toContain('ubuntu:24.04');
+    expect(args).toContain('ubuntuos-terminal:latest');
     expect(args).toContain('bash');
   });
 });

@@ -179,8 +179,34 @@ After running `npm run dev`, open your browser at the provided port (usually `ht
 | `npm run preview` | Local preview of the production build |
 | `tsc -b` | Project-wide type checking |
 
-## 🗂️ Documentation
+## 🐳 Docker Image (Real Terminal)
 
+A hardened custom Docker image is used for the Real Terminal feature. It is based on `ubuntu:24.04` with a non-root user (`appuser`, `uid=1000`), minimal packages, and no `sudo`.
+
+### Build the Image
+
+```bash
+cd backend
+npm run docker:build
+```
+
+### Validate
+
+```bash
+npm run docker:test
+```
+
+### Design
+
+| Aspect | Value | Rationale |
+| :--- | :--- | :--- |
+| Base | `ubuntu:24.04` | Matches previous config default |
+| Non-root user | `appuser:1000` | Matches `docker.ts` `User: '1000:1000'` |
+| Packages | `bash`, `coreutils`, `locales`, `procps` | Minimal functional terminal |
+| Removed | `sudo` | Security hardening |
+| Size | ~98 MB | Minimal footprint |
+
+## 🗂️ Documentation
 | Document | Purpose |
 | :--- | :--- |
 | `AGENTS.md` | High-signal architectural briefing for AI agents |

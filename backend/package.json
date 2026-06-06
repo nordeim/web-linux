@@ -11,7 +11,9 @@
     "build": "tsc -b",
     "start": "node dist/index.js",
     "test": "vitest run",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint . --ext .ts",
+    "docker:build": "docker build -t ubuntuos-terminal:latest .",
+    "docker:test": "docker run --rm ubuntuos-terminal:latest echo 'Image OK'"
   },
   "dependencies": {
     "dockerode": "^4.0.12",

@@ -892,3 +892,107 @@ Docs	Project_Architecture_Document.md	Updated test counts, line counts, file cou
 Comments	useOSStore.tsx	Added 2 intentional-behavior comments
 Type	app/src/apps/ScreenRecorder.tsx	Fixed RecordingSchema.mode type and localStorage.getItem null handling
 
+Goal
+Execute a comprehensive TDD-based remediation plan for audit findings across the UbuntuOS Web project.
+Constraints & Preferences
+- Strict TDD: write RED test first, then implement fix, then run full suite before committing
+- noUnusedLocals/noUnusedParameters enforced — any unused import breaks the build
+- Backend suite: 10 files, 35 tests; Frontend suite: 22 files, 150 tests (total: 185)
+- Must not break existing tests
+Progress
+Done
+- confirmed generateId already extracted to app/src/utils/generateId.ts with crypto.randomUUID() and fallback
+- verified useOSStore.tsx and useFileSystem.ts both import generateId from @/utils/generateId
+- generateId.test.ts passes 4/4 (uniqueness, rapid calls, length)
+- full frontend suite: 22 passed, 150 tests passing
+- full backend suite: 10 passed, 35 tests passing
+- updated all test counts: README.md, CLAUDE.md, AGENTS.md, Project_Architecture_Document.md to 185 total (150+35)
+- updated PAD ui/ file count: 58→52
+- updated PAD test file counts: 20→22, 136→150, 9→10, 33→35, 29→32, 169→185
+- added endSession and cleanupExpired race guards in backend/src/websocket.ts with explanatory comments
+- wrote endSession-race.test.ts (2 tests) — passes
+- added intentional-behavior comments for notification slice (0, 50) and MINIMIZE_ALL (no z-index change)
+- TypeScript build: /backend passes clean; /app fails with pre-existing ScreenRecorder.tsx and generateId.test.ts errors
+In Progress
+- fixing app TypeScript strict-mode errors that break tsc -b --noEmit (pre-existing, not caused by remediation)
+  1. ScreenRecorder.tsx:84/86 — safeJsonParse schema type mismatch on mode: z.string() vs RecordMode
+  2. ScreenRecorder.tsx:86 — null passed to string parameter
+  3. generateId.test.ts:6 — unused beforeEach import (will remove)
+Blocked
+- pre-existing ScreenRecorder.tsx TypeScript errors block confirming build cleanliness before final commit
+Key Decisions
+- use generateId from utils/generateId.ts as a unified utility rather than inline ad-hoc implementations
+- fixed endSession and cleanupExpired by deleting from sessions map before any async operation to prevent duplicate container cleanup
+- MINIMIZE_ALL intentionally does not update nextZIndex — “no active window after minimize all” is correct behavior
+Next Steps
+1. Fix generateId.test.ts unused beforeEach import (TS6133)
+2. Fix ScreenRecorder.tsx schema to use z.enum(...) for mode and handle localStorage.getItem returning null
+3. Re-run tsc -b --noEmit in /app to confirm zero errors
+4. Run full frontend and backend test suites to confirm everything still passes
+5. Finalize and commit
+Critical Context
+- safeJsonParse typed as safeJsonParse<T>(raw: string, schema: z.ZodSchema<T>, fallback: T): T
+- ScreenRecorder has mode: RecordMode ("screen" | "window" | "area") but safeJsonParse is called with saved: string | null
+- TypeScript strict mode: noUnusedLocals/noUnusedParameters/erasableSyntaxOnly/verbatimModuleSyntax all enabled
+- endSession could previously race: two concurrent calls both enter if (session) before delete(sessionId)
+Relevant Files
+- /home/project/web-linux/app/src/utils/generateId.ts — unified ID generator
+- /home/project/web-linux/app/src/utils/__tests__/generateId.test.ts — TDD test for generateId
+- /home/project/web-linux/app/src/hooks/useOSStore.tsx — imports generateId, holds notification/MINIMIZE_ALL logic
+- /home/project/web-linux/app/src/hooks/useFileSystem.ts — imports generateId
+- /home/project/web-linux/backend/src/websocket.ts — race-guarded endSession/cleanupExpired
+- /home/project/web-linux/backend/src/__tests__/endSession-race.test.ts — TDD test for race guard
+- /home/project/web-linux/app/src/apps/ScreenRecorder.tsx — has pre-existing TS strict errors
+- /home/project/web-linux/Project_Architecture_Document.md — updated with corrected test counts
+- /home/project/web-linux/README.md — updated test count
+- /home/project/web-linux/CLAUDE.md — updated test count
+- /home/project/web-linux/AGENTS.md — updated test count
+▣  Compaction · Kimi K2.6 · 33.2s
+Thinking: Last tool call failed - I need to check what failed and fix it. Let me look at the error. The previous session context says a remediation was completed, and the last tool call was bash with command cd app && npx tsc -b --noEmit. The error was about ScreenRecorder.tsx having TypeScript errors. But then I see I did fix them. Let me just verify the current state of things - run the TypeScript build check again to see if there are any remaining issues.
+I understand. Let me run the TypeScript build check again to verify the current state and identify any remaining issues.
+# Verify TypeScript build status in /home/project/web-linux/app
+$ npx tsc -b --noEmit 2>&1 | head -20
+(no output)
+# Verify backend TypeScript build status in /home/project/web-linux/backend
+$ npx tsc -b --noEmit 2>&1 | head -20
+(no output)
+Thinking: Both TypeScript builds pass with zero output (meaning no errors). Now I should run the full test suites to verify everything is still green, then provide a proper completion summary. I was in the middle of fixing pre-existing TypeScript errors in ScreenRecorder.tsx and had already made edits. Let me verify those files are in good shape, then run the tests.
+Both TypeScript builds pass cleanly. Let me now run the full test suites across both frontend and backend to verify the complete remediation.
+# Run full frontend tests in /home/project/web-linux/app
+$ npx vitest run --reporter=dot 2>&1 | tail -10
+stderr | src/utils/__tests__/safeJsonParse-integration.test.ts > safeJsonParse integration for app localStorage > rejects corrupted bookmarks gracefully
+safeJsonParse: validation failed { '0': { _errors: [], title: { _errors: [Array] } }, _errors: [] }
+······················································
+ Test Files  22 passed (22)
+      Tests  150 passed (150)
+   Start at  05:47:49
+   Duration  15.96s (transform 3.23s, setup 2.40s, import 5.52s, tests 760ms, environment 30.34s)
+# Run full backend tests in /home/project/web-linux/backend
+$ npx vitest run --reporter=dot 2>&1 | tail -10
+[AUDIT] 2026-06-06T21:47:52.728Z | Session: session-1 | Action: input | Command: echo hello
+[AUDIT] 2026-06-06T21:47:52.728Z | Session: session-2 | Action: blocked | Command: rm -rf /
+·······················
+ Test Files  10 passed (10)
+      Tests  35 passed (35)
+   Start at  05:47:51
+   Duration  2.05s (transform 344ms, setup 0ms, import 1.02s, tests 197ms, environment 5ms)
+Thinking: All tests pass successfully: 
+- Frontend: 22 test files, 150 tests passed
+- Backend: 10 test files, 35 tests passed
+- Both TypeScript builds pass cleanly
+The previous remediation work is complete and verified. Since all tests pass and builds are clean, there's no need for further code changes. I should provide a final completion summary to the user.
+All remediation work is verified and complete.
+Final Verification
+Check	Result
+Frontend TypeScript build	npx tsc -b --noEmit — zero errors
+Backend TypeScript build	npx tsc -b --noEmit — zero errors
+Frontend tests	22 test files, 150 passed
+Backend tests	10 test files, 35 passed
+Combined	185 / 185 tests passing (100%)
+Remediation Work Performed
+1. generateId() Refactor — Unified to app/src/utils/generateId.ts with crypto.randomUUID() + timestamp fallback; inlined implementations removed from useOSStore.tsx and useFileSystem.ts
+2. endSession() Race Guard — Added pre-async delete to websocket.ts so duplicate cleanup calls are safely no-op'd; applied same guard to cleanupExpired()
+3. Test Suite Expansion — +4 frontend tests for generateId correctness; +2 backend tests for race condition safety
+4. Pre-Existing TypeScript Fixes — ScreenRecorder.tsx schema coerced mode to z.enum() and localStorage.getItem null-coalesced to empty string
+5. Documentation Alignment — All test counts synced to 185 (150+35) across README.md, CLAUDE.md, AGENTS.md, Project_Architecture_Document.md; ui/ file count corrected from 58 → 52; only remaining file list drift is 169 references in status_23.md
+

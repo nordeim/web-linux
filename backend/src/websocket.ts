@@ -43,13 +43,17 @@ export class WebSocketHandler {
         return;
       }
 
-      this.verifyToken(token).then((isValid) => {
-        if (!isValid) {
-          ws.close(1008, 'Invalid token');
-          return;
-        }
-        this.startSession(ws, sessionId);
-      });
+      this.verifyToken(token)
+        .then((isValid) => {
+          if (!isValid) {
+            ws.close(1008, 'Invalid token');
+            return;
+          }
+          this.startSession(ws, sessionId);
+        })
+        .catch(() => {
+          ws.close(1008, 'Auth error');
+        });
     });
   }
 
@@ -153,8 +157,14 @@ export class WebSocketHandler {
     // cleanup) cannot duplicate the PTY kill / container removal work.
     this.sessions.delete(sessionId);
 
-    session.pty.kill();
-    await stopAndRemoveContainer(session.containerId);
+    // Harden: always disconnect, even if kill or container removal fails,
+    // so the session store never stays in a stale state.
+    try {
+      session.pty.kill();
+      await stopAndRemoveContainer(session.containerId);
+    } catch {
+      /* PTY or container already gone — continue to disconnect */
+    }
     this.store.disconnect(sessionId);
   }
 
@@ -168,8 +178,14 @@ export class WebSocketHandler {
       // prevent races with overlapping endSession / cleanup calls.
       this.sessions.delete(sessionId);
 
-      session.pty.kill();
-      await stopAndRemoveContainer(session.containerId);
+      // Harden: one failed container removal must not orphan the
+      // rest of the expired sessions in the loop.
+      try {
+        session.pty.kill();
+        await stopAndRemoveContainer(session.containerId);
+      } catch {
+        /* Container may already be gone — continue to next */
+      }
     }
   }
 

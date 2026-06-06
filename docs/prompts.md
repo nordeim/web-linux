@@ -75,6 +75,14 @@ Now analyze the comprehensive audit report. Next create a detailed remediation p
 Awesome meticulous job so far. Please keep up the good work. Now, please meticulously plan to re-evaluate and re-validate your code review and audit findings and recommendations against the current codebase to confirm the alignment and to identify the root causes and the optomal fixes. Then meticulously plan to create a detailed remediation plan with ToDo list to resolve and fix the identified/outstanding issues and gaps. Review and validate the remediation plan against the codebase again to check for accurate alignment before proceeding to execute it meticulously. use TDD approach to make code changes.
 Now analyze the comprehensive audit report. Next create a detailed remediation plan with a TDD approach, validating it against the codebase. The audit has several key findings, including security vulnerabilities, bugs, and architecture issues. You need to meticulously verify these against the actual source to identify root causes and plan the safest, most effective fixes.
 
+Tasks:
+1. Review given review/audit file and validate it against the codebase
+2. Re-evaluate and re-validate the findings and recommendations
+3. Identify root causes and optimal fixes
+4. Create a detailed remediation plan with ToDo list
+5. Validate the remediation plan against the codebase
+6. Use TDD approach for code changes
+
 ---
 
 awesome meticulous job so far. please keep up the good work. now, please meticulously review the following build error and validate it against the codebase to identify the root cause and optimal fix. then meticulously plan to create a remediation plan with a detailed ToDo list to implement the optimal fix. review and validate the remediation plan before executing it meticulously. use TDD approach to make code changes.

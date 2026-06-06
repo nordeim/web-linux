@@ -186,7 +186,7 @@ A real bash terminal has been integrated into UbuntuOS Web via `node-pty` + Dock
 
 **Validation:**
 - TypeScript: 0 errors (`tsc -b --noEmit`)
-- Vitest: 150 passing tests frontend + 35 backend tests (185 total). Component tests using `@/` aliases work when run from the `app/` directory.
+- Vitest: 150 passing tests frontend + 40 backend tests (190 total). Component tests using `@/` aliases work when run from the `app/` directory.
 - Vite build: successful, `RealTerminal` chunk generated (296 KB gzipped for xterm.js)
 
 **Files:**

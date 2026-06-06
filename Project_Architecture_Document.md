@@ -41,9 +41,9 @@
 | Metric | Value |
 |--------|-------|
 | Total Applications | 56 |
-| Frontend Test Files | 20 |
+| Frontend Test Files | 22 |
 | Backend Test Files | 9 |
-| Total Tests | 169 |
+| Total Tests | 185 |
 | Backend Modules | 9 (index, config, auth, docker, websocket, sessionStore, policy, logger, types) |
 
 ---
@@ -111,7 +111,7 @@
 │       │   │   ├── 📄 ContextMenu-actions.test.tsx
 │       │   │   └── 📄 NotImplemented.test.tsx
 │       │   │
-│       │   └── 📁 ui/                    # Radix UI primitives (58 files)
+│       │   └── 📁 ui/                    # Radix UI primitives (52 files)
 │       │       ├── button.tsx, dialog.tsx, input.tsx, ...
 │       │       └── (Shadcn UI components)
 │       │
@@ -728,9 +728,9 @@ npx tsc -b --noEmit
 | Component Tests | 3 | ~10 | `components/__tests__/` |
 | App Tests | 3 | ~8 | `apps/__tests__/` |
 | Utility Tests | 9 | ~98 | `utils/__tests__/` |
-| **Frontend Total** | **20** | **136** | |
-| Backend Tests | 9 | 33 | `backend/src/__tests__/` |
-| **Grand Total** | **29** | **169** | |
+| **Frontend Total** | **22** | **150** | |
+| Backend Tests | 10 | 35 | `backend/src/__tests__/` |
+| **Grand Total** | **32** | **185** | |
 
 ### 9.2 Test Patterns
 
@@ -756,8 +756,8 @@ expect(result).toBe(9);
 
 ### 9.3 Pre-PR Checklist
 
-- [ ] `npm test` passes (136/136 frontend)
-- [ ] `cd backend && npm test` passes (33/33 backend)
+- [ ] `npm test` passes (150/150 frontend)
+- [ ] `cd backend && npm test` passes (35/35 backend)
 - [ ] `npx tsc -b --noEmit` passes (zero errors)
 - [ ] No unused imports/variables
 - [ ] New apps added to registry + AppRouter

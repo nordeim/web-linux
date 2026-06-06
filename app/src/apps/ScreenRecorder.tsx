@@ -45,7 +45,7 @@ const RecordingSchema = z.object({
   duration: z.number(),
   size: z.string(),
   date: z.number(),
-  mode: z.string(),
+  mode: z.enum(["screen", "window", "area"]),
   blobUrl: z.string().optional(),
   mimeType: z.string().optional(),
 });
@@ -82,7 +82,7 @@ export default function ScreenRecorder() {
   const [recorderState, setRecorderState] = useState<RecorderState>("idle");
   const [elapsed, setElapsed] = useState(0);
   const [recordings, setRecordings] = useState<ScreenRecording[]>(() => {
-    const saved = localStorage.getItem("ubuntuos_screenrecordings");
+    const saved = localStorage.getItem("ubuntuos_screenrecordings") ?? "";
     return safeJsonParse(saved, z.array(RecordingSchema), []);
   });
   const [recordMode, setRecordMode] = useState<RecordMode>("screen");

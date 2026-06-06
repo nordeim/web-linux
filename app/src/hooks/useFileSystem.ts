@@ -7,7 +7,7 @@ import type { FileSystemNode, FileSystemState, FileAssociation } from '@/types';
 import { validateFileSystem, saveFileSystem } from '@/utils/storageValidation';
 import { walkAndDelete, recurseMoveNode } from '@/utils/vfsHelpers';
 
-const generateId = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+import { generateId } from '@/utils/generateId';
 
 // ---- Default File System Structure ----
 const createDefaultFS = (): FileSystemState => {

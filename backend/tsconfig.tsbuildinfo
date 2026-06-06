@@ -1,1 +1,1 @@
-{"root":["./src/auth.ts","./src/config.ts","./src/docker.ts","./src/index.ts","./src/sessionStore.ts","./src/websocket.ts"],"version":"5.9.3"}
+{"root":["./src/auth.ts","./src/config.ts","./src/docker.ts","./src/index.ts","./src/logger.ts","./src/policy.ts","./src/sessionStore.ts","./src/types.ts","./src/websocket.ts"],"version":"5.9.3"}

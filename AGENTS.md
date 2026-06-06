@@ -513,8 +513,8 @@ return color && isValidColor(color) ? `--color-${key}: ${color};` : null;
 ### Documentation Test Count Discrepancy
 **Symptom**: README.md stated "18 test files" while CLAUDE.md and status_23.md stated "19 test files".
 **Root Cause**: README.md was not updated when the MINIMIZE_ALL test was added.
-**Fix**: Updated README.md to reflect accurate counts. Current state: 169 tests across 29 test files (136 frontend + 33 backend, as of 2026-06-07).
-**Context**: Always update ALL documentation files when adding tests. The current count is 136 frontend tests (20 test files) and 33 backend tests (9 test files).
+**Fix**: Updated README.md to reflect accurate counts. Current state: 185 tests across 32 test files (150 frontend + 35 backend, as of 2026-06-08).
+**Context**: Always update ALL documentation files when adding tests. The current count is 150 frontend tests (22 test files) and 35 backend tests (10 test files).
 
 ## 🔒 Security Reminders
 
@@ -538,7 +538,7 @@ return color && isValidColor(color) ? `--color-${key}: ${color};` : null;
 18. **Validate CSS color values before injection**. Use `isValidColor()` from `@/utils/colorValidation` when injecting dynamic color values via `dangerouslySetInnerHTML` in CSS context.
 19. **Verify registry completeness when adding apps**. After adding a new app to `AppRouter.tsx`, ensure it has a corresponding entry in `registry.ts`. The registry completeness test will catch mismatches automatically.
 20. **Game highscore stores must use zod validation**. Even simple numeric values like highscores should use `safeJsonParse()` with a zod schema. Pattern: `const HighScoreSchema = z.number().int().min(0); safeJsonParse(val ?? '0', HighScoreSchema, 0)`.
-21. **Keep documentation test counts in sync**. When adding tests, update README.md, CLAUDE.md, and status_23.md. Current count: 169 tests across 29 test files (136 frontend + 33 backend).
+21. **Keep documentation test counts in sync**. When adding tests, update README.md, CLAUDE.md, and status_23.md. Current count: 185 tests across 32 test files (150 frontend + 35 backend).
 22. **Component rendering tests work with vitest aliases**. Despite earlier claims, `NotImplemented.test.tsx` and `VoiceRecorder.test.tsx` successfully use `render()` with `@/` aliases. The vitest config correctly resolves aliases via `resolve.alias`.
 23. **Wire security infrastructure into the main code path**. Creating `types.ts`, `logger.ts`, and `policy.ts` is not enough—they must be imported and used by the main handler (`websocket.ts`). The Phase 3 files existed for a full audit cycle without being wired in, leaving command filtering and audit logging effectively disabled.
 24. **Client heartbeat prevents premature session timeout**. WebSocket sessions can expire during long idle periods if the client does not send periodic heartbeats. Always implement a heartbeat (e.g., every 30 seconds) and clear it on disconnect/unmount.

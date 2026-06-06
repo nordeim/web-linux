@@ -147,11 +147,14 @@ export class WebSocketHandler {
 
   private async endSession(sessionId: string): Promise<void> {
     const session = this.sessions.get(sessionId);
-    if (session) {
-      session.pty.kill();
-      await stopAndRemoveContainer(session.containerId);
-      this.sessions.delete(sessionId);
-    }
+    if (!session) return;
+
+    // Guard: remove immediately so concurrent calls (or overlapping
+    // cleanup) cannot duplicate the PTY kill / container removal work.
+    this.sessions.delete(sessionId);
+
+    session.pty.kill();
+    await stopAndRemoveContainer(session.containerId);
     this.store.disconnect(sessionId);
   }
 
@@ -159,11 +162,14 @@ export class WebSocketHandler {
     const expired = this.store.cleanupExpired();
     for (const sessionId of expired) {
       const session = this.sessions.get(sessionId);
-      if (session) {
-        session.pty.kill();
-        await stopAndRemoveContainer(session.containerId);
-        this.sessions.delete(sessionId);
-      }
+      if (!session) continue;
+
+      // Same guard as endSession — delete before async cleanup to
+      // prevent races with overlapping endSession / cleanup calls.
+      this.sessions.delete(sessionId);
+
+      session.pty.kill();
+      await stopAndRemoveContainer(session.containerId);
     }
   }
 

@@ -8,8 +8,7 @@ import { APP_REGISTRY, getAppById, getDefaultDockApps } from '@/apps/registry';
 import { validateDesktopIcons } from '@/utils/storageValidation';
 
 // ---- Helpers ----
-let idCounter = 0;
-const generateId = () => `${Date.now().toString(36)}-${++idCounter}-${Math.random().toString(36).slice(2)}`;
+import { generateId } from '@/utils/generateId';
 
 const TOP_PANEL_HEIGHT = 28;
 
@@ -277,6 +276,8 @@ export function osReducer(state: OSState, action: OSAction): OSState {
         timestamp: Date.now(),
         isRead: false,
       };
+      // Keep a bounded notification queue to avoid unbounded memory growth
+      // in long-running sessions.
       return { ...state, notifications: [notif, ...state.notifications].slice(0, 50) };
     }
 
@@ -449,6 +450,9 @@ export function osReducer(state: OSState, action: OSAction): OSState {
     }
 
     case 'MINIMIZE_ALL': {
+      // Intentionally does NOT update nextZIndex — after minimizing all,
+      // there is no active window to focus, so z-index remains unchanged.
+      // Next active window will get a fresh z-index via FOCUS_WINDOW.
       return {
         ...state,
         windows: state.windows.map((w) =>

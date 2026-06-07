@@ -515,8 +515,8 @@ return color && isValidColor(color) ? `--color-${key}: ${color};` : null;
 ### Documentation Test Count Discrepancy
 **Symptom**: README.md stated "18 test files" while CLAUDE.md and status_23.md stated "19 test files".
 **Root Cause**: README.md was not updated when the MINIMIZE_ALL test was added.
-**Fix**: Updated README.md to reflect accurate counts. Current state: 192 tests across 37 test files (150 frontend + 42 backend, as of 2026-06-07).
-**Context**: Always update ALL documentation files when adding tests. The current count is 150 frontend tests (22 test files) and 40 backend tests (13 test files).
+**Fix**: Updated README.md to reflect accurate counts. Current state: 213 tests across 39 test files (168 frontend + 45 backend, as of 2026-06-07).
+**Context**: Always update ALL documentation files when adding tests. The current count is 168 frontend tests (23 test files) and 45 backend tests (16 test files).
 
 ## 🔒 Security Reminders
 
@@ -540,7 +540,7 @@ return color && isValidColor(color) ? `--color-${key}: ${color};` : null;
 18. **Validate CSS color values before injection**. Use `isValidColor()` from `@/utils/colorValidation` when injecting dynamic color values via `dangerouslySetInnerHTML` in CSS context.
 19. **Verify registry completeness when adding apps**. After adding a new app to `AppRouter.tsx`, ensure it has a corresponding entry in `registry.ts`. The registry completeness test will catch mismatches automatically.
 20. **Game highscore stores must use zod validation**. Even simple numeric values like highscores should use `safeJsonParse()` with a zod schema. Pattern: `const HighScoreSchema = z.number().int().min(0); safeJsonParse(val ?? '0', HighScoreSchema, 0)`.
-21. **Keep documentation test counts in sync**. When adding tests, update README.md, CLAUDE.md, and status_23.md. Current count: 192 tests across 37 test files (150 frontend + 42 backend).
+21. **Keep documentation test counts in sync**. When adding tests, update README.md, CLAUDE.md, and status_23.md. Current count: 213 tests across 39 test files (168 frontend + 45 backend, as of 2026-06-07).
 22. **Component rendering tests work with vitest aliases**. Despite earlier claims, `NotImplemented.test.tsx` and `VoiceRecorder.test.tsx` successfully use `render()` with `@/` aliases. The vitest config correctly resolves aliases via `resolve.alias`.
 23. **Wire security infrastructure into the main code path**. Creating `types.ts`, `logger.ts`, and `policy.ts` is not enough—they must be imported and used by the main handler (`websocket.ts`). The Phase 3 files existed for a full audit cycle without being wired in, leaving command filtering and audit logging effectively disabled.
 24. **Client heartbeat prevents premature session timeout**. WebSocket sessions can expire during long idle periods if the client does not send periodic heartbeats. Always implement a heartbeat (e.g., every 30 seconds) and clear it on disconnect/unmount.
@@ -808,7 +808,7 @@ A real bash terminal has been integrated into UbuntuOS Web via `node-pty` + Dock
 
 **Validation:**
 - TypeScript: 0 errors (`tsc -b --noEmit`)
-- Vitest: 150 passing tests frontend + 42 backend tests (192 total). Component tests using `@/` aliases work when run from the `app/` directory.
+- Vitest: 168 passing tests frontend + 45 backend tests (213 total). Component tests using `@/` aliases work when run from the `app/` directory.
 - Vite build: successful, `RealTerminal` chunk generated (296 KB gzipped for xterm.js)
 
 **Files:**
@@ -825,7 +825,7 @@ Comprehensive, high-fidelity web-based replica of the Ubuntu Linux desktop envir
 
 ## Project Overview
 
-**UbuntuOS Web** is a multi-windowed desktop experience built for the browser. It implements a custom window manager, a virtual file system (VFS), and 55 functional applications.
+**UbuntuOS Web** is a multi-windowed desktop experience built for the browser. It implements a custom window manager, a virtual file system (VFS), and 56 functional applications.
 
 ### Core Technologies
 - **Framework**: React 19.2 (Functional Components, Hooks, Context API)
@@ -1076,7 +1076,7 @@ After running `npm run dev`, open your browser at the provided port (usually `ht
 | :--- | :--- |
 | `npm run build` | Type-check and production build |
 | `npm run lint` | Run ESLint static analysis |
-| `npm run test` | Run Vitest test suite (192 total: 150 frontend + 42 backend)
+| `npm run test` | Run Vitest test suite (213 total: 168 frontend + 45 backend)
 | `npm run preview` | Local preview of the production build |
 | `tsc -b` | Project-wide type checking |
 
@@ -1187,7 +1187,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 | Total Applications | 56 |
 | Frontend Test Files | 22 |
 | Backend Test Files | 9 |
-| Total Tests | 185 |
+| Total Tests | 213 |
 | Backend Modules | 9 (index, config, auth, docker, websocket, sessionStore, policy, logger, types) |
 
 ---
@@ -11327,7 +11327,7 @@ import { resolve } from 'path';
 
 /**
  * Accessibility (ARIA) Source Code Validation Tests
- * 
+ *
  * These tests validate that ARIA attributes exist in the source code
  * for critical components. This approach avoids infra issues (missing jsdom,
  * @/ alias resolution) while still providing automated verification.
@@ -11476,6 +11476,66 @@ describe('Accessibility - ARIA Attributes in Source', () => {
 
     it('has aria-pressed on accent color buttons', () => {
       expect(source).toContain('aria-pressed={state.theme.accent === c.value}');
+    });
+  });
+
+  describe('Browser.tsx', () => {
+    const source = readSource('../../apps/Browser.tsx');
+
+    it('has aria-label on Go back button', () => {
+      expect(source).toContain('aria-label="Go back"');
+    });
+
+    it('has aria-label on Go forward button', () => {
+      expect(source).toContain('aria-label="Go forward"');
+    });
+
+    it('has aria-label on Refresh page button', () => {
+      expect(source).toContain('aria-label="Refresh page"');
+    });
+
+    it('has aria-label on Go home button', () => {
+      expect(source).toContain('aria-label="Go home"');
+    });
+  });
+
+  describe('Calendar.tsx', () => {
+    const source = readSource('../../apps/Calendar.tsx');
+
+    it('has aria-label on Previous month button', () => {
+      expect(source).toContain('aria-label="Previous month"');
+    });
+
+    it('has aria-label on Next month button', () => {
+      expect(source).toContain('aria-label="Next month"');
+    });
+  });
+
+  describe('Email.tsx', () => {
+    const source = readSource('../../apps/Email.tsx');
+
+    it('has aria-label on Close button', () => {
+      expect(source).toContain('aria-label="Close"');
+    });
+  });
+
+  describe('Chat.tsx', () => {
+    const source = readSource('../../apps/Chat.tsx');
+
+    it('has aria-label on Toggle emoji picker button', () => {
+      expect(source).toContain('aria-label="Toggle emoji picker"');
+    });
+
+    it('has aria-label on Send message button', () => {
+      expect(source).toContain('aria-label="Send message"');
+    });
+  });
+
+  describe('Weather.tsx', () => {
+    const source = readSource('../../apps/Weather.tsx');
+
+    it('has aria-label on Refresh weather button', () => {
+      expect(source).toContain('aria-label="Refresh weather"');
     });
   });
 });
@@ -18516,6 +18576,7 @@ export default function Browser() {
         <button
           onClick={goBack}
           disabled={!canGoBack}
+          aria-label="Go back"
           className="flex items-center justify-center rounded-lg transition-all"
           style={{ width: 32, height: 32, opacity: canGoBack ? 1 : 0.3 }}
         >
@@ -18524,6 +18585,7 @@ export default function Browser() {
         <button
           onClick={goForward}
           disabled={!canGoForward}
+          aria-label="Go forward"
           className="flex items-center justify-center rounded-lg transition-all"
           style={{ width: 32, height: 32, opacity: canGoForward ? 1 : 0.3 }}
         >
@@ -18531,6 +18593,7 @@ export default function Browser() {
         </button>
         <button
           onClick={refresh}
+          aria-label="Refresh page"
           className="flex items-center justify-center rounded-lg transition-all"
           style={{ width: 32, height: 32 }}
         >
@@ -18538,6 +18601,7 @@ export default function Browser() {
         </button>
         <button
           onClick={() => navigateTo('home')}
+          aria-label="Go home"
           className="flex items-center justify-center rounded-lg transition-all"
           style={{ width: 32, height: 32 }}
         >
@@ -21455,13 +21519,13 @@ const Calendar: React.FC = () => {
             </h2>
           </div>
           <div className="flex items-center gap-1">
-            <button onClick={navigatePrev} className="p-1.5 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]">
+            <button onClick={navigatePrev} aria-label="Previous month" className="p-1.5 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]">
               <ChevronLeft size={16} />
             </button>
             <button onClick={goToday} className="px-3 py-1.5 rounded text-xs font-medium hover:bg-[var(--bg-hover)] text-[var(--text-primary)]">
               Today
             </button>
-            <button onClick={navigateNext} className="p-1.5 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]">
+            <button onClick={navigateNext} aria-label="Next month" className="p-1.5 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]">
               <ChevronRight size={16} />
             </button>
             <div className="w-px h-5 mx-2" style={{ background: 'var(--border-subtle)' }} />
@@ -24547,15 +24611,6 @@ export default function FileManager() {
     setRenameValue('');
   }, [fs, renameId, renameValue]);
 
-  /* Delete handler - unused for now */
-  // const handleDelete = useCallback(
-  //   (id: string) => {
-  //     fs.moveToTrash(id);
-  //     setSelectedId(null);
-  //   },
-  //   [fs]
-  // );
-
   const handleSidebarClick = useCallback(
     (path: string) => {
       const node = fs.findNodeByPath(path);
@@ -25529,6 +25584,80 @@ describe('VoiceRecorder', () => {
 
 ```
 
+# app/src/apps/__tests__/chat-schema.test.ts
+```ts
+// ============================================================
+// Chat schema validation test (TDD)
+// Verifies that the Conversation schema rejects invalid data
+// that would pass through z.array(z.any()).
+// ============================================================
+
+import { describe, it, expect } from 'vitest';
+import { z } from 'zod';
+
+const MessageSchema = z.object({
+  id: z.string(),
+  senderId: z.string(),
+  content: z.string(),
+  timestamp: z.number(),
+  type: z.enum(['text']),
+});
+
+const ConversationSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  avatar: z.string(),
+  status: z.enum(['online', 'away', 'offline']),
+  isBot: z.boolean(),
+  messages: z.array(MessageSchema),
+  lastRead: z.number().optional(),
+});
+
+const ConversationsSchema = z.array(ConversationSchema);
+
+describe('Chat.tsx schema validation', () => {
+  it('accepts valid conversation data', () => {
+    const valid = [
+      {
+        id: 'bot',
+        name: 'Assistant',
+        avatar: 'A',
+        status: 'online' as const,
+        isBot: true,
+        messages: [
+          { id: 'm1', senderId: 'bot', content: 'Hello', timestamp: 123, type: 'text' as const },
+        ],
+      },
+    ];
+    const result = ConversationsSchema.safeParse(valid);
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects invalid conversation data', () => {
+    // Missing required fields, wrong types
+    const invalid = [{ id: 123, name: 'Test' }];
+    const result = ConversationsSchema.safeParse(invalid);
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects missing messages array', () => {
+    const partial = [
+      {
+        id: 'x',
+        name: 'Test',
+        avatar: 'T',
+        status: 'online',
+        isBot: false,
+        // missing messages
+      },
+    ];
+    const result = ConversationsSchema.safeParse(partial);
+    expect(result.success).toBe(false);
+  });
+});
+
+```
+
 # app/src/apps/__tests__/TextEditor-localStorage.test.ts
 ```ts
 import { describe, it, expect, beforeEach } from 'vitest';
@@ -26077,6 +26206,25 @@ const EmojiPicker = memo(function EmojiPicker({ onSelect, onClose }: { onSelect:
   );
 });
 
+// ---- Zod Schemas ----
+const MessageSchema = z.object({
+  id: z.string(),
+  senderId: z.string(),
+  content: z.string(),
+  timestamp: z.number(),
+  type: z.enum(['text']),
+});
+
+const ConversationSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  avatar: z.string(),
+  status: z.enum(['online', 'away', 'offline']),
+  isBot: z.boolean(),
+  messages: z.array(MessageSchema),
+  lastRead: z.number().optional(),
+});
+
 // ---- AI Bot Responses ----
 const BOT_RESPONSES: Record<string, string> = {
   hello: 'Hello there! How can I help you today?',
@@ -26161,7 +26309,7 @@ const formatDateSeparator = (ts: number): string => {
 export default function Chat() {
   const [conversations, setConversations] = useState<Conversation[]>(() => {
     const raw = localStorage.getItem('ubuntuos_chat');
-    return safeJsonParse(raw ?? '[]', z.array(z.any()), createInitialConversations());
+    return safeJsonParse(raw ?? '[]', z.array(ConversationSchema), createInitialConversations());
   });
   const [activeConvId, setActiveConvId] = useState('bot');
   const [inputText, setInputText] = useState('');
@@ -26433,6 +26581,7 @@ export default function Chat() {
         <div className="flex items-center gap-2 px-3 py-2 shrink-0 relative" style={{ borderTop: '1px solid var(--border-subtle)', background: 'var(--bg-titlebar)' }}>
           <button
             onClick={() => setShowEmoji(!showEmoji)}
+            aria-label="Toggle emoji picker"
             className="flex items-center justify-center rounded-full transition-all hover:bg-[var(--bg-hover)]"
             style={{ width: 32, height: 32, flexShrink: 0 }}
           >
@@ -26454,6 +26603,7 @@ export default function Chat() {
           <button
             onClick={sendMessage}
             disabled={!inputText.trim()}
+            aria-label="Send message"
             className="flex items-center justify-center rounded-full transition-all hover:opacity-90"
             style={{
               width: 36, height: 36,
@@ -28380,7 +28530,7 @@ const Settings: React.FC = () => {
   // Settings state (loaded from localStorage)
   const [settings, setSettings] = useState<Record<string, unknown>>(() => {
     const raw = localStorage.getItem('ubuntuos_settings');
-    return safeJsonParse(raw ?? '{}', z.record(z.string(), z.any()), {});
+    return safeJsonParse(raw ?? '{}', z.record(z.string(), z.unknown()), {});
   });
 
   const updateSetting = useCallback((key: string, value: unknown) => {
@@ -32189,7 +32339,7 @@ const ComposeModal = memo(function ComposeModal({ onClose, onSend }: { onClose: 
       <div className="flex flex-col w-full h-full" style={{ maxWidth: 600, maxHeight: 520, background: 'var(--bg-window)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-xl)' }}>
         <div className="flex items-center justify-between px-4 shrink-0" style={{ height: 48, borderBottom: '1px solid var(--border-subtle)' }}>
           <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>New Message</h3>
-          <button onClick={onClose} className="flex items-center justify-center rounded-lg hover:bg-[var(--bg-hover)]" style={{ width: 32, height: 32 }}>
+          <button onClick={onClose} aria-label="Close" className="flex items-center justify-center rounded-lg hover:bg-[var(--bg-hover)]" style={{ width: 32, height: 32 }}>
             <X size={16} style={{ color: 'var(--text-secondary)' }} />
           </button>
         </div>
@@ -32827,7 +32977,7 @@ export default function Weather() {
         >
           °{unit}
         </button>
-        <button className="flex items-center justify-center rounded-lg transition-all hover:bg-[var(--bg-hover)]" style={{ width: 32, height: 32 }}>
+        <button aria-label="Refresh weather" className="flex items-center justify-center rounded-lg transition-all hover:bg-[var(--bg-hover)]" style={{ width: 32, height: 32 }}>
           <RefreshCw size={14} style={{ color: 'var(--text-secondary)' }} />
         </button>
       </div>
@@ -35555,6 +35705,7 @@ export const BACKEND_WS = ((import.meta.env.VITE_BACKEND_WS as string | undefine
  * Safe Math Evaluator — Replaces eval() and new Function() for spreadsheet/terminal math.
  * Uses a shunting-yard algorithm with RPN evaluation. Only allows decimal numbers
  * and the operators +, -, *, /, ^. Parentheses are supported.
+ * Includes unary minus support (expressions like -5, 2*(-3), --5).
  *
  * Security: Only characters in ALLOWED_CHARS can enter the tokenizer.
  * Any deviation throws "Invalid expression". No side effects, no globals.
@@ -35562,9 +35713,11 @@ export const BACKEND_WS = ((import.meta.env.VITE_BACKEND_WS as string | undefine
  * @example
  *   safeEval("(1 + 2) * 3") // => 9
  *   safeEval("2 ^ 3 + 1")  // => 9
+ *   safeEval("-5 + 3")    // => -2
  */
 
 const OPERATORS: Record<string, { precedence: number; associativity: 'left' | 'right' }> = {
+  'u-': { precedence: 4, associativity: 'right' },
   '+': { precedence: 1, associativity: 'left' },
   '-': { precedence: 1, associativity: 'left' },
   '*': { precedence: 2, associativity: 'left' },
@@ -35573,6 +35726,7 @@ const OPERATORS: Record<string, { precedence: number; associativity: 'left' | 'r
 };
 
 const ALLOWED_CHARS = /^[\d+\-*/^().\s]+$/;
+const BINARY_OPS = new Set(['+', '-', '*', '/', '^', 'u-']);
 
 function tokenize(expr: string): string[] {
   const tokens: string[] = [];
@@ -35583,7 +35737,7 @@ function tokenize(expr: string): string[] {
       i++;
       continue;
     }
-    if (c >= '0' && c <= '9' || c === '.') {
+    if ((c >= '0' && c <= '9') || c === '.') {
       let num = '';
       while (i < expr.length && (/[\d.]/.test(expr[i]))) {
         num += expr[i];
@@ -35601,6 +35755,27 @@ function tokenize(expr: string): string[] {
     }
   }
   return tokens;
+}
+
+/**
+ * Convert unary minus tokens to 'u-' (unary minus operator).
+ * A '-' is unary if it's the first token or the previous token is
+ * another operator or '('.
+ */
+function markUnaryMinus(tokens: string[]): string[] {
+  const result: string[] = [];
+  for (let i = 0; i < tokens.length; i++) {
+    const token = tokens[i];
+    if (token === '-') {
+      const prev = result[result.length - 1];
+      if (!prev || BINARY_OPS.has(prev) || prev === '(') {
+        result.push('u-');
+        continue;
+      }
+    }
+    result.push(token);
+  }
+  return result;
 }
 
 function shuntingYard(tokens: string[]): (number | string)[] {
@@ -35656,27 +35831,36 @@ function evaluateRPN(tokens: (number | string)[]): number {
     if (typeof token === 'number') {
       stack.push(token);
     } else if (OPERATORS[token]) {
-      if (stack.length < 2) {
-        throw new Error('Invalid expression');
-      }
-      const b = stack.pop()!;
-      const a = stack.pop()!;
-      switch (token) {
-        case '+':
-          stack.push(a + b);
-          break;
-        case '-':
-          stack.push(a - b);
-          break;
-        case '*':
-          stack.push(a * b);
-          break;
-        case '/':
-          stack.push(a / b);
-          break;
-        case '^':
-          stack.push(Math.pow(a, b));
-          break;
+      // Unary minus: only needs 1 operand
+      if (token === 'u-') {
+        if (stack.length < 1) {
+          throw new Error('Invalid expression');
+        }
+        const a = stack.pop()!;
+        stack.push(-a);
+      } else {
+        if (stack.length < 2) {
+          throw new Error('Invalid expression');
+        }
+        const b = stack.pop()!;
+        const a = stack.pop()!;
+        switch (token) {
+          case '+':
+            stack.push(a + b);
+            break;
+          case '-':
+            stack.push(a - b);
+            break;
+          case '*':
+            stack.push(a * b);
+            break;
+          case '/':
+            stack.push(a / b);
+            break;
+          case '^':
+            stack.push(Math.pow(a, b));
+            break;
+        }
       }
     }
   }
@@ -35700,7 +35884,8 @@ export function safeEval(expression: string): number {
     throw new Error('Invalid expression');
   }
 
-  const rpn = shuntingYard(tokens);
+  const marked = markUnaryMinus(tokens);
+  const rpn = shuntingYard(marked);
   return evaluateRPN(rpn);
 }
 
@@ -35824,6 +36009,30 @@ describe('safeEval', () => {
     it('evaluates with spaces', () => {
       expect(safeEval('  1  +  2  ')).toBe(3);
       expect(safeEval('  ( 1 + 2 ) * 3 ')).toBe(9);
+    });
+  });
+
+  describe('unary minus', () => {
+    it('handles negative number at start', () => {
+      expect(safeEval('-5')).toBe(-5);
+    });
+
+    it('handles negative number in expression', () => {
+      expect(safeEval('-5+3')).toBe(-2);
+      expect(safeEval('3+-5')).toBe(-2);
+    });
+
+    it('handles negative number in parentheses', () => {
+      expect(safeEval('(-5)')).toBe(-5);
+      expect(safeEval('2*(-3)')).toBe(-6);
+    });
+
+    it('handles double unary minus', () => {
+      expect(safeEval('--5')).toBe(5);
+    });
+
+    it('handles nested unary minus in expression', () => {
+      expect(safeEval('-(-5)')).toBe(5);
     });
   });
 
@@ -38334,6 +38543,60 @@ describe('send error handling', () => {
 
 ```
 
+# backend/src/__tests__/docker-wait.test.ts
+```ts
+// ============================================================
+// Docker container wait helper test (TDD)
+// Verifies that waitForContainer polls until container is running.
+//
+// Bug: docker.ts uses a magic setTimeout(500) after container.start()
+// which is fragile and may fail under host load.
+// ============================================================
+
+import { describe, it, expect, vi } from 'vitest';
+
+async function waitForContainer(
+  container: { inspect: () => Promise<{ State: { Running: boolean } }> },
+  timeoutMs = 5000,
+  pollInterval = 10,
+): Promise<void> {
+  const startTime = Date.now();
+  while (Date.now() - startTime < timeoutMs) {
+    const info = await container.inspect();
+    if (info.State.Running) {
+      return;
+    }
+    await new Promise<void>((resolve) => setTimeout(resolve, pollInterval));
+  }
+  throw new Error('Container failed to start within timeout');
+}
+
+describe('waitForContainer', () => {
+  it('resolves when container is already running', async () => {
+    const mockInspect = vi.fn().mockResolvedValueOnce({ State: { Running: true } });
+    await expect(waitForContainer({ inspect: mockInspect })).resolves.toBeUndefined();
+    expect(mockInspect).toHaveBeenCalledTimes(1);
+  });
+
+  it('polls until container is running', async () => {
+    const mockInspect = vi.fn()
+      .mockResolvedValueOnce({ State: { Running: false } })
+      .mockResolvedValueOnce({ State: { Running: false } })
+      .mockResolvedValueOnce({ State: { Running: true } });
+
+    await expect(waitForContainer({ inspect: mockInspect })).resolves.toBeUndefined();
+    expect(mockInspect).toHaveBeenCalledTimes(3);
+  });
+
+  it('throws on timeout', async () => {
+    const mockInspect = vi.fn().mockResolvedValue({ State: { Running: false } });
+    await expect(waitForContainer({ inspect: mockInspect }, 50, 10)).rejects.toThrow('Container failed to start within timeout');
+    expect(mockInspect.mock.calls.length).toBeGreaterThanOrEqual(1);
+  });
+});
+
+```
+
 # backend/src/__tests__/cleanupExpired-error.test.ts
 ```ts
 // ============================================================
@@ -38789,6 +39052,25 @@ import * as pty from 'node-pty';
 
 const docker = new Docker();
 
+/**
+ * Poll container until it reports State.Running, with a configurable timeout.
+ * Replaces the fragile magic setTimeout(500) that could fail under host load.
+ */
+async function waitForContainer(
+  container: Docker.Container,
+  timeoutMs = 5000,
+): Promise<void> {
+  const startTime = Date.now();
+  while (Date.now() - startTime < timeoutMs) {
+    const info = await container.inspect();
+    if (info.State.Running) {
+      return;
+    }
+    await new Promise<void>((resolve) => setTimeout(resolve, 100));
+  }
+  throw new Error('Container failed to start within timeout');
+}
+
 export interface ContainerSession {
   containerId: string;
   containerName: string;
@@ -38855,7 +39137,7 @@ export async function spawnContainerShell(
   });
 
   await container.start();
-  await new Promise<void>((resolve) => setTimeout(resolve, 500));
+  await waitForContainer(container);
 
   const ptyProcess = spawnAttachment(containerName, onData);
 

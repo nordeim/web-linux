@@ -25,7 +25,6 @@ app/tsconfig.app.json
 app/vitest.setup.ts
 app/src/App.tsx
 app/src/main.tsx
-app/src/components
 app/src/components/Desktop.tsx
 app/src/components/LoginScreen.tsx
 app/src/components/NotificationSystem.tsx
@@ -134,6 +133,7 @@ app/src/apps/Game2048.tsx
 app/src/apps/MediaConverter.tsx
 app/src/apps/__tests__/registry-completeness.test.ts
 app/src/apps/__tests__/VoiceRecorder.test.tsx
+app/src/apps/__tests__/chat-schema.test.ts
 app/src/apps/__tests__/TextEditor-localStorage.test.ts
 app/src/apps/JsonFormatter.tsx
 app/src/apps/Chat.tsx
@@ -209,6 +209,7 @@ backend/src/__tests__/sessionStore.test.ts
 backend/src/__tests__/endSession-error.test.ts
 backend/src/__tests__/handleMessage-error.test.ts
 backend/src/__tests__/send-error.test.ts
+backend/src/__tests__/docker-wait.test.ts
 backend/src/__tests__/cleanupExpired-error.test.ts
 backend/src/index.ts
 backend/src/websocket.ts

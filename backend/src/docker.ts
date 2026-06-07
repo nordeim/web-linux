@@ -3,6 +3,25 @@ import * as pty from 'node-pty';
 
 const docker = new Docker();
 
+/**
+ * Poll container until it reports State.Running, with a configurable timeout.
+ * Replaces the fragile magic setTimeout(500) that could fail under host load.
+ */
+async function waitForContainer(
+  container: Docker.Container,
+  timeoutMs = 5000,
+): Promise<void> {
+  const startTime = Date.now();
+  while (Date.now() - startTime < timeoutMs) {
+    const info = await container.inspect();
+    if (info.State.Running) {
+      return;
+    }
+    await new Promise<void>((resolve) => setTimeout(resolve, 100));
+  }
+  throw new Error('Container failed to start within timeout');
+}
+
 export interface ContainerSession {
   containerId: string;
   containerName: string;
@@ -69,7 +88,7 @@ export async function spawnContainerShell(
   });
 
   await container.start();
-  await new Promise<void>((resolve) => setTimeout(resolve, 500));
+  await waitForContainer(container);
 
   const ptyProcess = spawnAttachment(containerName, onData);
 

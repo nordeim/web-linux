@@ -330,7 +330,7 @@ export default function Weather() {
         >
           °{unit}
         </button>
-        <button className="flex items-center justify-center rounded-lg transition-all hover:bg-[var(--bg-hover)]" style={{ width: 32, height: 32 }}>
+        <button aria-label="Refresh weather" className="flex items-center justify-center rounded-lg transition-all hover:bg-[var(--bg-hover)]" style={{ width: 32, height: 32 }}>
           <RefreshCw size={14} style={{ color: 'var(--text-secondary)' }} />
         </button>
       </div>

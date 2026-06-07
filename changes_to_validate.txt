@@ -1,113 +1,534 @@
 diff --git a/AGENTS.md b/AGENTS.md
-index 3422c25..6520c26 100644
+index 8486387..6c765fc 100644
 --- a/AGENTS.md
 +++ b/AGENTS.md
-@@ -513,8 +513,8 @@ return color && isValidColor(color) ? `--color-${key}: ${color};` : null;
+@@ -513,7 +513,7 @@ return color && isValidColor(color) ? `--color-${key}: ${color};` : null;
  ### Documentation Test Count Discrepancy
  **Symptom**: README.md stated "18 test files" while CLAUDE.md and status_23.md stated "19 test files".
  **Root Cause**: README.md was not updated when the MINIMIZE_ALL test was added.
--**Fix**: Updated README.md to reflect accurate counts. Current state: 185 tests across 32 test files (150 frontend + 35 backend, as of 2026-06-08).
--**Context**: Always update ALL documentation files when adding tests. The current count is 150 frontend tests (22 test files) and 35 backend tests (10 test files).
-+**Fix**: Updated README.md to reflect accurate counts. Current state: 190 tests across 35 test files (150 frontend + 40 backend, as of 2026-06-07).
-+**Context**: Always update ALL documentation files when adding tests. The current count is 150 frontend tests (22 test files) and 40 backend tests (13 test files).
+-**Fix**: Updated README.md to reflect accurate counts. Current state: 192 tests across 37 test files (150 frontend + 42 backend, as of 2026-06-07).
++**Fix**: Updated README.md to reflect accurate counts. Current state: 203 tests across 39 test files (158 frontend + 45 backend, as of 2026-06-07).
+ **Context**: Always update ALL documentation files when adding tests. The current count is 150 frontend tests (22 test files) and 40 backend tests (13 test files).
  
  ## 🔒 Security Reminders
- 
 @@ -538,7 +538,7 @@ return color && isValidColor(color) ? `--color-${key}: ${color};` : null;
  18. **Validate CSS color values before injection**. Use `isValidColor()` from `@/utils/colorValidation` when injecting dynamic color values via `dangerouslySetInnerHTML` in CSS context.
  19. **Verify registry completeness when adding apps**. After adding a new app to `AppRouter.tsx`, ensure it has a corresponding entry in `registry.ts`. The registry completeness test will catch mismatches automatically.
  20. **Game highscore stores must use zod validation**. Even simple numeric values like highscores should use `safeJsonParse()` with a zod schema. Pattern: `const HighScoreSchema = z.number().int().min(0); safeJsonParse(val ?? '0', HighScoreSchema, 0)`.
--21. **Keep documentation test counts in sync**. When adding tests, update README.md, CLAUDE.md, and status_23.md. Current count: 185 tests across 32 test files (150 frontend + 35 backend).
-+21. **Keep documentation test counts in sync**. When adding tests, update README.md, CLAUDE.md, and status_23.md. Current count: 190 tests across 35 test files (150 frontend + 40 backend).
+-21. **Keep documentation test counts in sync**. When adding tests, update README.md, CLAUDE.md, and status_23.md. Current count: 192 tests across 37 test files (150 frontend + 42 backend).
++21. **Keep documentation test counts in sync**. When adding tests, update README.md, CLAUDE.md, and status_23.md. Current count: 203 tests across 39 test files (158 frontend + 45 backend).
  22. **Component rendering tests work with vitest aliases**. Despite earlier claims, `NotImplemented.test.tsx` and `VoiceRecorder.test.tsx` successfully use `render()` with `@/` aliases. The vitest config correctly resolves aliases via `resolve.alias`.
  23. **Wire security infrastructure into the main code path**. Creating `types.ts`, `logger.ts`, and `policy.ts` is not enough—they must be imported and used by the main handler (`websocket.ts`). The Phase 3 files existed for a full audit cycle without being wired in, leaving command filtering and audit logging effectively disabled.
  24. **Client heartbeat prevents premature session timeout**. WebSocket sessions can expire during long idle periods if the client does not send periodic heartbeats. Always implement a heartbeat (e.g., every 30 seconds) and clear it on disconnect/unmount.
 diff --git a/CLAUDE.md b/CLAUDE.md
-index 68bfef8..f9d750d 100644
+index a5d8b86..13d778b 100644
 --- a/CLAUDE.md
 +++ b/CLAUDE.md
 @@ -186,7 +186,7 @@ A real bash terminal has been integrated into UbuntuOS Web via `node-pty` + Dock
  
  **Validation:**
  - TypeScript: 0 errors (`tsc -b --noEmit`)
--- Vitest: 150 passing tests frontend + 35 backend tests (185 total). Component tests using `@/` aliases work when run from the `app/` directory.
-+- Vitest: 150 passing tests frontend + 40 backend tests (190 total). Component tests using `@/` aliases work when run from the `app/` directory.
+-- Vitest: 150 passing tests frontend + 42 backend tests (192 total). Component tests using `@/` aliases work when run from the `app/` directory.
++- Vitest: 150 passing tests frontend + 45 backend tests (203 total). Component tests using `@/` aliases work when run from the `app/` directory.
  - Vite build: successful, `RealTerminal` chunk generated (296 KB gzipped for xterm.js)
  
  **Files:**
+diff --git a/GEMINI.md b/GEMINI.md
+index 41bf42a..3c5748b 100644
+--- a/GEMINI.md
++++ b/GEMINI.md
+@@ -4,7 +4,7 @@ Comprehensive, high-fidelity web-based replica of the Ubuntu Linux desktop envir
+ 
+ ## Project Overview
+ 
+-**UbuntuOS Web** is a multi-windowed desktop experience built for the browser. It implements a custom window manager, a virtual file system (VFS), and 55 functional applications.
++**UbuntuOS Web** is a multi-windowed desktop experience built for the browser. It implements a custom window manager, a virtual file system (VFS), and 56 functional applications.
+ 
+ ### Core Technologies
+ - **Framework**: React 19.2 (Functional Components, Hooks, Context API)
+diff --git a/Project_Architecture_Document.md b/Project_Architecture_Document.md
+index 64a100d..31dc147 100644
+--- a/Project_Architecture_Document.md
++++ b/Project_Architecture_Document.md
+@@ -43,7 +43,7 @@
+ | Total Applications | 56 |
+ | Frontend Test Files | 22 |
+ | Backend Test Files | 9 |
+-| Total Tests | 185 |
++| Total Tests | 203 |
+ | Backend Modules | 9 (index, config, auth, docker, websocket, sessionStore, policy, logger, types) |
+ 
+ ---
 diff --git a/README.md b/README.md
-index 3a481ff..4f1cd7a 100644
+index 95d6a0a..3bfd6f5 100644
 --- a/README.md
 +++ b/README.md
 @@ -175,7 +175,7 @@ After running `npm run dev`, open your browser at the provided port (usually `ht
  | :--- | :--- |
  | `npm run build` | Type-check and production build |
  | `npm run lint` | Run ESLint static analysis |
--| `npm run test` | Run Vitest test suite (185 total: 150 frontend + 35 backend)
-+| `npm run test` | Run Vitest test suite (190 total: 150 frontend + 40 backend)
+-| `npm run test` | Run Vitest test suite (192 total: 150 frontend + 42 backend)
++| `npm run test` | Run Vitest test suite (203 total: 158 frontend + 45 backend)
  | `npm run preview` | Local preview of the production build |
  | `tsc -b` | Project-wide type checking |
  
-diff --git a/backend/src/websocket.ts b/backend/src/websocket.ts
-index cc07381..cf288f0 100644
---- a/backend/src/websocket.ts
-+++ b/backend/src/websocket.ts
-@@ -43,13 +43,17 @@ export class WebSocketHandler {
-         return;
-       }
+diff --git a/app/src/apps/Browser.tsx b/app/src/apps/Browser.tsx
+index 83214a2..34f8235 100644
+--- a/app/src/apps/Browser.tsx
++++ b/app/src/apps/Browser.tsx
+@@ -436,6 +436,7 @@ export default function Browser() {
+         <button
+           onClick={goBack}
+           disabled={!canGoBack}
++          aria-label="Go back"
+           className="flex items-center justify-center rounded-lg transition-all"
+           style={{ width: 32, height: 32, opacity: canGoBack ? 1 : 0.3 }}
+         >
+@@ -444,6 +445,7 @@ export default function Browser() {
+         <button
+           onClick={goForward}
+           disabled={!canGoForward}
++          aria-label="Go forward"
+           className="flex items-center justify-center rounded-lg transition-all"
+           style={{ width: 32, height: 32, opacity: canGoForward ? 1 : 0.3 }}
+         >
+@@ -451,6 +453,7 @@ export default function Browser() {
+         </button>
+         <button
+           onClick={refresh}
++          aria-label="Refresh page"
+           className="flex items-center justify-center rounded-lg transition-all"
+           style={{ width: 32, height: 32 }}
+         >
+@@ -458,6 +461,7 @@ export default function Browser() {
+         </button>
+         <button
+           onClick={() => navigateTo('home')}
++          aria-label="Go home"
+           className="flex items-center justify-center rounded-lg transition-all"
+           style={{ width: 32, height: 32 }}
+         >
+diff --git a/app/src/apps/Calendar.tsx b/app/src/apps/Calendar.tsx
+index 2ca0965..ccdbd07 100644
+--- a/app/src/apps/Calendar.tsx
++++ b/app/src/apps/Calendar.tsx
+@@ -264,13 +264,13 @@ const Calendar: React.FC = () => {
+             </h2>
+           </div>
+           <div className="flex items-center gap-1">
+-            <button onClick={navigatePrev} className="p-1.5 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]">
++            <button onClick={navigatePrev} aria-label="Previous month" className="p-1.5 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]">
+               <ChevronLeft size={16} />
+             </button>
+             <button onClick={goToday} className="px-3 py-1.5 rounded text-xs font-medium hover:bg-[var(--bg-hover)] text-[var(--text-primary)]">
+               Today
+             </button>
+-            <button onClick={navigateNext} className="p-1.5 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]">
++            <button onClick={navigateNext} aria-label="Next month" className="p-1.5 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]">
+               <ChevronRight size={16} />
+             </button>
+             <div className="w-px h-5 mx-2" style={{ background: 'var(--border-subtle)' }} />
+diff --git a/app/src/apps/Chat.tsx b/app/src/apps/Chat.tsx
+index 9504ed9..9629d29 100644
+--- a/app/src/apps/Chat.tsx
++++ b/app/src/apps/Chat.tsx
+@@ -50,6 +50,25 @@ const EmojiPicker = memo(function EmojiPicker({ onSelect, onClose }: { onSelect:
+   );
+ });
  
--      this.verifyToken(token).then((isValid) => {
--        if (!isValid) {
--          ws.close(1008, 'Invalid token');
--          return;
--        }
--        this.startSession(ws, sessionId);
--      });
-+      this.verifyToken(token)
-+        .then((isValid) => {
-+          if (!isValid) {
-+            ws.close(1008, 'Invalid token');
-+            return;
-+          }
-+          this.startSession(ws, sessionId);
-+        })
-+        .catch(() => {
-+          ws.close(1008, 'Auth error');
-+        });
++// ---- Zod Schemas ----
++const MessageSchema = z.object({
++  id: z.string(),
++  senderId: z.string(),
++  content: z.string(),
++  timestamp: z.number(),
++  type: z.enum(['text']),
++});
++
++const ConversationSchema = z.object({
++  id: z.string(),
++  name: z.string(),
++  avatar: z.string(),
++  status: z.enum(['online', 'away', 'offline']),
++  isBot: z.boolean(),
++  messages: z.array(MessageSchema),
++  lastRead: z.number().optional(),
++});
++
+ // ---- AI Bot Responses ----
+ const BOT_RESPONSES: Record<string, string> = {
+   hello: 'Hello there! How can I help you today?',
+@@ -134,7 +153,7 @@ const formatDateSeparator = (ts: number): string => {
+ export default function Chat() {
+   const [conversations, setConversations] = useState<Conversation[]>(() => {
+     const raw = localStorage.getItem('ubuntuos_chat');
+-    return safeJsonParse(raw ?? '[]', z.array(z.any()), createInitialConversations());
++    return safeJsonParse(raw ?? '[]', z.array(ConversationSchema), createInitialConversations());
+   });
+   const [activeConvId, setActiveConvId] = useState('bot');
+   const [inputText, setInputText] = useState('');
+@@ -406,6 +425,7 @@ export default function Chat() {
+         <div className="flex items-center gap-2 px-3 py-2 shrink-0 relative" style={{ borderTop: '1px solid var(--border-subtle)', background: 'var(--bg-titlebar)' }}>
+           <button
+             onClick={() => setShowEmoji(!showEmoji)}
++            aria-label="Toggle emoji picker"
+             className="flex items-center justify-center rounded-full transition-all hover:bg-[var(--bg-hover)]"
+             style={{ width: 32, height: 32, flexShrink: 0 }}
+           >
+@@ -427,6 +447,7 @@ export default function Chat() {
+           <button
+             onClick={sendMessage}
+             disabled={!inputText.trim()}
++            aria-label="Send message"
+             className="flex items-center justify-center rounded-full transition-all hover:opacity-90"
+             style={{
+               width: 36, height: 36,
+diff --git a/app/src/apps/Email.tsx b/app/src/apps/Email.tsx
+index 4894108..23e45c4 100644
+--- a/app/src/apps/Email.tsx
++++ b/app/src/apps/Email.tsx
+@@ -162,7 +162,7 @@ const ComposeModal = memo(function ComposeModal({ onClose, onSend }: { onClose:
+       <div className="flex flex-col w-full h-full" style={{ maxWidth: 600, maxHeight: 520, background: 'var(--bg-window)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-xl)' }}>
+         <div className="flex items-center justify-between px-4 shrink-0" style={{ height: 48, borderBottom: '1px solid var(--border-subtle)' }}>
+           <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>New Message</h3>
+-          <button onClick={onClose} className="flex items-center justify-center rounded-lg hover:bg-[var(--bg-hover)]" style={{ width: 32, height: 32 }}>
++          <button onClick={onClose} aria-label="Close" className="flex items-center justify-center rounded-lg hover:bg-[var(--bg-hover)]" style={{ width: 32, height: 32 }}>
+             <X size={16} style={{ color: 'var(--text-secondary)' }} />
+           </button>
+         </div>
+diff --git a/app/src/apps/FileManager.tsx b/app/src/apps/FileManager.tsx
+index 9c13dde..f781365 100644
+--- a/app/src/apps/FileManager.tsx
++++ b/app/src/apps/FileManager.tsx
+@@ -117,15 +117,6 @@ export default function FileManager() {
+     setRenameValue('');
+   }, [fs, renameId, renameValue]);
+ 
+-  /* Delete handler - unused for now */
+-  // const handleDelete = useCallback(
+-  //   (id: string) => {
+-  //     fs.moveToTrash(id);
+-  //     setSelectedId(null);
+-  //   },
+-  //   [fs]
+-  // );
+-
+   const handleSidebarClick = useCallback(
+     (path: string) => {
+       const node = fs.findNodeByPath(path);
+diff --git a/app/src/apps/Settings.tsx b/app/src/apps/Settings.tsx
+index f641dda..8fdc153 100644
+--- a/app/src/apps/Settings.tsx
++++ b/app/src/apps/Settings.tsx
+@@ -96,7 +96,7 @@ const Settings: React.FC = () => {
+   // Settings state (loaded from localStorage)
+   const [settings, setSettings] = useState<Record<string, unknown>>(() => {
+     const raw = localStorage.getItem('ubuntuos_settings');
+-    return safeJsonParse(raw ?? '{}', z.record(z.string(), z.any()), {});
++    return safeJsonParse(raw ?? '{}', z.record(z.string(), z.unknown()), {});
+   });
+ 
+   const updateSetting = useCallback((key: string, value: unknown) => {
+diff --git a/app/src/apps/Weather.tsx b/app/src/apps/Weather.tsx
+index a649be7..8e8f399 100644
+--- a/app/src/apps/Weather.tsx
++++ b/app/src/apps/Weather.tsx
+@@ -330,7 +330,7 @@ export default function Weather() {
+         >
+           °{unit}
+         </button>
+-        <button className="flex items-center justify-center rounded-lg transition-all hover:bg-[var(--bg-hover)]" style={{ width: 32, height: 32 }}>
++        <button aria-label="Refresh weather" className="flex items-center justify-center rounded-lg transition-all hover:bg-[var(--bg-hover)]" style={{ width: 32, height: 32 }}>
+           <RefreshCw size={14} style={{ color: 'var(--text-secondary)' }} />
+         </button>
+       </div>
+diff --git a/app/src/components/__tests__/aria-attributes.test.ts b/app/src/components/__tests__/aria-attributes.test.ts
+index cb9d38a..86c009e 100644
+--- a/app/src/components/__tests__/aria-attributes.test.ts
++++ b/app/src/components/__tests__/aria-attributes.test.ts
+@@ -5,7 +5,7 @@ import { resolve } from 'path';
+ 
+ /**
+  * Accessibility (ARIA) Source Code Validation Tests
+- * 
++ *
+  * These tests validate that ARIA attributes exist in the source code
+  * for critical components. This approach avoids infra issues (missing jsdom,
+  * @/ alias resolution) while still providing automated verification.
+@@ -156,6 +156,66 @@ describe('Accessibility - ARIA Attributes in Source', () => {
+       expect(source).toContain('aria-pressed={state.theme.accent === c.value}');
      });
-   }
+   });
++
++  describe('Browser.tsx', () => {
++    const source = readSource('../../apps/Browser.tsx');
++
++    it('has aria-label on Go back button', () => {
++      expect(source).toContain('aria-label="Go back"');
++    });
++
++    it('has aria-label on Go forward button', () => {
++      expect(source).toContain('aria-label="Go forward"');
++    });
++
++    it('has aria-label on Refresh page button', () => {
++      expect(source).toContain('aria-label="Refresh page"');
++    });
++
++    it('has aria-label on Go home button', () => {
++      expect(source).toContain('aria-label="Go home"');
++    });
++  });
++
++  describe('Calendar.tsx', () => {
++    const source = readSource('../../apps/Calendar.tsx');
++
++    it('has aria-label on Previous month button', () => {
++      expect(source).toContain('aria-label="Previous month"');
++    });
++
++    it('has aria-label on Next month button', () => {
++      expect(source).toContain('aria-label="Next month"');
++    });
++  });
++
++  describe('Email.tsx', () => {
++    const source = readSource('../../apps/Email.tsx');
++
++    it('has aria-label on Close button', () => {
++      expect(source).toContain('aria-label="Close"');
++    });
++  });
++
++  describe('Chat.tsx', () => {
++    const source = readSource('../../apps/Chat.tsx');
++
++    it('has aria-label on Toggle emoji picker button', () => {
++      expect(source).toContain('aria-label="Toggle emoji picker"');
++    });
++
++    it('has aria-label on Send message button', () => {
++      expect(source).toContain('aria-label="Send message"');
++    });
++  });
++
++  describe('Weather.tsx', () => {
++    const source = readSource('../../apps/Weather.tsx');
++
++    it('has aria-label on Refresh weather button', () => {
++      expect(source).toContain('aria-label="Refresh weather"');
++    });
++  });
+ });
  
-@@ -153,8 +157,14 @@ export class WebSocketHandler {
-     // cleanup) cannot duplicate the PTY kill / container removal work.
-     this.sessions.delete(sessionId);
+ describe('Accessibility - Focus Visible Styles', () => {
+diff --git a/app/src/utils/__tests__/safeEval.test.ts b/app/src/utils/__tests__/safeEval.test.ts
+index b1c538c..3388294 100644
+--- a/app/src/utils/__tests__/safeEval.test.ts
++++ b/app/src/utils/__tests__/safeEval.test.ts
+@@ -84,6 +84,30 @@ describe('safeEval', () => {
+     });
+   });
  
--    session.pty.kill();
--    await stopAndRemoveContainer(session.containerId);
-+    // Harden: always disconnect, even if kill or container removal fails,
-+    // so the session store never stays in a stale state.
-+    try {
-+      session.pty.kill();
-+      await stopAndRemoveContainer(session.containerId);
-+    } catch {
-+      /* PTY or container already gone — continue to disconnect */
-+    }
-     this.store.disconnect(sessionId);
-   }
++  describe('unary minus', () => {
++    it('handles negative number at start', () => {
++      expect(safeEval('-5')).toBe(-5);
++    });
++
++    it('handles negative number in expression', () => {
++      expect(safeEval('-5+3')).toBe(-2);
++      expect(safeEval('3+-5')).toBe(-2);
++    });
++
++    it('handles negative number in parentheses', () => {
++      expect(safeEval('(-5)')).toBe(-5);
++      expect(safeEval('2*(-3)')).toBe(-6);
++    });
++
++    it('handles double unary minus', () => {
++      expect(safeEval('--5')).toBe(5);
++    });
++
++    it('handles nested unary minus in expression', () => {
++      expect(safeEval('-(-5)')).toBe(5);
++    });
++  });
++
+   describe('edge cases', () => {
+     it('throws on empty string', () => {
+       expect(() => safeEval('')).toThrow('Invalid expression');
+diff --git a/app/src/utils/safeEval.ts b/app/src/utils/safeEval.ts
+index 3cb06d5..8286c1a 100644
+--- a/app/src/utils/safeEval.ts
++++ b/app/src/utils/safeEval.ts
+@@ -2,6 +2,7 @@
+  * Safe Math Evaluator — Replaces eval() and new Function() for spreadsheet/terminal math.
+  * Uses a shunting-yard algorithm with RPN evaluation. Only allows decimal numbers
+  * and the operators +, -, *, /, ^. Parentheses are supported.
++ * Includes unary minus support (expressions like -5, 2*(-3), --5).
+  *
+  * Security: Only characters in ALLOWED_CHARS can enter the tokenizer.
+  * Any deviation throws "Invalid expression". No side effects, no globals.
+@@ -9,9 +10,11 @@
+  * @example
+  *   safeEval("(1 + 2) * 3") // => 9
+  *   safeEval("2 ^ 3 + 1")  // => 9
++ *   safeEval("-5 + 3")    // => -2
+  */
  
-@@ -168,8 +178,14 @@ export class WebSocketHandler {
-       // prevent races with overlapping endSession / cleanup calls.
-       this.sessions.delete(sessionId);
+ const OPERATORS: Record<string, { precedence: number; associativity: 'left' | 'right' }> = {
++  'u-': { precedence: 4, associativity: 'right' },
+   '+': { precedence: 1, associativity: 'left' },
+   '-': { precedence: 1, associativity: 'left' },
+   '*': { precedence: 2, associativity: 'left' },
+@@ -20,6 +23,7 @@ const OPERATORS: Record<string, { precedence: number; associativity: 'left' | 'r
+ };
  
--      session.pty.kill();
--      await stopAndRemoveContainer(session.containerId);
-+      // Harden: one failed container removal must not orphan the
-+      // rest of the expired sessions in the loop.
-+      try {
-+        session.pty.kill();
-+        await stopAndRemoveContainer(session.containerId);
-+      } catch {
-+        /* Container may already be gone — continue to next */
+ const ALLOWED_CHARS = /^[\d+\-*/^().\s]+$/;
++const BINARY_OPS = new Set(['+', '-', '*', '/', '^', 'u-']);
+ 
+ function tokenize(expr: string): string[] {
+   const tokens: string[] = [];
+@@ -30,7 +34,7 @@ function tokenize(expr: string): string[] {
+       i++;
+       continue;
+     }
+-    if (c >= '0' && c <= '9' || c === '.') {
++    if ((c >= '0' && c <= '9') || c === '.') {
+       let num = '';
+       while (i < expr.length && (/[\d.]/.test(expr[i]))) {
+         num += expr[i];
+@@ -50,6 +54,27 @@ function tokenize(expr: string): string[] {
+   return tokens;
+ }
+ 
++/**
++ * Convert unary minus tokens to 'u-' (unary minus operator).
++ * A '-' is unary if it's the first token or the previous token is
++ * another operator or '('.
++ */
++function markUnaryMinus(tokens: string[]): string[] {
++  const result: string[] = [];
++  for (let i = 0; i < tokens.length; i++) {
++    const token = tokens[i];
++    if (token === '-') {
++      const prev = result[result.length - 1];
++      if (!prev || BINARY_OPS.has(prev) || prev === '(') {
++        result.push('u-');
++        continue;
 +      }
++    }
++    result.push(token);
++  }
++  return result;
++}
++
+ function shuntingYard(tokens: string[]): (number | string)[] {
+   const output: (number | string)[] = [];
+   const stack: string[] = [];
+@@ -103,27 +128,36 @@ function evaluateRPN(tokens: (number | string)[]): number {
+     if (typeof token === 'number') {
+       stack.push(token);
+     } else if (OPERATORS[token]) {
+-      if (stack.length < 2) {
+-        throw new Error('Invalid expression');
+-      }
+-      const b = stack.pop()!;
+-      const a = stack.pop()!;
+-      switch (token) {
+-        case '+':
+-          stack.push(a + b);
+-          break;
+-        case '-':
+-          stack.push(a - b);
+-          break;
+-        case '*':
+-          stack.push(a * b);
+-          break;
+-        case '/':
+-          stack.push(a / b);
+-          break;
+-        case '^':
+-          stack.push(Math.pow(a, b));
+-          break;
++      // Unary minus: only needs 1 operand
++      if (token === 'u-') {
++        if (stack.length < 1) {
++          throw new Error('Invalid expression');
++        }
++        const a = stack.pop()!;
++        stack.push(-a);
++      } else {
++        if (stack.length < 2) {
++          throw new Error('Invalid expression');
++        }
++        const b = stack.pop()!;
++        const a = stack.pop()!;
++        switch (token) {
++          case '+':
++            stack.push(a + b);
++            break;
++          case '-':
++            stack.push(a - b);
++            break;
++          case '*':
++            stack.push(a * b);
++            break;
++          case '/':
++            stack.push(a / b);
++            break;
++          case '^':
++            stack.push(Math.pow(a, b));
++            break;
++        }
+       }
      }
    }
+@@ -147,6 +181,7 @@ export function safeEval(expression: string): number {
+     throw new Error('Invalid expression');
+   }
+ 
+-  const rpn = shuntingYard(tokens);
++  const marked = markUnaryMinus(tokens);
++  const rpn = shuntingYard(marked);
+   return evaluateRPN(rpn);
+ }
+diff --git a/backend/src/docker.ts b/backend/src/docker.ts
+index 024083b..27b58d5 100644
+--- a/backend/src/docker.ts
++++ b/backend/src/docker.ts
+@@ -3,6 +3,25 @@ import * as pty from 'node-pty';
+ 
+ const docker = new Docker();
+ 
++/**
++ * Poll container until it reports State.Running, with a configurable timeout.
++ * Replaces the fragile magic setTimeout(500) that could fail under host load.
++ */
++async function waitForContainer(
++  container: Docker.Container,
++  timeoutMs = 5000,
++): Promise<void> {
++  const startTime = Date.now();
++  while (Date.now() - startTime < timeoutMs) {
++    const info = await container.inspect();
++    if (info.State.Running) {
++      return;
++    }
++    await new Promise<void>((resolve) => setTimeout(resolve, 100));
++  }
++  throw new Error('Container failed to start within timeout');
++}
++
+ export interface ContainerSession {
+   containerId: string;
+   containerName: string;
+@@ -69,7 +88,7 @@ export async function spawnContainerShell(
+   });
+ 
+   await container.start();
+-  await new Promise<void>((resolve) => setTimeout(resolve, 500));
++  await waitForContainer(container);
+ 
+   const ptyProcess = spawnAttachment(containerName, onData);
  

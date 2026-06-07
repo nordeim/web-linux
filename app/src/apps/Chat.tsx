@@ -50,6 +50,25 @@ const EmojiPicker = memo(function EmojiPicker({ onSelect, onClose }: { onSelect:
   );
 });
 
+// ---- Zod Schemas ----
+const MessageSchema = z.object({
+  id: z.string(),
+  senderId: z.string(),
+  content: z.string(),
+  timestamp: z.number(),
+  type: z.enum(['text']),
+});
+
+const ConversationSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  avatar: z.string(),
+  status: z.enum(['online', 'away', 'offline']),
+  isBot: z.boolean(),
+  messages: z.array(MessageSchema),
+  lastRead: z.number().optional(),
+});
+
 // ---- AI Bot Responses ----
 const BOT_RESPONSES: Record<string, string> = {
   hello: 'Hello there! How can I help you today?',
@@ -134,7 +153,7 @@ const formatDateSeparator = (ts: number): string => {
 export default function Chat() {
   const [conversations, setConversations] = useState<Conversation[]>(() => {
     const raw = localStorage.getItem('ubuntuos_chat');
-    return safeJsonParse(raw ?? '[]', z.array(z.any()), createInitialConversations());
+    return safeJsonParse(raw ?? '[]', z.array(ConversationSchema), createInitialConversations());
   });
   const [activeConvId, setActiveConvId] = useState('bot');
   const [inputText, setInputText] = useState('');
@@ -406,6 +425,7 @@ export default function Chat() {
         <div className="flex items-center gap-2 px-3 py-2 shrink-0 relative" style={{ borderTop: '1px solid var(--border-subtle)', background: 'var(--bg-titlebar)' }}>
           <button
             onClick={() => setShowEmoji(!showEmoji)}
+            aria-label="Toggle emoji picker"
             className="flex items-center justify-center rounded-full transition-all hover:bg-[var(--bg-hover)]"
             style={{ width: 32, height: 32, flexShrink: 0 }}
           >
@@ -427,6 +447,7 @@ export default function Chat() {
           <button
             onClick={sendMessage}
             disabled={!inputText.trim()}
+            aria-label="Send message"
             className="flex items-center justify-center rounded-full transition-all hover:opacity-90"
             style={{
               width: 36, height: 36,

@@ -175,7 +175,7 @@ After running `npm run dev`, open your browser at the provided port (usually `ht
 | :--- | :--- |
 | `npm run build` | Type-check and production build |
 | `npm run lint` | Run ESLint static analysis |
-| `npm run test` | Run Vitest test suite (192 total: 150 frontend + 42 backend)
+| `npm run test` | Run Vitest test suite (203 total: 158 frontend + 45 backend)
 | `npm run preview` | Local preview of the production build |
 | `tsc -b` | Project-wide type checking |
 

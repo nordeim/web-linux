@@ -2,6 +2,7 @@
  * Safe Math Evaluator — Replaces eval() and new Function() for spreadsheet/terminal math.
  * Uses a shunting-yard algorithm with RPN evaluation. Only allows decimal numbers
  * and the operators +, -, *, /, ^. Parentheses are supported.
+ * Includes unary minus support (expressions like -5, 2*(-3), --5).
  *
  * Security: Only characters in ALLOWED_CHARS can enter the tokenizer.
  * Any deviation throws "Invalid expression". No side effects, no globals.
@@ -9,9 +10,11 @@
  * @example
  *   safeEval("(1 + 2) * 3") // => 9
  *   safeEval("2 ^ 3 + 1")  // => 9
+ *   safeEval("-5 + 3")    // => -2
  */
 
 const OPERATORS: Record<string, { precedence: number; associativity: 'left' | 'right' }> = {
+  'u-': { precedence: 4, associativity: 'right' },
   '+': { precedence: 1, associativity: 'left' },
   '-': { precedence: 1, associativity: 'left' },
   '*': { precedence: 2, associativity: 'left' },
@@ -20,6 +23,7 @@ const OPERATORS: Record<string, { precedence: number; associativity: 'left' | 'r
 };
 
 const ALLOWED_CHARS = /^[\d+\-*/^().\s]+$/;
+const BINARY_OPS = new Set(['+', '-', '*', '/', '^', 'u-']);
 
 function tokenize(expr: string): string[] {
   const tokens: string[] = [];
@@ -30,7 +34,7 @@ function tokenize(expr: string): string[] {
       i++;
       continue;
     }
-    if (c >= '0' && c <= '9' || c === '.') {
+    if ((c >= '0' && c <= '9') || c === '.') {
       let num = '';
       while (i < expr.length && (/[\d.]/.test(expr[i]))) {
         num += expr[i];
@@ -48,6 +52,27 @@ function tokenize(expr: string): string[] {
     }
   }
   return tokens;
+}
+
+/**
+ * Convert unary minus tokens to 'u-' (unary minus operator).
+ * A '-' is unary if it's the first token or the previous token is
+ * another operator or '('.
+ */
+function markUnaryMinus(tokens: string[]): string[] {
+  const result: string[] = [];
+  for (let i = 0; i < tokens.length; i++) {
+    const token = tokens[i];
+    if (token === '-') {
+      const prev = result[result.length - 1];
+      if (!prev || BINARY_OPS.has(prev) || prev === '(') {
+        result.push('u-');
+        continue;
+      }
+    }
+    result.push(token);
+  }
+  return result;
 }
 
 function shuntingYard(tokens: string[]): (number | string)[] {
@@ -103,27 +128,36 @@ function evaluateRPN(tokens: (number | string)[]): number {
     if (typeof token === 'number') {
       stack.push(token);
     } else if (OPERATORS[token]) {
-      if (stack.length < 2) {
-        throw new Error('Invalid expression');
-      }
-      const b = stack.pop()!;
-      const a = stack.pop()!;
-      switch (token) {
-        case '+':
-          stack.push(a + b);
-          break;
-        case '-':
-          stack.push(a - b);
-          break;
-        case '*':
-          stack.push(a * b);
-          break;
-        case '/':
-          stack.push(a / b);
-          break;
-        case '^':
-          stack.push(Math.pow(a, b));
-          break;
+      // Unary minus: only needs 1 operand
+      if (token === 'u-') {
+        if (stack.length < 1) {
+          throw new Error('Invalid expression');
+        }
+        const a = stack.pop()!;
+        stack.push(-a);
+      } else {
+        if (stack.length < 2) {
+          throw new Error('Invalid expression');
+        }
+        const b = stack.pop()!;
+        const a = stack.pop()!;
+        switch (token) {
+          case '+':
+            stack.push(a + b);
+            break;
+          case '-':
+            stack.push(a - b);
+            break;
+          case '*':
+            stack.push(a * b);
+            break;
+          case '/':
+            stack.push(a / b);
+            break;
+          case '^':
+            stack.push(Math.pow(a, b));
+            break;
+        }
       }
     }
   }
@@ -147,6 +181,7 @@ export function safeEval(expression: string): number {
     throw new Error('Invalid expression');
   }
 
-  const rpn = shuntingYard(tokens);
+  const marked = markUnaryMinus(tokens);
+  const rpn = shuntingYard(marked);
   return evaluateRPN(rpn);
 }

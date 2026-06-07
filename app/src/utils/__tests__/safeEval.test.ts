@@ -84,6 +84,30 @@ describe('safeEval', () => {
     });
   });
 
+  describe('unary minus', () => {
+    it('handles negative number at start', () => {
+      expect(safeEval('-5')).toBe(-5);
+    });
+
+    it('handles negative number in expression', () => {
+      expect(safeEval('-5+3')).toBe(-2);
+      expect(safeEval('3+-5')).toBe(-2);
+    });
+
+    it('handles negative number in parentheses', () => {
+      expect(safeEval('(-5)')).toBe(-5);
+      expect(safeEval('2*(-3)')).toBe(-6);
+    });
+
+    it('handles double unary minus', () => {
+      expect(safeEval('--5')).toBe(5);
+    });
+
+    it('handles nested unary minus in expression', () => {
+      expect(safeEval('-(-5)')).toBe(5);
+    });
+  });
+
   describe('edge cases', () => {
     it('throws on empty string', () => {
       expect(() => safeEval('')).toThrow('Invalid expression');

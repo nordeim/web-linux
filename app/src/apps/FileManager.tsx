@@ -117,15 +117,6 @@ export default function FileManager() {
     setRenameValue('');
   }, [fs, renameId, renameValue]);
 
-  /* Delete handler - unused for now */
-  // const handleDelete = useCallback(
-  //   (id: string) => {
-  //     fs.moveToTrash(id);
-  //     setSelectedId(null);
-  //   },
-  //   [fs]
-  // );
-
   const handleSidebarClick = useCallback(
     (path: string) => {
       const node = fs.findNodeByPath(path);

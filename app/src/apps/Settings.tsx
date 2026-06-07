@@ -96,7 +96,7 @@ const Settings: React.FC = () => {
   // Settings state (loaded from localStorage)
   const [settings, setSettings] = useState<Record<string, unknown>>(() => {
     const raw = localStorage.getItem('ubuntuos_settings');
-    return safeJsonParse(raw ?? '{}', z.record(z.string(), z.any()), {});
+    return safeJsonParse(raw ?? '{}', z.record(z.string(), z.unknown()), {});
   });
 
   const updateSetting = useCallback((key: string, value: unknown) => {

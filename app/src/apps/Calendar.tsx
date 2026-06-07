@@ -264,13 +264,13 @@ const Calendar: React.FC = () => {
             </h2>
           </div>
           <div className="flex items-center gap-1">
-            <button onClick={navigatePrev} className="p-1.5 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]">
+            <button onClick={navigatePrev} aria-label="Previous month" className="p-1.5 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]">
               <ChevronLeft size={16} />
             </button>
             <button onClick={goToday} className="px-3 py-1.5 rounded text-xs font-medium hover:bg-[var(--bg-hover)] text-[var(--text-primary)]">
               Today
             </button>
-            <button onClick={navigateNext} className="p-1.5 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]">
+            <button onClick={navigateNext} aria-label="Next month" className="p-1.5 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]">
               <ChevronRight size={16} />
             </button>
             <div className="w-px h-5 mx-2" style={{ background: 'var(--border-subtle)' }} />

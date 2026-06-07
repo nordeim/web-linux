@@ -162,7 +162,7 @@ const ComposeModal = memo(function ComposeModal({ onClose, onSend }: { onClose: 
       <div className="flex flex-col w-full h-full" style={{ maxWidth: 600, maxHeight: 520, background: 'var(--bg-window)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-xl)' }}>
         <div className="flex items-center justify-between px-4 shrink-0" style={{ height: 48, borderBottom: '1px solid var(--border-subtle)' }}>
           <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>New Message</h3>
-          <button onClick={onClose} className="flex items-center justify-center rounded-lg hover:bg-[var(--bg-hover)]" style={{ width: 32, height: 32 }}>
+          <button onClick={onClose} aria-label="Close" className="flex items-center justify-center rounded-lg hover:bg-[var(--bg-hover)]" style={{ width: 32, height: 32 }}>
             <X size={16} style={{ color: 'var(--text-secondary)' }} />
           </button>
         </div>

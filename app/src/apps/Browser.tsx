@@ -436,6 +436,7 @@ export default function Browser() {
         <button
           onClick={goBack}
           disabled={!canGoBack}
+          aria-label="Go back"
           className="flex items-center justify-center rounded-lg transition-all"
           style={{ width: 32, height: 32, opacity: canGoBack ? 1 : 0.3 }}
         >
@@ -444,6 +445,7 @@ export default function Browser() {
         <button
           onClick={goForward}
           disabled={!canGoForward}
+          aria-label="Go forward"
           className="flex items-center justify-center rounded-lg transition-all"
           style={{ width: 32, height: 32, opacity: canGoForward ? 1 : 0.3 }}
         >
@@ -451,6 +453,7 @@ export default function Browser() {
         </button>
         <button
           onClick={refresh}
+          aria-label="Refresh page"
           className="flex items-center justify-center rounded-lg transition-all"
           style={{ width: 32, height: 32 }}
         >
@@ -458,6 +461,7 @@ export default function Browser() {
         </button>
         <button
           onClick={() => navigateTo('home')}
+          aria-label="Go home"
           className="flex items-center justify-center rounded-lg transition-all"
           style={{ width: 32, height: 32 }}
         >

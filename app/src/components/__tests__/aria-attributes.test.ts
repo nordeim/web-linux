@@ -5,7 +5,7 @@ import { resolve } from 'path';
 
 /**
  * Accessibility (ARIA) Source Code Validation Tests
- * 
+ *
  * These tests validate that ARIA attributes exist in the source code
  * for critical components. This approach avoids infra issues (missing jsdom,
  * @/ alias resolution) while still providing automated verification.
@@ -154,6 +154,66 @@ describe('Accessibility - ARIA Attributes in Source', () => {
 
     it('has aria-pressed on accent color buttons', () => {
       expect(source).toContain('aria-pressed={state.theme.accent === c.value}');
+    });
+  });
+
+  describe('Browser.tsx', () => {
+    const source = readSource('../../apps/Browser.tsx');
+
+    it('has aria-label on Go back button', () => {
+      expect(source).toContain('aria-label="Go back"');
+    });
+
+    it('has aria-label on Go forward button', () => {
+      expect(source).toContain('aria-label="Go forward"');
+    });
+
+    it('has aria-label on Refresh page button', () => {
+      expect(source).toContain('aria-label="Refresh page"');
+    });
+
+    it('has aria-label on Go home button', () => {
+      expect(source).toContain('aria-label="Go home"');
+    });
+  });
+
+  describe('Calendar.tsx', () => {
+    const source = readSource('../../apps/Calendar.tsx');
+
+    it('has aria-label on Previous month button', () => {
+      expect(source).toContain('aria-label="Previous month"');
+    });
+
+    it('has aria-label on Next month button', () => {
+      expect(source).toContain('aria-label="Next month"');
+    });
+  });
+
+  describe('Email.tsx', () => {
+    const source = readSource('../../apps/Email.tsx');
+
+    it('has aria-label on Close button', () => {
+      expect(source).toContain('aria-label="Close"');
+    });
+  });
+
+  describe('Chat.tsx', () => {
+    const source = readSource('../../apps/Chat.tsx');
+
+    it('has aria-label on Toggle emoji picker button', () => {
+      expect(source).toContain('aria-label="Toggle emoji picker"');
+    });
+
+    it('has aria-label on Send message button', () => {
+      expect(source).toContain('aria-label="Send message"');
+    });
+  });
+
+  describe('Weather.tsx', () => {
+    const source = readSource('../../apps/Weather.tsx');
+
+    it('has aria-label on Refresh weather button', () => {
+      expect(source).toContain('aria-label="Refresh weather"');
     });
   });
 });

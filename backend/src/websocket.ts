@@ -122,7 +122,12 @@ export class WebSocketHandler {
           command: data,
           action: 'input',
         });
-        containerSession.pty.write(data);
+        // Harden: guard against a PTY that has already exited.
+        try {
+          containerSession.pty.write(data);
+        } catch {
+          this.send(ws, { type: 'error', message: 'PTY write failed' });
+        }
         break;
       }
       case 'resize': {
@@ -134,7 +139,7 @@ export class WebSocketHandler {
         break;
       }
       case 'close': {
-        this.endSession(sessionId);
+        void this.endSession(sessionId);  // Explicit: fire-and-forget is intentional
         ws.close();
         break;
       }
@@ -191,7 +196,13 @@ export class WebSocketHandler {
 
   private send(ws: WebSocket, msg: ServerMessage): void {
     if (ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify(msg));
+      // Harden: the socket can close between the readyState check
+      // and the actual send, so catch any send errors.
+      try {
+        ws.send(JSON.stringify(msg));
+      } catch {
+        /* Socket closed between check and send — ignore */
+      }
     }
   }
 

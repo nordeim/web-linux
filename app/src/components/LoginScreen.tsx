@@ -135,14 +135,26 @@ const LoginScreen = memo(function LoginScreen() {
         <div className="flex items-center gap-4 mt-6 pt-4 w-full justify-center"
           style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
         >
-          <button className="w-8 h-8 rounded-lg flex items-center justify-center text-[#9E9E9E] hover:text-[#E0E0E0] hover:bg-white/[0.06] transition-all">
-            <Power size={16} />
+          <button
+            type="button"
+            aria-label="Power options"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#9E9E9E] hover:text-[#E0E0E0] hover:bg-white/[0.06] transition-all"
+          >
+            <Power size={16} aria-hidden="true" />
           </button>
-          <button className="w-8 h-8 rounded-lg flex items-center justify-center text-[#9E9E9E] hover:text-[#E0E0E0] hover:bg-white/[0.06] transition-all">
-            <Moon size={16} />
+          <button
+            type="button"
+            aria-label="Sleep"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#9E9E9E] hover:text-[#E0E0E0] hover:bg-white/[0.06] transition-all"
+          >
+            <Moon size={16} aria-hidden="true" />
           </button>
-          <button className="w-8 h-8 rounded-lg flex items-center justify-center text-[#9E9E9E] hover:text-[#E0E0E0] hover:bg-white/[0.06] transition-all">
-            <LogOut size={16} />
+          <button
+            type="button"
+            aria-label="Log out"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#9E9E9E] hover:text-[#E0E0E0] hover:bg-white/[0.06] transition-all"
+          >
+            <LogOut size={16} aria-hidden="true" />
           </button>
         </div>
       </div>

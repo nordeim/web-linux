@@ -5,6 +5,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { FileSystemNode, FileSystemState, FileAssociation } from '@/types';
 import { validateFileSystem, saveFileSystem } from '@/utils/storageValidation';
+import { emitFileSystemSaveError, isQuotaExceededError } from '@/utils/fsEvents';
 import { walkAndDelete, recurseMoveNode } from '@/utils/vfsHelpers';
 
 import { generateId } from '@/utils/generateId';
@@ -95,7 +96,15 @@ function loadFS(): FileSystemState {
 function saveFS(state: FileSystemState) {
   try {
     saveFileSystem(state);
-  } catch { /* ignore */ }
+  } catch (err) {
+    // Previously swallowed silently, causing silent data loss on quota errors.
+    // Now emit a typed event so the OSProvider can surface a notification.
+    emitFileSystemSaveError({
+      kind: isQuotaExceededError(err) ? 'quota-exceeded' : 'unknown',
+      message: err instanceof Error ? err.message : String(err),
+      cause: err,
+    });
+  }
 }
 
 // ---- Hook ----

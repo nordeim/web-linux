@@ -3,6 +3,7 @@
 // ============================================================
 
 import React, { createContext, useContext, useReducer, useCallback, useEffect } from 'react';
+import { subscribeFileSystemSaveError, isQuotaExceededError, emitFileSystemSaveError } from '@/utils/fsEvents';
 import type { OSState, OSAction, Window, DesktopIcon, Notification, DockItem, WindowState } from '@/types';
 import { APP_REGISTRY, getAppById, getDefaultDockApps } from '@/apps/registry';
 import { validateDesktopIcons } from '@/utils/storageValidation';
@@ -486,10 +487,42 @@ export const OSProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   // Debounced to avoid rapid writes during drag operations (L-1).
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      localStorage.setItem('ubuntuos_desktop_icons', JSON.stringify(state.desktopIcons));
+      try {
+        localStorage.setItem('ubuntuos_desktop_icons', JSON.stringify(state.desktopIcons));
+      } catch (err) {
+        emitFileSystemSaveError({
+          kind: isQuotaExceededError(err) ? 'quota-exceeded' : 'unknown',
+          message: err instanceof Error ? err.message : String(err),
+          cause: err,
+        });
+      }
     }, 300);
     return () => clearTimeout(timeoutId);
   }, [state.desktopIcons]);
+
+  // Surface filesystem save failures to the user via a notification.
+  // This converts what was previously a silent data loss into a visible
+  // error message.
+  useEffect(() => {
+    return subscribeFileSystemSaveError((err) => {
+      const title = err.kind === 'quota-exceeded' ? 'Storage full' : 'Filesystem error';
+      const message =
+        err.kind === 'quota-exceeded'
+          ? 'Your changes could not be saved because localStorage is full. Delete some files or clear browser storage.'
+          : `Your changes could not be saved: ${err.message}`;
+      dispatch({
+        type: 'ADD_NOTIFICATION',
+        notification: {
+          appId: 'system',
+          appName: 'System',
+          appIcon: 'HardDrive',
+          title,
+          message,
+          isRead: false,
+        },
+      });
+    });
+  }, []);
 
   return (
     <OSContext.Provider value={{ state, dispatch }}>

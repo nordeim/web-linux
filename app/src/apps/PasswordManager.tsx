@@ -118,20 +118,25 @@ export default function PasswordManager() {
 
   if (!authenticated) {
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-4" style={{ background: 'var(--bg-window)' }}>
-        <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: 'var(--accent-primary)' }}>
-          <Lock size={28} color="#fff" />
+      <div className="flex flex-col h-full" style={{ background: 'var(--bg-window)' }}>
+        <div className="px-3 py-1.5" style={{ background: 'var(--accent-warning-bg)', color: 'var(--accent-warning)' }} role="status">
+          <p className="text-xs font-medium">Demo Mode — passwords are not securely encrypted.</p>
         </div>
-        <div className="text-center">
-          <h3 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Password Manager</h3>
-          <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>Enter PIN to unlock (demo: 1234)</p>
-        </div>
-        <div className="flex flex-col items-center gap-2">
-          <input type="password" value={pin} onChange={e => { setPin(e.target.value); setPinError(false); }} onKeyDown={e => e.key === 'Enter' && checkPin()} maxLength={4} placeholder="****" className="w-32 px-3 py-2 rounded-md text-center text-sm tracking-widest outline-none" style={{ background: 'var(--bg-input)', color: 'var(--text-primary)', border: pinError ? '1px solid var(--accent-error)' : '1px solid var(--border-subtle)' }} />
-          {pinError && <p className="text-xs" style={{ color: 'var(--accent-error)' }}>Incorrect PIN</p>}
-          <button onClick={checkPin} className="flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium" style={{ background: 'var(--accent-primary)', color: '#fff' }}>
-            <Unlock size={14} /> Unlock
-          </button>
+        <div className="flex flex-col items-center justify-center flex-1 gap-4">
+          <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: 'var(--accent-primary)' }}>
+            <Lock size={28} color="#fff" />
+          </div>
+          <div className="text-center">
+            <h3 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>Password Manager</h3>
+            <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>Enter PIN to unlock (demo: 1234)</p>
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <input type="password" value={pin} onChange={e => { setPin(e.target.value); setPinError(false); }} onKeyDown={e => e.key === 'Enter' && checkPin()} maxLength={4} placeholder="****" className="w-32 px-3 py-2 rounded-md text-center text-sm tracking-widest outline-none" style={{ background: 'var(--bg-input)', color: 'var(--text-primary)', border: pinError ? '1px solid var(--accent-error)' : '1px solid var(--border-subtle)' }} />
+            {pinError && <p className="text-xs" style={{ color: 'var(--accent-error)' }}>Incorrect PIN</p>}
+            <button onClick={checkPin} className="flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium" style={{ background: 'var(--accent-primary)', color: '#fff' }}>
+              <Unlock size={14} /> Unlock
+            </button>
+          </div>
         </div>
       </div>
     );

@@ -14,6 +14,15 @@ describe('PasswordManager security controls', () => {
     expect(src).toContain('not securely encrypted');
   });
 
+  it('shows the demo-mode warning at the lock screen (before the authenticated branch)', () => {
+    // The lock screen is the first return in the component. The demo warning
+    // should appear there too so users see the security caveat before typing a PIN.
+    const lockBranchMatch = src.match(/if\s*\(\s*!\s*authenticated\s*\)\s*\{[\s\S]*?\n\s*\}\s*\n\s*return\s*\(/);
+    expect(lockBranchMatch, 'expected an `if (!authenticated) { ... } return (` lock branch').not.toBeNull();
+    const lockBranch = lockBranchMatch![0];
+    expect(lockBranch).toMatch(/[Dd]emo.*[Mm]ode|[Nn]ot securely encrypted/);
+  });
+
   it('reads PIN via safeStoredPin instead of a hardcoded constant', () => {
     expect(src).toMatch(/safeStoredPin/);
   });

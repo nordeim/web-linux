@@ -1,7 +1,17 @@
 import { SignJWT, jwtVerify } from 'jose';
 
-const getSecret = (): Uint8Array => {
-  const secret = process.env.JWT_SECRET ?? 'ubuntuos-dev-secret-change-me';
+export class JwtSecretMissingError extends Error {
+  constructor() {
+    super('JWT_SECRET environment variable is required to sign or verify tokens. Refusing to use a silent dev fallback.');
+    this.name = 'JwtSecretMissingError';
+  }
+}
+
+const getSecretFromEnv = (): Uint8Array => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret || secret.length === 0) {
+    throw new JwtSecretMissingError();
+  }
   return new TextEncoder().encode(secret);
 };
 
@@ -13,7 +23,7 @@ export interface TokenPayload {
 }
 
 export async function generateToken(userName: string): Promise<string> {
-  const secret = getSecret();
+  const secret = getSecretFromEnv();
   const now = Math.floor(Date.now() / 1000);
 
   return new SignJWT({ sub: userName })
@@ -28,7 +38,7 @@ export async function verifyToken(token: string, secretOverride?: string): Promi
   try {
     const secret = secretOverride
       ? new TextEncoder().encode(secretOverride)
-      : getSecret();
+      : getSecretFromEnv();
 
     const { payload } = await jwtVerify(token, secret, {
       audience: 'ubuntuos-ws',

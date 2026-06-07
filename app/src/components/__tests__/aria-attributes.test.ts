@@ -216,6 +216,22 @@ describe('Accessibility - ARIA Attributes in Source', () => {
       expect(source).toContain('aria-label="Refresh weather"');
     });
   });
+
+  describe('LoginScreen.tsx', () => {
+    const source = readSource('../LoginScreen.tsx');
+
+    it('has aria-label on the Power (shutdown) icon-only button', () => {
+      expect(source).toMatch(/<button[^>]*aria-label="[^"]*[Pp]ower[^"]*"[^>]*>[\s\S]*?<Power/);
+    });
+
+    it('has aria-label on the Sleep (Moon) icon-only button', () => {
+      expect(source).toMatch(/<button[^>]*aria-label="[^"]*[Ss]leep[^"]*"[^>]*>[\s\S]*?<Moon/);
+    });
+
+    it('has aria-label on the Log out (LogOut) icon-only button', () => {
+      expect(source).toMatch(/<button[^>]*aria-label="[^"]*[Ll]og\s?out[^"]*"[^>]*>[\s\S]*?<LogOut/);
+    });
+  });
 });
 
 describe('Accessibility - Focus Visible Styles', () => {

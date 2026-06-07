@@ -1,9 +1,30 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
 import { generateToken, verifyToken } from '../auth.js';
 
 describe('auth', () => {
   const secret = 'test-secret-for-vitest-only';
   process.env.JWT_SECRET = secret;
+
+  it('throws when JWT_SECRET is not set (no silent dev fallback)', async () => {
+    const originalSecret = process.env.JWT_SECRET;
+    delete process.env.JWT_SECRET;
+    try {
+      await expect(generateToken('User')).rejects.toThrow(/JWT_SECRET/);
+    } finally {
+      process.env.JWT_SECRET = originalSecret;
+    }
+  });
+
+  it('throws from verifyToken when JWT_SECRET is unset and no override is provided', async () => {
+    const originalSecret = process.env.JWT_SECRET;
+    delete process.env.JWT_SECRET;
+    try {
+      const result = await verifyToken('any.token.here');
+      expect(result).toBeNull();
+    } finally {
+      process.env.JWT_SECRET = originalSecret;
+    }
+  });
 
   it('generates a valid signed JWT with userName claim', async () => {
     const token = await generateToken('User');

@@ -3,11 +3,11 @@
     "@xterm/addon-fit": "^0.10.0",
     "@xterm/addon-web-links": "^0.10.0",
     "@xterm/xterm": "^5.5.0",
-    "dompurify": "^3.4.7",
+    "dompurify": "^3.4.8",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/dompurify": "^3.2.0",
-    "vitest": "^4.1.7"
+    "vitest": "^4.1.8"
   }
 }

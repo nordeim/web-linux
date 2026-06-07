@@ -3,6 +3,6 @@ dist
 .DS_Store
 
 # Environment files (use .env.example as a tracked template)
-#.env
-#.env.*
-#!.env.example
+.env
+.env.*
+!.env.example

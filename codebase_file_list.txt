@@ -1,9 +1,19 @@
-$ find app/ -type f -name '*tsx' -o -name '*ts' -o -name '*js' -o -name '*json' | grep -vE '\.next\/|node_modules|dist\/assets|package-lock'
+$ find docker/ -type f 
 AGENTS.md
 CLAUDE.md
 GEMINI.md
 README.md
-status_25.md
+Project_Architecture_Document.md
+docker/docker-compose.yml
+docker/nginx.conf
+docker/Dockerfile.dev
+docker/.env.docker
+docker/scripts/start.sh
+docker/scripts/build.sh
+docker/README.md
+docker/.dockerignore
+$ find package.json app/ backend/ -type f -name '*tsx' -o -name '*ts' -o -name '*js' -o -name '*json' | grep -vE '\.next\/|node_modules|dist\/assets|package-lock'
+package.json
 app/tsconfig.node.json
 app/components.json
 app/tsconfig.json
@@ -15,6 +25,7 @@ app/tsconfig.app.json
 app/vitest.setup.ts
 app/src/App.tsx
 app/src/main.tsx
+app/src/components
 app/src/components/Desktop.tsx
 app/src/components/LoginScreen.tsx
 app/src/components/NotificationSystem.tsx
@@ -161,8 +172,10 @@ app/src/utils/backendUrl.ts
 app/src/utils/safeEval.ts
 app/src/utils/safeJsonParse.ts
 app/src/utils/__tests__/safeEval.test.ts
+app/src/utils/__tests__/storageValidation.test.ts
 app/src/utils/__tests__/gameHighscore.test.ts
 app/src/utils/__tests__/authToken.test.ts
+app/src/utils/__tests__/generateId.test.ts
 app/src/utils/__tests__/terminal-windowId-source.test.ts
 app/src/utils/__tests__/safeJsonParse-integration.test.ts
 app/src/utils/__tests__/colorValidation.test.ts
@@ -170,8 +183,35 @@ app/src/utils/__tests__/password-security-source.test.ts
 app/src/utils/__tests__/safeJsonParse.test.ts
 app/src/utils/__tests__/pinStorage.test.ts
 app/src/utils/__tests__/vfsHelpers.test.ts
+app/src/utils/generateId.ts
 app/src/utils/vfsHelpers.ts
 app/src/utils/colorValidation.ts
 app/src/lib/utils.ts
 app/src/types/index.ts
 app/tailwind.config.mjs
+backend/tsconfig.json
+backend/package.json
+backend/src/logger.ts
+backend/src/sessionStore.ts
+backend/src/types.ts
+backend/src/policy.ts
+backend/src/__tests__/logger.test.ts
+backend/src/__tests__/docker.test.ts
+backend/src/__tests__/auth.test.ts
+backend/src/__tests__/endSession-race.test.ts
+backend/src/__tests__/types.test.ts
+backend/src/__tests__/config.test.ts
+backend/src/__tests__/websocket.test.ts
+backend/src/__tests__/integration.test.ts
+backend/src/__tests__/policy.test.ts
+backend/src/__tests__/verifyToken-error.test.ts
+backend/src/__tests__/sessionStore.test.ts
+backend/src/__tests__/endSession-error.test.ts
+backend/src/__tests__/handleMessage-error.test.ts
+backend/src/__tests__/send-error.test.ts
+backend/src/__tests__/cleanupExpired-error.test.ts
+backend/src/index.ts
+backend/src/websocket.ts
+backend/src/config.ts
+backend/src/auth.ts
+backend/src/docker.ts

@@ -19,7 +19,7 @@ Comprehensive, high-fidelity web-based replica of the Ubuntu Linux desktop envir
 ### Architectural Pillars
 - **OS Store (`src/hooks/useOSStore.tsx`)**: Centralized state management using `useReducer` and React Context. Handles window stacking (z-index), focus, notifications, and desktop state.
 - **Virtual File System (`src/hooks/useFileSystem.ts`)**: ID-based file management with `localStorage` persistence. Utilizes refactored traversal helpers in `src/utils/vfsHelpers.ts` (`walkAndDelete`, `recurseMoveNode`) to maintain DRY principles.
-- **Application Routing (`src/apps/AppRouter.tsx`)**: Implements `React.lazy()` and `Suspense` to code-split 55 applications, significantly reducing initial bundle size (~360 KB initial).
+- **Application Routing (`src/apps/AppRouter.tsx`)**: Implements `React.lazy()` and `Suspense` to code-split 56 applications, significantly reducing initial bundle size (~360 KB initial).
 - **Real Terminal**: Hybrid implementation with a Node.js backend (`backend/src/`) using `node-pty` + Docker for hardened bash sessions, and an `xterm.js` frontend (`RealTerminal.tsx`) communicating via WebSockets and JWT authentication.
 
 ### Security Utilities (`src/utils/`)

@@ -41,9 +41,9 @@
 | Metric | Value |
 |--------|-------|
 | Total Applications | 56 |
-| Frontend Test Files | 22 |
-| Backend Test Files | 9 |
-| Total Tests | 213 |
+| Frontend Test Files | 29 |
+| Backend Test Files | 16 |
+| Total Tests | 248 |
 | Backend Modules | 9 (index, config, auth, docker, websocket, sessionStore, policy, logger, types) |
 
 ---

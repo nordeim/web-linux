@@ -85,7 +85,7 @@ const TreeEntry: React.FC<{
         onClick={() => onToggle(entry.id)}
       >
         {entry.type === 'folder' && (
-          <button onClick={e => { e.stopPropagation(); setExpanded(!expanded); }} className="text-[var(--text-secondary)]">
+          <button onClick={e => { e.stopPropagation(); setExpanded(!expanded); }} className="text-[var(--text-secondary)]" aria-label={expanded ? "Collapse folder" : "Expand folder"}>
             {expanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
           </button>
         )}
@@ -202,6 +202,7 @@ const ArchiveManager: React.FC = () => {
               <button
                 onClick={() => deleteArchive(archive.id)}
                 className="hidden group-hover:block p-1 text-[var(--text-secondary)] hover:text-[var(--accent-error)]"
+                aria-label="Delete archive"
               >
                 <Trash2 size={12} />
               </button>
@@ -295,7 +296,7 @@ const ArchiveManager: React.FC = () => {
                 >
                   <Download size={12} /> Extract
                 </button>
-                <button onClick={() => deleteArchive(activeArchive.id)} className="p-1.5 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:text-[var(--accent-error)]">
+                <button onClick={() => deleteArchive(activeArchive.id)} className="p-1.5 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:text-[var(--accent-error)]" aria-label="Delete archive">
                   <Trash2 size={14} />
                 </button>
               </div>

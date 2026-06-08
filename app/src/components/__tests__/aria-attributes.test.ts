@@ -430,6 +430,49 @@ describe('Accessibility - ARIA Attributes in Source', () => {
       expect(source).toContain('aria-label="Delete recording"');
     });
   });
+
+  describe('ArchiveManager.tsx', () => {
+    const source = readSource('../../apps/ArchiveManager.tsx');
+    it('has aria-label on icon-only buttons', () => {
+      expect(source).toContain('aria-label={expanded ? "Collapse folder" : "Expand folder"}');
+      expect(source).toContain('aria-label="Delete archive"');
+    });
+  });
+
+  describe('DocumentViewer.tsx', () => {
+    const source = readSource('../../apps/DocumentViewer.tsx');
+    it('has aria-label on icon-only buttons', () => {
+      expect(source).toContain('aria-label="Previous match"');
+      expect(source).toContain('aria-label="Next match"');
+      expect(source).toContain('aria-label="Close search"');
+      expect(source).toContain('aria-label="Close file picker"');
+    });
+  });
+
+  describe('ImageViewer.tsx', () => {
+    const source = readSource('../../apps/ImageViewer.tsx');
+    it('has aria-label on icon-only buttons', () => {
+      expect(source).toContain('aria-label="Zoom out"');
+      expect(source).toContain('aria-label="Zoom in"');
+      expect(source).toContain('aria-label="Fit to window"');
+      expect(source).toContain('aria-label="Actual size"');
+      expect(source).toContain('aria-label={isSlideshow ? "Stop slideshow" : "Start slideshow"}');
+      expect(source).toContain('aria-label="Toggle info"');
+      expect(source).toContain('aria-label="Previous image"');
+      expect(source).toContain('aria-label="Next image"');
+      expect(source).toContain('aria-label="Close info"');
+    });
+  });
+
+  describe('Reminders.tsx', () => {
+    const source = readSource('../../apps/Reminders.tsx');
+    it('has aria-label on icon-only buttons', () => {
+      expect(source).toContain('aria-label="Close form"');
+      expect(source).toContain('aria-label="Toggle complete"');
+      expect(source).toContain('aria-label="Edit reminder"');
+      expect(source).toContain('aria-label="Delete reminder"');
+    });
+  });
 });
 
 describe('Accessibility - Focus Visible Styles', () => {

@@ -120,26 +120,26 @@ export default function ImageViewer() {
         }}
       >
         <div className="flex items-center gap-1">
-          <button onClick={handleZoomOut} className="flex items-center justify-center rounded hover:bg-[rgba(255,255,255,0.1)]" style={{ width: 28, height: 28 }}>
+          <button onClick={handleZoomOut} className="flex items-center justify-center rounded hover:bg-[rgba(255,255,255,0.1)]" style={{ width: 28, height: 28 }} aria-label="Zoom out">
             <ZoomOut size={16} style={{ color: 'white' }} />
           </button>
           <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', minWidth: 36, textAlign: 'center' }}>{zoomPercent}%</span>
-          <button onClick={handleZoomIn} className="flex items-center justify-center rounded hover:bg-[rgba(255,255,255,0.1)]" style={{ width: 28, height: 28 }}>
+          <button onClick={handleZoomIn} className="flex items-center justify-center rounded hover:bg-[rgba(255,255,255,0.1)]" style={{ width: 28, height: 28 }} aria-label="Zoom in">
             <ZoomIn size={16} style={{ color: 'white' }} />
           </button>
           <div style={{ width: 1, height: 20, background: 'rgba(255,255,255,0.2)', margin: '0 4px' }} />
-          <button onClick={() => { setViewMode('fit'); setZoom(1); setPanOffset({ x: 0, y: 0 }); }} className="flex items-center justify-center rounded hover:bg-[rgba(255,255,255,0.1)]" style={{ width: 28, height: 28 }}>
+          <button onClick={() => { setViewMode('fit'); setZoom(1); setPanOffset({ x: 0, y: 0 }); }} className="flex items-center justify-center rounded hover:bg-[rgba(255,255,255,0.1)]" style={{ width: 28, height: 28 }} aria-label="Fit to window">
             <Maximize2 size={16} style={{ color: viewMode === 'fit' ? 'var(--accent-primary)' : 'white' }} />
           </button>
-          <button onClick={() => setViewMode('actual')} className="flex items-center justify-center rounded hover:bg-[rgba(255,255,255,0.1)]" style={{ width: 28, height: 28 }}>
+          <button onClick={() => setViewMode('actual')} className="flex items-center justify-center rounded hover:bg-[rgba(255,255,255,0.1)]" style={{ width: 28, height: 28 }} aria-label="Actual size">
             <RotateCcw size={16} style={{ color: viewMode === 'actual' ? 'var(--accent-primary)' : 'white' }} />
           </button>
         </div>
         <div className="flex items-center gap-1">
-          <button onClick={() => setIsSlideshow((s) => !s)} className="flex items-center justify-center rounded hover:bg-[rgba(255,255,255,0.1)]" style={{ width: 28, height: 28 }}>
+          <button onClick={() => setIsSlideshow((s) => !s)} className="flex items-center justify-center rounded hover:bg-[rgba(255,255,255,0.1)]" style={{ width: 28, height: 28 }} aria-label={isSlideshow ? "Stop slideshow" : "Start slideshow"}>
             {isSlideshow ? <Square size={16} style={{ color: 'var(--accent-primary)' }} /> : <Play size={16} style={{ color: 'white' }} />}
           </button>
-          <button onClick={() => setShowInfo((s) => !s)} className="flex items-center justify-center rounded hover:bg-[rgba(255,255,255,0.1)]" style={{ width: 28, height: 28 }}>
+          <button onClick={() => setShowInfo((s) => !s)} className="flex items-center justify-center rounded hover:bg-[rgba(255,255,255,0.1)]" style={{ width: 28, height: 28 }} aria-label="Toggle info">
             <Info size={16} style={{ color: showInfo ? 'var(--accent-primary)' : 'white' }} />
           </button>
         </div>
@@ -177,6 +177,7 @@ export default function ImageViewer() {
               onClick={goPrev}
               className="absolute left-3 flex items-center justify-center rounded-full transition-all hover:bg-[rgba(255,255,255,0.2)] z-10"
               style={{ width: 48, height: 48, background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(4px)' }}
+              aria-label="Previous image"
             >
               <ChevronLeft size={24} style={{ color: 'white' }} />
             </button>
@@ -184,6 +185,7 @@ export default function ImageViewer() {
               onClick={goNext}
               className="absolute right-3 flex items-center justify-center rounded-full transition-all hover:bg-[rgba(255,255,255,0.2)] z-10"
               style={{ width: 48, height: 48, background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(4px)' }}
+              aria-label="Next image"
             >
               <ChevronRight size={24} style={{ color: 'white' }} />
             </button>
@@ -198,7 +200,7 @@ export default function ImageViewer() {
           >
             <div className="flex items-center justify-between mb-3">
               <span style={{ fontSize: '13px', fontWeight: 600, color: 'white' }}>Image Info</span>
-              <button onClick={() => setShowInfo(false)}><X size={14} style={{ color: 'rgba(255,255,255,0.6)' }} /></button>
+              <button onClick={() => setShowInfo(false)} aria-label="Close info"><X size={14} style={{ color: 'rgba(255,255,255,0.6)' }} /></button>
             </div>
             <div className="flex flex-col gap-2">
               <InfoRow label="Name" value={currentImage.name} />

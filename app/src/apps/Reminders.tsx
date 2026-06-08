@@ -164,7 +164,7 @@ export default function Reminders() {
         <div className="p-3 border-b" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-panel)' }}>
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{editingId ? 'Edit' : 'New'} Reminder</span>
-            <button onClick={() => { setShowForm(false); resetForm(); }} className="p-1 rounded"><X size={14} style={{ color: 'var(--text-secondary)' }} /></button>
+            <button onClick={() => { setShowForm(false); resetForm(); }} className="p-1 rounded" aria-label="Close form"><X size={14} style={{ color: 'var(--text-secondary)' }} /></button>
           </div>
           <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Reminder title..." className="w-full px-2.5 py-1.5 rounded-md text-sm mb-2 outline-none" style={{ background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }} />
           <div className="flex gap-2 mb-2">
@@ -199,7 +199,7 @@ export default function Reminders() {
               const pc = PRIORITY_COLORS[r.priority];
               return (
                 <div key={r.id} className="flex items-start gap-2 p-2 rounded-md group transition-colors" style={{ background: r.completed ? 'transparent' : 'var(--bg-panel)', borderLeft: `3px solid ${r.completed ? 'var(--border-subtle)' : pc.text}`, opacity: r.completed ? 0.6 : 1 }}>
-                  <button onClick={() => toggleComplete(r.id)} className="mt-0.5 p-0.5 rounded-full flex-shrink-0" style={{ border: `2px solid ${r.completed ? 'var(--accent-success)' : 'var(--border-default)'}`, background: r.completed ? 'var(--accent-success)' : 'transparent' }}>
+                  <button onClick={() => toggleComplete(r.id)} className="mt-0.5 p-0.5 rounded-full flex-shrink-0" style={{ border: `2px solid ${r.completed ? 'var(--accent-success)' : 'var(--border-default)'}`, background: r.completed ? 'var(--accent-success)' : 'transparent' }} aria-label="Toggle complete">
                     {r.completed && <Check size={10} color="#fff" />}
                   </button>
                   <div className="flex-1 min-w-0">
@@ -216,8 +216,8 @@ export default function Reminders() {
                     </div>
                   </div>
                   <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => startEdit(r)} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><Edit2 size={12} /></button>
-                    <button onClick={() => deleteReminder(r.id)} className="p-1 rounded" style={{ color: 'var(--accent-error)' }}><Trash2 size={12} /></button>
+                    <button onClick={() => startEdit(r)} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }} aria-label="Edit reminder"><Edit2 size={12} /></button>
+                    <button onClick={() => deleteReminder(r.id)} className="p-1 rounded" style={{ color: 'var(--accent-error)' }} aria-label="Delete reminder"><Trash2 size={12} /></button>
                   </div>
                 </div>
               );

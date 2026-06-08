@@ -818,3 +818,163 @@ index 21da397..37df920 100644
 +  "private": true,
 +  "version": "0.0.0"
  }
+
+$ git diff app/src/apps/ArchiveManager.tsx
+diff --git a/app/src/apps/ArchiveManager.tsx b/app/src/apps/ArchiveManager.tsx
+index 704b3bc..357b296 100644
+--- a/app/src/apps/ArchiveManager.tsx
++++ b/app/src/apps/ArchiveManager.tsx
+@@ -85,7 +85,7 @@ const TreeEntry: React.FC<{
+         onClick={() => onToggle(entry.id)}
+       >
+         {entry.type === 'folder' && (
+-          <button onClick={e => { e.stopPropagation(); setExpanded(!expanded); }} className="text-[var(--text-secondary)]">
++          <button onClick={e => { e.stopPropagation(); setExpanded(!expanded); }} className="text-[var(--text-secondary)]" aria-label={expanded ? "Collapse folder" : "Expand folder"}>
+             {expanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+           </button>
+         )}
+@@ -202,6 +202,7 @@ const ArchiveManager: React.FC = () => {
+               <button
+                 onClick={() => deleteArchive(archive.id)}
+                 className="hidden group-hover:block p-1 text-[var(--text-secondary)] hover:text-[var(--accent-error)]"
++                aria-label="Delete archive"
+               >
+                 <Trash2 size={12} />
+               </button>
+@@ -295,7 +296,7 @@ const ArchiveManager: React.FC = () => {
+                 >
+                   <Download size={12} /> Extract
+                 </button>
+-                <button onClick={() => deleteArchive(activeArchive.id)} className="p-1.5 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:text-[var(--accent-error)]">
++                <button onClick={() => deleteArchive(activeArchive.id)} className="p-1.5 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:text-[var(--accent-error)]" aria-label="Delete archive">
+                   <Trash2 size={14} />
+                 </button>
+               </div>
+(venv) pete@pop-os:/home/project/web-linux
+$ git diff app/src/apps/DocumentViewer.tsx
+diff --git a/app/src/apps/DocumentViewer.tsx b/app/src/apps/DocumentViewer.tsx
+index eb56485..a3e9673 100644
+--- a/app/src/apps/DocumentViewer.tsx
++++ b/app/src/apps/DocumentViewer.tsx
+@@ -192,9 +192,9 @@ export default function DocumentViewer({ fileNodeId }: DocumentViewerProps) {
+               {searchIndex + 1}/{searchMatches.length}
+             </span>
+           )}
+-          <button onClick={() => navigateSearch(-1)} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><ChevronLeft size={14} /></button>
+-          <button onClick={() => navigateSearch(1)} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><ChevronRight size={14} /></button>
+-          <button onClick={() => { setShowSearch(false); setSearchQuery(''); }} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><X size={14} /></button>
++          <button onClick={() => navigateSearch(-1)} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }} aria-label="Previous match"><ChevronLeft size={14} /></button>
++          <button onClick={() => navigateSearch(1)} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }} aria-label="Next match"><ChevronRight size={14} /></button>
++          <button onClick={() => { setShowSearch(false); setSearchQuery(''); }} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }} aria-label="Close search"><X size={14} /></button>
+         </div>
+       )}
+ 
+@@ -246,7 +246,7 @@ export default function DocumentViewer({ fileNodeId }: DocumentViewerProps) {
+           <div className="rounded-lg shadow-xl overflow-hidden" style={{ width: '480px', maxHeight: '400px', background: 'var(--bg-window)' }}>
+             <div className="flex items-center justify-between px-4 py-2 border-b" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-panel)' }}>
+               <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Open File</span>
+-              <button onClick={() => setShowFilePicker(false)} className="p-1 rounded"><X size={14} /></button>
++              <button onClick={() => setShowFilePicker(false)} className="p-1 rounded" aria-label="Close file picker"><X size={14} /></button>
+             </div>
+             <div className="overflow-auto custom-scrollbar p-2" style={{ maxHeight: '320px' }}>
+               {getTextFiles().map(file => (
+(venv) pete@pop-os:/home/project/web-linux
+$ git diff app/src/apps/ImageViewer.tsx
+diff --git a/app/src/apps/ImageViewer.tsx b/app/src/apps/ImageViewer.tsx
+index 4f03cec..dcd51e7 100644
+--- a/app/src/apps/ImageViewer.tsx
++++ b/app/src/apps/ImageViewer.tsx
+@@ -120,26 +120,26 @@ export default function ImageViewer() {
+         }}
+       >
+         <div className="flex items-center gap-1">
+-          <button onClick={handleZoomOut} className="flex items-center justify-center rounded hover:bg-[rgba(255,255,255,0.1)]" style={{ width: 28, height: 28 }}>
++          <button onClick={handleZoomOut} className="flex items-center justify-center rounded hover:bg-[rgba(255,255,255,0.1)]" style={{ width: 28, height: 28 }} aria-label="Zoom out">
+             <ZoomOut size={16} style={{ color: 'white' }} />
+           </button>
+           <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)', minWidth: 36, textAlign: 'center' }}>{zoomPercent}%</span>
+-          <button onClick={handleZoomIn} className="flex items-center justify-center rounded hover:bg-[rgba(255,255,255,0.1)]" style={{ width: 28, height: 28 }}>
++          <button onClick={handleZoomIn} className="flex items-center justify-center rounded hover:bg-[rgba(255,255,255,0.1)]" style={{ width: 28, height: 28 }} aria-label="Zoom in">
+             <ZoomIn size={16} style={{ color: 'white' }} />
+           </button>
+           <div style={{ width: 1, height: 20, background: 'rgba(255,255,255,0.2)', margin: '0 4px' }} />
+-          <button onClick={() => { setViewMode('fit'); setZoom(1); setPanOffset({ x: 0, y: 0 }); }} className="flex items-center justify-center rounded hover:bg-[rgba(255,255,255,0.1)]" style={{ width: 28, height: 28 }}>
++          <button onClick={() => { setViewMode('fit'); setZoom(1); setPanOffset({ x: 0, y: 0 }); }} className="flex items-center justify-center rounded hover:bg-[rgba(255,255,255,0.1)]" style={{ width: 28, height: 28 }} aria-label="Fit to window">
+             <Maximize2 size={16} style={{ color: viewMode === 'fit' ? 'var(--accent-primary)' : 'white' }} />
+           </button>
+-          <button onClick={() => setViewMode('actual')} className="flex items-center justify-center rounded hover:bg-[rgba(255,255,255,0.1)]" style={{ width: 28, height: 28 }}>
++          <button onClick={() => setViewMode('actual')} className="flex items-center justify-center rounded hover:bg-[rgba(255,255,255,0.1)]" style={{ width: 28, height: 28 }} aria-label="Actual size">
+             <RotateCcw size={16} style={{ color: viewMode === 'actual' ? 'var(--accent-primary)' : 'white' }} />
+           </button>
+         </div>
+         <div className="flex items-center gap-1">
+-          <button onClick={() => setIsSlideshow((s) => !s)} className="flex items-center justify-center rounded hover:bg-[rgba(255,255,255,0.1)]" style={{ width: 28, height: 28 }}>
++          <button onClick={() => setIsSlideshow((s) => !s)} className="flex items-center justify-center rounded hover:bg-[rgba(255,255,255,0.1)]" style={{ width: 28, height: 28 }} aria-label={isSlideshow ? "Stop slideshow" : "Start slideshow"}>
+             {isSlideshow ? <Square size={16} style={{ color: 'var(--accent-primary)' }} /> : <Play size={16} style={{ color: 'white' }} />}
+           </button>
+-          <button onClick={() => setShowInfo((s) => !s)} className="flex items-center justify-center rounded hover:bg-[rgba(255,255,255,0.1)]" style={{ width: 28, height: 28 }}>
++          <button onClick={() => setShowInfo((s) => !s)} className="flex items-center justify-center rounded hover:bg-[rgba(255,255,255,0.1)]" style={{ width: 28, height: 28 }} aria-label="Toggle info">
+             <Info size={16} style={{ color: showInfo ? 'var(--accent-primary)' : 'white' }} />
+           </button>
+         </div>
+@@ -177,6 +177,7 @@ export default function ImageViewer() {
+               onClick={goPrev}
+               className="absolute left-3 flex items-center justify-center rounded-full transition-all hover:bg-[rgba(255,255,255,0.2)] z-10"
+               style={{ width: 48, height: 48, background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(4px)' }}
++              aria-label="Previous image"
+             >
+               <ChevronLeft size={24} style={{ color: 'white' }} />
+             </button>
+@@ -184,6 +185,7 @@ export default function ImageViewer() {
+               onClick={goNext}
+               className="absolute right-3 flex items-center justify-center rounded-full transition-all hover:bg-[rgba(255,255,255,0.2)] z-10"
+               style={{ width: 48, height: 48, background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(4px)' }}
++              aria-label="Next image"
+             >
+               <ChevronRight size={24} style={{ color: 'white' }} />
+             </button>
+@@ -198,7 +200,7 @@ export default function ImageViewer() {
+           >
+             <div className="flex items-center justify-between mb-3">
+               <span style={{ fontSize: '13px', fontWeight: 600, color: 'white' }}>Image Info</span>
+-              <button onClick={() => setShowInfo(false)}><X size={14} style={{ color: 'rgba(255,255,255,0.6)' }} /></button>
++              <button onClick={() => setShowInfo(false)} aria-label="Close info"><X size={14} style={{ color: 'rgba(255,255,255,0.6)' }} /></button>
+             </div>
+             <div className="flex flex-col gap-2">
+               <InfoRow label="Name" value={currentImage.name} />
+(venv) pete@pop-os:/home/project/web-linux
+$ git diff app/src/apps/Reminders.tsx
+diff --git a/app/src/apps/Reminders.tsx b/app/src/apps/Reminders.tsx
+index 06864ac..c1ef64f 100644
+--- a/app/src/apps/Reminders.tsx
++++ b/app/src/apps/Reminders.tsx
+@@ -164,7 +164,7 @@ export default function Reminders() {
+         <div className="p-3 border-b" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-panel)' }}>
+           <div className="flex items-center justify-between mb-2">
+             <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{editingId ? 'Edit' : 'New'} Reminder</span>
+-            <button onClick={() => { setShowForm(false); resetForm(); }} className="p-1 rounded"><X size={14} style={{ color: 'var(--text-secondary)' }} /></button>
++            <button onClick={() => { setShowForm(false); resetForm(); }} className="p-1 rounded" aria-label="Close form"><X size={14} style={{ color: 'var(--text-secondary)' }} /></button>
+           </div>
+           <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Reminder title..." className="w-full px-2.5 py-1.5 rounded-md text-sm mb-2 outline-none" style={{ background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }} />
+           <div className="flex gap-2 mb-2">
+@@ -199,7 +199,7 @@ export default function Reminders() {
+               const pc = PRIORITY_COLORS[r.priority];
+               return (
+                 <div key={r.id} className="flex items-start gap-2 p-2 rounded-md group transition-colors" style={{ background: r.completed ? 'transparent' : 'var(--bg-panel)', borderLeft: `3px solid ${r.completed ? 'var(--border-subtle)' : pc.text}`, opacity: r.completed ? 0.6 : 1 }}>
+-                  <button onClick={() => toggleComplete(r.id)} className="mt-0.5 p-0.5 rounded-full flex-shrink-0" style={{ border: `2px solid ${r.completed ? 'var(--accent-success)' : 'var(--border-default)'}`, background: r.completed ? 'var(--accent-success)' : 'transparent' }}>
++                  <button onClick={() => toggleComplete(r.id)} className="mt-0.5 p-0.5 rounded-full flex-shrink-0" style={{ border: `2px solid ${r.completed ? 'var(--accent-success)' : 'var(--border-default)'}`, background: r.completed ? 'var(--accent-success)' : 'transparent' }} aria-label="Toggle complete">
+                     {r.completed && <Check size={10} color="#fff" />}
+                   </button>
+                   <div className="flex-1 min-w-0">
+@@ -216,8 +216,8 @@ export default function Reminders() {
+                     </div>
+                   </div>
+                   <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+-                    <button onClick={() => startEdit(r)} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><Edit2 size={12} /></button>
+-                    <button onClick={() => deleteReminder(r.id)} className="p-1 rounded" style={{ color: 'var(--accent-error)' }}><Trash2 size={12} /></button>
++                    <button onClick={() => startEdit(r)} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }} aria-label="Edit reminder"><Edit2 size={12} /></button>
++                    <button onClick={() => deleteReminder(r.id)} className="p-1 rounded" style={{ color: 'var(--accent-error)' }} aria-label="Delete reminder"><Trash2 size={12} /></button>
+                   </div>
+                 </div>
+               );
+

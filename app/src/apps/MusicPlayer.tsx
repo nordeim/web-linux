@@ -206,10 +206,11 @@ export default function MusicPlayer() {
           onClick={() => setIsShuffle((s) => !s)}
           className="transition-all hover:scale-110"
           style={{ color: isShuffle ? 'var(--accent-primary)' : 'var(--text-secondary)' }}
+          aria-label="Toggle shuffle"
         >
           <Shuffle size={20} />
         </button>
-        <button onClick={handlePrev} className="transition-all hover:scale-110" style={{ color: 'var(--text-primary)' }}>
+        <button onClick={handlePrev} className="transition-all hover:scale-110" style={{ color: 'var(--text-primary)' }} aria-label="Previous track">
           <SkipBack size={28} />
         </button>
         <button
@@ -219,16 +220,18 @@ export default function MusicPlayer() {
             width: 56, height: 56,
             background: 'var(--accent-primary)', color: 'white',
           }}
+          aria-label={isPlaying ? "Pause" : "Play"}
         >
           {isPlaying ? <Pause size={24} /> : <Play size={24} className="ml-0.5" />}
         </button>
-        <button onClick={handleNext} className="transition-all hover:scale-110" style={{ color: 'var(--text-primary)' }}>
+        <button onClick={handleNext} className="transition-all hover:scale-110" style={{ color: 'var(--text-primary)' }} aria-label="Next track">
           <SkipForward size={28} />
         </button>
         <button
           onClick={toggleRepeat}
           className="transition-all hover:scale-110"
           style={{ color: repeatMode !== 'off' ? 'var(--accent-primary)' : 'var(--text-secondary)' }}
+          aria-label="Toggle repeat"
         >
           {repeatMode === 'one' ? <Repeat1 size={20} /> : <Repeat size={20} />}
         </button>
@@ -237,7 +240,7 @@ export default function MusicPlayer() {
       {/* Volume + Playlist Row */}
       <div className="flex items-center justify-between px-6 py-2">
         <div className="flex items-center gap-2 flex-1">
-          <button onClick={() => setVolume(v => v === 0 ? 0.7 : 0)} className="transition-all" style={{ color: 'var(--text-secondary)' }}>
+          <button onClick={() => setVolume(v => v === 0 ? 0.7 : 0)} className="transition-all" style={{ color: 'var(--text-secondary)' }} aria-label="Toggle mute">
             {volume === 0 ? <VolumeX size={18} /> : <Volume2 size={18} />}
           </button>
           <input
@@ -255,6 +258,7 @@ export default function MusicPlayer() {
           onClick={() => setShowPlaylist((s) => !s)}
           className="flex items-center justify-center rounded-lg transition-all hover:bg-[var(--bg-hover)]"
           style={{ width: 32, height: 32, color: showPlaylist ? 'var(--accent-primary)' : 'var(--text-secondary)' }}
+          aria-label="Toggle playlist"
         >
           <ListMusic size={20} />
         </button>

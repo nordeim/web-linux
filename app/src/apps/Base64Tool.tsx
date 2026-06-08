@@ -312,7 +312,7 @@ export default function Base64Tool() {
                   </>
                 )}
 
-                <button onClick={clearAll} className="p-1.5 rounded hover:bg-[var(--bg-hover)]">
+                <button onClick={clearAll} aria-label="Clear all" className="p-1.5 rounded hover:bg-[var(--bg-hover)]">
                   <Trash2 size={14} style={{ color: 'var(--text-secondary)' }} />
                 </button>
 

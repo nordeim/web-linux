@@ -5,6 +5,7 @@ import { WebSocketHandler } from './websocket.js';
 import { SessionStore } from './sessionStore.js';
 import { generateToken, verifyToken } from './auth.js';
 import { loadConfig } from './config.js';
+import rateLimit from 'express-rate-limit';
 
 const config = loadConfig();
 
@@ -13,7 +14,18 @@ const server = http.createServer(app);
 
 app.use(express.json());
 
-app.post('/auth/token', async (req: Request, res: Response) => {
+const rateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req: Request) => (req as any).ip || 'unknown',
+  handler: (_req: Request, res: Response) => {
+    res.status(429).json({ error: 'Too many requests' });
+  },
+});
+
+app.post('/auth/token', rateLimiter, async (req: Request, res: Response) => {
   try {
     const { userName } = req.body as { userName: string };
     if (!userName || typeof userName !== 'string') {

@@ -158,7 +158,7 @@ export default function RssReader() {
     return (
       <div className="flex flex-col h-full" style={{ background: 'var(--bg-window)' }}>
         <div className="flex items-center gap-2 px-3 py-2 border-b" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-panel)' }}>
-          <button onClick={() => setViewArticle(null)} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><ChevronLeft size={16} /></button>
+          <button onClick={() => setViewArticle(null)} aria-label="Back to feed list" className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><ChevronLeft size={16} /></button>
           <span className="text-sm font-medium flex-1 truncate" style={{ color: 'var(--text-primary)' }}>{viewArticle.title}</span>
           {!readIds.has(viewArticle.id) ? (
             <button onClick={() => markRead(viewArticle.id)} className="flex items-center gap-1 px-2 py-1 rounded-md text-xs" style={{ color: 'var(--text-secondary)' }}><Check size={12} /> Mark Read</button>

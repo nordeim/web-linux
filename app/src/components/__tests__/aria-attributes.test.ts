@@ -232,6 +232,204 @@ describe('Accessibility - ARIA Attributes in Source', () => {
       expect(source).toMatch(/<button[^>]*aria-label="[^"]*[Ll]og\s?out[^"]*"[^>]*>[\s\S]*?<LogOut/);
     });
   });
+
+  describe('Whiteboard.tsx', () => {
+    const source = readSource('../../apps/Whiteboard.tsx');
+    it('has aria-label on icon-only buttons', () => {
+      expect(source).toMatch(/<button[^>]*aria-label="Undo"[^>]*>/);
+      expect(source).toMatch(/<button[^>]*aria-label="Redo"[^>]*>/);
+      expect(source).toMatch(/<button[^>]*aria-label="Clear canvas"[^>]*>/);
+      expect(source).toMatch(/<button[^>]*aria-label="Export canvas"[^>]*>/);
+    });
+  });
+
+  describe('Drawing.tsx', () => {
+    const source = readSource('../../apps/Drawing.tsx');
+    it('has aria-label on icon-only buttons', () => {
+      expect(source).toContain('aria-label="Undo"');
+      expect(source).toContain('aria-label="Redo"');
+      expect(source).toContain('aria-label="Toggle grid"');
+      expect(source).toContain('aria-label="Clear canvas"');
+      expect(source).toContain('aria-label="Export image"');
+    });
+  });
+
+  describe('MarkdownPreview.tsx', () => {
+    const source = readSource('../../apps/MarkdownPreview.tsx');
+    it('has aria-label on toolbar buttons', () => {
+      expect(source).toContain('aria-label="Bold"');
+      expect(source).toContain('aria-label="Italic"');
+      expect(source).toContain('aria-label="Heading"');
+      expect(source).toContain('aria-label="Link"');
+      expect(source).toContain('aria-label="Image"');
+      expect(source).toContain('aria-label="Code"');
+      expect(source).toContain('aria-label="Quote"');
+      expect(source).toContain('aria-label="Bullet list"');
+      expect(source).toContain('aria-label="Numbered list"');
+      expect(source).toContain('aria-label="Task list"');
+      expect(source).toContain('aria-label="Horizontal rule"');
+    });
+  });
+
+  describe('ApiTester.tsx', () => {
+    const source = readSource('../../apps/ApiTester.tsx');
+    it('has aria-label on icon-only buttons', () => {
+      expect(source).toContain('aria-label="Save request"');
+      expect(source).toContain('aria-label="Remove parameter"');
+      expect(source).toContain('aria-label="Remove header"');
+    });
+  });
+
+  describe('Contacts.tsx', () => {
+    const source = readSource('../../apps/Contacts.tsx');
+    it('has aria-label on icon-only buttons', () => {
+      expect(source).toContain('aria-label="Toggle favorite"');
+      expect(source).toContain('aria-label="Edit contact"');
+      expect(source).toContain('aria-label="Delete contact"');
+    });
+  });
+
+  describe('ColorPicker.tsx', () => {
+    const source = readSource('../../apps/ColorPicker.tsx');
+    it('has aria-label on copy buttons', () => {
+      expect(source).toContain('aria-label="Copy HEX value"');
+      expect(source).toContain('aria-label="Copy RGB value"');
+      expect(source).toContain('aria-label="Copy HSL value"');
+      expect(source).toContain('aria-label="Copy CMYK value"');
+    });
+  });
+
+  describe('NetworkTools.tsx', () => {
+    const source = readSource('../../apps/NetworkTools.tsx');
+    it('has aria-label on clear button', () => {
+      expect(source).toContain('aria-label="Clear results"');
+    });
+  });
+
+  describe('MediaConverter.tsx', () => {
+    const source = readSource('../../apps/MediaConverter.tsx');
+    it('has aria-label on icon-only buttons', () => {
+      expect(source).toContain('aria-label="Toggle settings"');
+      expect(source).toContain('aria-label="Download file"');
+      expect(source).toContain('aria-label="Delete job"');
+      expect(source).toContain('aria-label="Close file picker"');
+    });
+  });
+
+  describe('Notes.tsx', () => {
+    const source = readSource('../../apps/Notes.tsx');
+    it('has aria-label on icon-only buttons', () => {
+      expect(source).toContain('aria-label="Create folder"');
+      expect(source).toContain('aria-label="Cancel new folder"');
+    });
+  });
+
+  describe('RssReader.tsx', () => {
+    const source = readSource('../../apps/RssReader.tsx');
+    it('has aria-label on back button', () => {
+      expect(source).toContain('aria-label="Back to feed list"');
+    });
+  });
+
+  describe('Todo.tsx', () => {
+    const source = readSource('../../apps/Todo.tsx');
+    it('has aria-label on add new task button', () => {
+      expect(source).toContain('aria-label="Add new task"');
+    });
+  });
+
+  describe('CodeEditor.tsx', () => {
+    const source = readSource('../../apps/CodeEditor.tsx');
+    it('has aria-label on close tab button', () => {
+      expect(source).toContain('aria-label="Close tab"');
+    });
+  });
+
+  describe('ImageGallery.tsx', () => {
+    const source = readSource('../../apps/ImageGallery.tsx');
+    it('has aria-label on view toggle buttons', () => {
+      expect(source).toContain('aria-label="Grid view"');
+      expect(source).toContain('aria-label="Masonry view"');
+    });
+  });
+
+  describe('PhotoEditor.tsx', () => {
+    const source = readSource('../../apps/PhotoEditor.tsx');
+    it('has aria-label on undo/redo buttons', () => {
+      expect(source).toContain('aria-label="Undo"');
+      expect(source).toContain('aria-label="Redo"');
+    });
+  });
+
+  describe('FtpClient.tsx', () => {
+    const source = readSource('../../apps/FtpClient.tsx');
+    it('has aria-label on refresh button', () => {
+      expect(source).toContain('aria-label="Refresh remote files"');
+    });
+  });
+
+  describe('Base64Tool.tsx', () => {
+    const source = readSource('../../apps/Base64Tool.tsx');
+    it('has aria-label on clear button', () => {
+      expect(source).toContain('aria-label="Clear all"');
+    });
+  });
+
+  describe('Minesweeper.tsx', () => {
+    const source = readSource('../../apps/Minesweeper.tsx');
+    it('has aria-label on new game button', () => {
+      expect(source).toContain('aria-label="New game"');
+    });
+  });
+
+  describe('MusicPlayer.tsx', () => {
+    const source = readSource('../../apps/MusicPlayer.tsx');
+    it('has aria-label on icon-only buttons', () => {
+      expect(source).toContain('aria-label="Toggle shuffle"');
+      expect(source).toContain('aria-label="Previous track"');
+      expect(source).toContain('aria-label={isPlaying ? "Pause" : "Play"}');
+      expect(source).toContain('aria-label="Next track"');
+      expect(source).toContain('aria-label="Toggle repeat"');
+      expect(source).toContain('aria-label="Toggle mute"');
+      expect(source).toContain('aria-label="Toggle playlist"');
+    });
+  });
+
+  describe('PasswordManager.tsx', () => {
+    const source = readSource('../../apps/PasswordManager.tsx');
+    it('has aria-label on cancel PIN change button', () => {
+      expect(source).toContain('aria-label="Cancel PIN change"');
+    });
+  });
+
+  describe('VoiceRecorder.tsx', () => {
+    const source = readSource('../../apps/VoiceRecorder.tsx');
+    it('has aria-label on play/pause button', () => {
+      expect(source).toContain('aria-label={playingId === recording.id ? "Pause" : "Play"}');
+    });
+    it('has aria-label on delete button', () => {
+      expect(source).toContain('aria-label="Delete recording"');
+    });
+  });
+
+  describe('Spreadsheet.tsx', () => {
+    const source = readSource('../../apps/Spreadsheet.tsx');
+    it('has aria-label on formatting and sheet buttons', () => {
+      expect(source).toContain('aria-label="Bold"');
+      expect(source).toContain('aria-label="Italic"');
+      expect(source).toContain('aria-label="Background color"');
+      expect(source).toContain('aria-label="Delete sheet"');
+      expect(source).toContain('aria-label="Add sheet"');
+    });
+  });
+
+  describe('ScreenRecorder.tsx', () => {
+    const source = readSource('../../apps/ScreenRecorder.tsx');
+    it('has aria-label on recording list buttons', () => {
+      expect(source).toContain('aria-label="Download recording"');
+      expect(source).toContain('aria-label="Delete recording"');
+    });
+  });
 });
 
 describe('Accessibility - Focus Visible Styles', () => {

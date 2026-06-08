@@ -280,10 +280,10 @@ export default function Whiteboard() {
         <div className="w-px h-6 mx-1" style={{ background: 'var(--border-subtle)' }} />
         <input type="range" min={1} max={20} value={brushSize} onChange={e => setBrushSize(Number(e.target.value))} className="w-16" />
         <div className="flex-1" />
-        <button onClick={undo} className="p-1.5 rounded" style={{ color: 'var(--text-secondary)' }}><RotateCcw size={14} /></button>
-        <button onClick={redo} className="p-1.5 rounded" style={{ color: 'var(--text-secondary)' }}><RotateCw size={14} /></button>
-        <button onClick={clearCanvas} className="p-1.5 rounded" style={{ color: 'var(--accent-error)' }}><Trash2 size={14} /></button>
-        <button onClick={exportCanvas} className="p-1.5 rounded" style={{ color: 'var(--text-secondary)' }}><Download size={14} /></button>
+        <button onClick={undo} aria-label="Undo" className="p-1.5 rounded" style={{ color: 'var(--text-secondary)' }}><RotateCcw size={14} /></button>
+        <button onClick={redo} aria-label="Redo" className="p-1.5 rounded" style={{ color: 'var(--text-secondary)' }}><RotateCw size={14} /></button>
+        <button onClick={clearCanvas} aria-label="Clear canvas" className="p-1.5 rounded" style={{ color: 'var(--accent-error)' }}><Trash2 size={14} /></button>
+        <button onClick={exportCanvas} aria-label="Export canvas" className="p-1.5 rounded" style={{ color: 'var(--text-secondary)' }}><Download size={14} /></button>
       </div>
       {/* Canvas Area */}
       <div ref={containerRef} className="flex-1 overflow-auto custom-scrollbar relative">

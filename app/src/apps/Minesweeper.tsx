@@ -244,6 +244,7 @@ export default function Minesweeper() {
         </div>
         <button
           onClick={() => newGame()}
+          aria-label="New game"
           className="flex items-center justify-center"
           style={{ width: 32, height: 32, borderRadius: '50%', border: '2px solid var(--border-default)', background: 'var(--bg-hover)', fontSize: 18, cursor: 'pointer' }}
           title="New Game"

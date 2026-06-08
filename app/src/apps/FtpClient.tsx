@@ -168,7 +168,7 @@ export default function FtpClient() {
         <button onClick={downloadFile} disabled={!selectedRemote} className="flex items-center gap-1 px-2 py-1 rounded-md text-xs" style={{ color: selectedRemote ? 'var(--accent-primary)' : 'var(--text-disabled)' }}><Download size={10} /> Download</button>
         <button onClick={uploadFile} disabled={!selectedLocal} className="flex items-center gap-1 px-2 py-1 rounded-md text-xs" style={{ color: selectedLocal ? 'var(--accent-primary)' : 'var(--text-disabled)' }}><Upload size={10} /> Upload</button>
         <div className="flex-1" />
-        <button onClick={() => { const f = remoteFiles.find(rf => rf.id === selectedRemote); if (f) { setTransfers(prev => prev.filter(t => t.name !== f.name)); } }} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><RefreshCw size={12} /></button>
+        <button onClick={() => { const f = remoteFiles.find(rf => rf.id === selectedRemote); if (f) { setTransfers(prev => prev.filter(t => t.name !== f.name)); } }} aria-label="Refresh remote files" className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><RefreshCw size={12} /></button>
       </div>
 
       {/* Two Panes */}

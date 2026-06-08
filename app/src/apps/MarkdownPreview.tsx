@@ -234,17 +234,17 @@ export default function MarkdownPreview() {
     <div className="h-full flex flex-col" style={{ background: 'var(--bg-window)' }}>
       {/* Toolbar */}
       <div className="flex items-center gap-1 px-2 py-1.5 shrink-0" style={{ background: 'var(--bg-titlebar)', borderBottom: '1px solid var(--border-subtle)' }}>
-        <button onClick={() => insertMarkdown('**', '**')} className="p-1.5 rounded hover:bg-[var(--bg-hover)]" title="Bold"><Bold size={14} /></button>
-        <button onClick={() => insertMarkdown('*', '*')} className="p-1.5 rounded hover:bg-[var(--bg-hover)]" title="Italic"><Italic size={14} /></button>
-        <button onClick={() => insertMarkdown('### ', '')} className="p-1.5 rounded hover:bg-[var(--bg-hover)]" title="Heading"><Heading size={14} /></button>
-        <button onClick={() => insertMarkdown('[', '](url)')} className="p-1.5 rounded hover:bg-[var(--bg-hover)]" title="Link"><Link size={14} /></button>
-        <button onClick={() => insertMarkdown('![alt](', ')')} className="p-1.5 rounded hover:bg-[var(--bg-hover)]" title="Image"><Image size={14} /></button>
-        <button onClick={() => insertMarkdown('`', '`')} className="p-1.5 rounded hover:bg-[var(--bg-hover)]" title="Code"><Code size={14} /></button>
-        <button onClick={() => insertMarkdown('> ', '')} className="p-1.5 rounded hover:bg-[var(--bg-hover)]" title="Quote"><Quote size={14} /></button>
-        <button onClick={() => insertMarkdown('- ', '')} className="p-1.5 rounded hover:bg-[var(--bg-hover)]" title="List"><List size={14} /></button>
-        <button onClick={() => insertMarkdown('1. ', '')} className="p-1.5 rounded hover:bg-[var(--bg-hover)]" title="Ordered List"><ListOrdered size={14} /></button>
-        <button onClick={() => insertMarkdown('- [ ] ', '')} className="p-1.5 rounded hover:bg-[var(--bg-hover)]" title="Task List"><CheckSquare size={14} /></button>
-        <button onClick={() => insertMarkdown('\n---\n', '')} className="p-1.5 rounded hover:bg-[var(--bg-hover)]" title="Horizontal Rule"><Minus size={14} /></button>
+        <button onClick={() => insertMarkdown('**', '**')} className="p-1.5 rounded hover:bg-[var(--bg-hover)]" aria-label="Bold" title="Bold"><Bold size={14} /></button>
+        <button onClick={() => insertMarkdown('*', '*')} className="p-1.5 rounded hover:bg-[var(--bg-hover)]" aria-label="Italic" title="Italic"><Italic size={14} /></button>
+        <button onClick={() => insertMarkdown('### ', '')} className="p-1.5 rounded hover:bg-[var(--bg-hover)]" aria-label="Heading" title="Heading"><Heading size={14} /></button>
+        <button onClick={() => insertMarkdown('[', '](url)')} className="p-1.5 rounded hover:bg-[var(--bg-hover)]" aria-label="Link" title="Link"><Link size={14} /></button>
+        <button onClick={() => insertMarkdown('![alt](', ')')} className="p-1.5 rounded hover:bg-[var(--bg-hover)]" aria-label="Image" title="Image"><Image size={14} /></button>
+        <button onClick={() => insertMarkdown('`', '`')} className="p-1.5 rounded hover:bg-[var(--bg-hover)]" aria-label="Code" title="Code"><Code size={14} /></button>
+        <button onClick={() => insertMarkdown('> ', '')} className="p-1.5 rounded hover:bg-[var(--bg-hover)]" aria-label="Quote" title="Quote"><Quote size={14} /></button>
+        <button onClick={() => insertMarkdown('- ', '')} className="p-1.5 rounded hover:bg-[var(--bg-hover)]" aria-label="Bullet list" title="List"><List size={14} /></button>
+        <button onClick={() => insertMarkdown('1. ', '')} className="p-1.5 rounded hover:bg-[var(--bg-hover)]" aria-label="Numbered list" title="Ordered List"><ListOrdered size={14} /></button>
+        <button onClick={() => insertMarkdown('- [ ] ', '')} className="p-1.5 rounded hover:bg-[var(--bg-hover)]" aria-label="Task list" title="Task List"><CheckSquare size={14} /></button>
+        <button onClick={() => insertMarkdown('\n---\n', '')} className="p-1.5 rounded hover:bg-[var(--bg-hover)]" aria-label="Horizontal rule" title="Horizontal Rule"><Minus size={14} /></button>
         <div className="w-px h-5 mx-1" style={{ background: 'var(--border-subtle)' }} />
         <button onClick={() => setSyncScroll((v) => !v)} className="flex items-center gap-1 px-2 py-1 rounded text-xs hover:bg-[var(--bg-hover)] transition-colors" style={{ color: syncScroll ? 'var(--accent-primary)' : 'var(--text-secondary)' }}>
           <Eye size={12} /> Sync

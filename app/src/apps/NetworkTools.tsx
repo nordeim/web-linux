@@ -233,7 +233,7 @@ export default function NetworkTools() {
         <button onClick={runTool} disabled={isRunning || !target} className="flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium" style={{ background: 'var(--accent-primary)', color: '#fff', opacity: isRunning || !target ? 0.6 : 1 }}>
           {isRunning ? <Loader2 size={10} className="animate-spin" /> : <Play size={10} />} Start
         </button>
-        <button onClick={clear} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><X size={12} /></button>
+        <button onClick={clear} aria-label="Clear results" className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><X size={12} /></button>
       </div>
 
       {/* Results */}

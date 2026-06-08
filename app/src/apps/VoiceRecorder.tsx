@@ -274,7 +274,7 @@ export default function VoiceRecorder() {
       <div className="flex flex-col gap-2 flex-1 overflow-y-auto">
         {recordings.map((recording) => (
           <div key={recording.id} className="flex items-center gap-3 p-3 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
-              <button onClick={() => togglePlay(recording)} className="p-2 rounded-full" style={{ background: 'var(--accent-primary)' }}>
+              <button onClick={() => togglePlay(recording)} className="p-2 rounded-full" style={{ background: 'var(--accent-primary)' }} aria-label={playingId === recording.id ? "Pause" : "Play"}>
                 {playingId === recording.id ? <Pause size={18} className="text-white" /> : <Play size={18} className="text-white" />}
               </button>
               <div className="flex-1 min-w-0">
@@ -301,7 +301,7 @@ export default function VoiceRecorder() {
                   <Download size={16} />
                 </span>
               )}
-              <button onClick={() => deleteRecording(recording.id)} className="p-2 rounded-lg hover:opacity-70">
+              <button onClick={() => deleteRecording(recording.id)} className="p-2 rounded-lg hover:opacity-70" aria-label="Delete recording">
                 <Trash2 size={16} className="text-[var(--accent-error)]" />
               </button>
             </div>

@@ -299,7 +299,7 @@ const ClockApp: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <span className="text-lg font-light text-[var(--text-primary)]">{cityTime}</span>
                     {cityId !== 'local' && (
-                      <button onClick={() => removeCity(cityId)} className="text-[var(--text-secondary)] hover:text-[var(--accent-error)]">
+                      <button onClick={() => removeCity(cityId)} aria-label="Remove city" className="text-[var(--text-secondary)] hover:text-[var(--accent-error)]">
                         <X size={14} />
                       </button>
                     )}

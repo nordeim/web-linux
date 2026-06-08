@@ -129,9 +129,9 @@ export default function Contacts() {
         <div className="flex items-center gap-2 px-3 py-2 border-b" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-panel)' }}>
           <button onClick={() => setViewContact(null)} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><ChevronLeft size={16} /></button>
           <span className="text-sm font-medium flex-1" style={{ color: 'var(--text-primary)' }}>Contact Details</span>
-          <button onClick={() => toggleFavorite(c.id)} className="p-1 rounded"><Star size={14} style={{ color: c.favorite ? 'var(--accent-secondary)' : 'var(--text-disabled)', fill: c.favorite ? 'var(--accent-secondary)' : 'none' }} /></button>
-          <button onClick={() => startEdit(c)} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><Edit2 size={14} /></button>
-          <button onClick={() => deleteContact(c.id)} className="p-1 rounded" style={{ color: 'var(--accent-error)' }}><Trash2 size={14} /></button>
+          <button onClick={() => toggleFavorite(c.id)} aria-label="Toggle favorite" className="p-1 rounded"><Star size={14} style={{ color: c.favorite ? 'var(--accent-secondary)' : 'var(--text-disabled)', fill: c.favorite ? 'var(--accent-secondary)' : 'none' }} /></button>
+          <button onClick={() => startEdit(c)} aria-label="Edit contact" className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><Edit2 size={14} /></button>
+          <button onClick={() => deleteContact(c.id)} aria-label="Delete contact" className="p-1 rounded" style={{ color: 'var(--accent-error)' }}><Trash2 size={14} /></button>
         </div>
         <div className="flex-1 overflow-auto custom-scrollbar p-4">
           <div className="flex flex-col items-center mb-4">

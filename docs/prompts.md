@@ -67,6 +67,10 @@ please meticulously plan to create an implementation plan with a detailed ToDo l
 
 ---
 
+please meticulously review @status_32.md and validate it against the codebase to check for alignment and to re-evaluate and identify outstanding tasks, then meticulously plan to create a detailed remediation plan with a ToDo list. review and validate the remediation plan against the codebase to ensure alignment before proceeding to execute it meticulously. use TDD approach to make code changes.
+
+---
+
 please meticulously review and validate the recent changes captured in @changes_to_validate.txt against the codebase to align with the remediation plans @COMBINED_AUDIT_REMEDIATION_PLAN.md and @COMBINED_AUDIT_REMEDIATION_COMPLETE.md
 
 ---

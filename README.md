@@ -4,7 +4,7 @@
 
 [![React 19](https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![TypeScript 5.9](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Vite 7.2](https://img.shields.io/badge/Vite-7.2-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Vite 8](https://img.shields.io/badge/Vite-8.0-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Tailwind CSS 3.4](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -47,6 +47,14 @@ This codebase has undergone multiple comprehensive security audits and remediati
 - **Added client heartbeat for Real Terminal**: `RealTerminal.tsx` now sends a heartbeat every 30 seconds to keep sessions alive, matching the server's heartbeat handler.
 - **Added MINIMIZE_ALL test coverage**: New test file validates that `prevPosition` and `prevSize` are correctly captured.
 - **Stale comment fixes**: Updated `AppRouter.tsx` and `registry.ts` to correctly reference 56 apps.
+
+### mimax-8 Code Review Audit & Remediation (2026-06-07)
+- **Fixed `npm run build` failure (CRITICAL)**: Removed unused shadcn components (`toggle-group.tsx`, `calendar.tsx`, `sidebar.tsx`) that contained Tailwind v4 syntax incompatible with lightningcss. Production build now passes cleanly.
+- **Fixed `.env` tracked in git (CRITICAL)**: Added `.env` to both root and `app/.gitignore` to prevent accidental secret leakage. `app/.env` stays locally but is no longer tracked.
+- **Removed JWT secret fallback (CRITICAL)**: Backend `auth.ts` previously had a hardcoded dev secret fallback (`?? 'ubuntuos-dev-secret-change-me'`). Now throws `JwtSecretMissingError` when `JWT_SECRET` is unset, eliminating a silent security downgrade.
+- **Added `fsEvents` typed event bus (HIGH)**: Created `src/utils/fsEvents.ts` to replace the silent `try/catch { /* ignore */ }` anti-pattern in `useFileSystem.ts`. QuotaExceededErrors and other save failures now emit typed events that the OSProvider subscribes to, surfacing user-visible notifications instead of silently dropping data.
+- **Fixed `index.html` title (LOW)**: Changed `<title>LinuxOS</title>` to `<title>UbuntuOS Web</title>` for brand consistency.
+- **Installed `@testing-library/dom`** (INFRA): Resolved missing peer dependency that caused `VoiceRecorder.test.tsx` and `NotImplemented.test.tsx` to fail.
 
 ### Audit Remediation (2026-06-06)
 - **Added zod validation to game highscore stores**: Snake, Sudoku, Tetris, FlappyBird, Minesweeper, and Game2048 now use `safeJsonParse()` with zod schemas for localStorage reads, replacing raw `parseInt()` calls.
@@ -175,7 +183,7 @@ After running `npm run dev`, open your browser at the provided port (usually `ht
 | :--- | :--- |
 | `npm run build` | Type-check and production build |
 | `npm run lint` | Run ESLint static analysis |
-| `npm run test` | Run Vitest test suite (248 total: 201 frontend + 47 backend)
+| `npm run test` | Run Vitest test suite (248 total: 201 frontend + 47 backend) |
 | `npm run preview` | Local preview of the production build |
 | `tsc -b` | Project-wide type checking |
 
@@ -224,14 +232,17 @@ npm run docker:test
 
 ## ⚠️ Known Issues & Recommendations
 
-1. **VFS localStorage Limit**: The virtual file system uses `localStorage`, which has a ~5 MB limit. For large file storage, consider migrating to IndexedDB.
-2. **Accessibility - Remaining Work**: Core shell components (Dock, WindowFrame, Desktop), Calculator, TextEditor, PasswordManager, FileManager, and Settings now have ARIA labels. 41 other apps with icon-only buttons still need ARIA labels. Run a Lighthouse accessibility audit for details.
-3. **Split osReducer**: The `osReducer` is approximately 375 lines and handles window, dock, notification, context menu, icon, theme, and alt-tab logic. Now `export`ed for testing. Consider splitting into domain-specific reducers.
-4. **CI/CD Pipeline**: Automated build + lint + test gates are not yet implemented.
-5. **Unused Local / Import Hygiene**: The `tsconfig.app.json` enforces `"noUnusedLocals": true` and `"noUnusedParameters": true`. Prior build broke with 43 `TS6133` errors across 16 files. Keep imports lean and remove dead code promptly to prevent build regressions.
-6. **ReDoS from User-Crafted Regex**: RegexTester and TextEditor now limit iterations. Apps accepting user regex (e.g., Notes search, Email filters) use `String.includes()` and are not vulnerable. Audit any app with `new RegExp(userInput)` for missing guards.
-7. **ScreenRecorder**: Now uses real `getDisplayMedia` + `MediaRecorder` API for actual screen capture with `.webm` output.
-8. **Game Highscore Validation**: All 7 game apps now use zod validation for highscore localStorage reads. Pattern: `safeJsonParse(val ?? '0', HighScoreSchema, 0)`.
+1. **VFS localStorage Limit**: The virtual file system uses `localStorage`, which has a ~5 MB limit. For large file storage, consider migrating to IndexedDB. **Status**: `saveFS` now emits typed `FileSystemSaveError` events; the OSProvider surfaces a user-visible notification on quota errors.
+2. **Accessibility - Remaining Work**: Core shell components plus Browser, Calendar, Email, Chat, Weather, and LoginScreen now have ARIA labels. **~36 other apps** with icon-only buttons still need ARIA labels. Run a Lighthouse accessibility audit for details.
+3. **`/auth/token` endpoint lacks rate limiting (CRITICAL)**: The backend `POST /auth/token` endpoint accepts any `userName` without authentication, rate limiting, or CORS. Acceptable for isolated local demo use, but **must not be exposed to the internet** without adding `express-rate-limit` + CORS + per-IP throttling.
+4. **Split osReducer**: The `osReducer` is approximately 379 lines and handles window, dock, notification, context menu, icon, theme, and alt-tab logic. Now `export`ed for testing. Consider splitting into domain-specific reducers.
+5. **CI/CD Pipeline**: Automated build + lint + test gates are not yet implemented.
+6. **Unused Local / Import Hygiene**: The `tsconfig.app.json` enforces `"noUnusedLocals": true` and `"noUnusedParameters": true`. Prior build broke with 43 `TS6133` errors across 16 files. Keep imports lean and remove dead code promptly to prevent build regressions.
+7. **ReDoS from User-Crafted Regex**: RegexTester and TextEditor now limit iterations. Apps accepting user regex (e.g., Notes search, Email filters) use `String.includes()` and are not vulnerable. Audit any app with `new RegExp(userInput)` for missing guards.
+8. **ScreenRecorder**: Now uses real `getDisplayMedia` + `MediaRecorder` API for actual screen capture with `.webm` output.
+9. **Game Highscore Validation**: All 7 game apps now use zod validation for highscore localStorage reads. Pattern: `safeJsonParse(val ?? '0', HighScoreSchema, 0)`.
+10. **Spreadsheet cell-reference regex**: Pattern `([A-Z]+\d+)` matches arbitrary column names (e.g., `W5`) that exceed the 20-column limit (A–T). Consider validating cell refs against the `COLS` array.
+11. **Spreadsheet formula recursion**: `evaluateCell` has no recursion depth cap. Long chains can cause stack overflow. Consider adding a `maxDepth` parameter (suggested: 100).
 
 ## 📜 License
 

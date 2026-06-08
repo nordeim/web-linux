@@ -221,8 +221,8 @@ const Notes: React.FC = () => {
                   style={{ background: 'var(--bg-input)', border: '1px solid var(--border-default)' }}
                   autoFocus
                 />
-                <button onClick={createFolder} className="text-[var(--accent-primary)]"><Check size={14} /></button>
-                <button onClick={() => setShowNewFolder(false)} className="text-[var(--text-secondary)]"><X size={14} /></button>
+                <button onClick={createFolder} aria-label="Create folder" className="text-[var(--accent-primary)]"><Check size={14} /></button>
+                <button onClick={() => setShowNewFolder(false)} aria-label="Cancel new folder" className="text-[var(--text-secondary)]"><X size={14} /></button>
               </div>
             )}
 

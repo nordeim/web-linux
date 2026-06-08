@@ -159,7 +159,7 @@ export default function PasswordManager() {
           <KeyRound size={12} style={{ color: 'var(--text-secondary)' }} />
           <input type="password" value={newPinValue} onChange={e => setNewPinValue(e.target.value)} maxLength={4} placeholder="New PIN (4 digits)" className="w-32 px-2 py-1 rounded-md text-xs outline-none" style={{ background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-subtle)' }} />
           <button onClick={handleChangePin} className="px-2 py-1 rounded-md text-xs" style={{ background: 'var(--accent-primary)', color: '#fff' }}>Save</button>
-          <button onClick={() => { setShowChangePin(false); setNewPinValue(''); }} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }}><X size={12} /></button>
+          <button onClick={() => { setShowChangePin(false); setNewPinValue(''); }} className="p-1 rounded" style={{ color: 'var(--text-secondary)' }} aria-label="Cancel PIN change"><X size={12} /></button>
         </div>
       )}
       <div className="px-3 py-2">

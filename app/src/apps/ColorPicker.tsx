@@ -231,7 +231,7 @@ export default function ColorPicker() {
             <div className="flex items-center gap-2">
               <span className="text-xs w-10" style={{ color: 'var(--text-secondary)' }}>HEX</span>
               <input value={color.toUpperCase()} onChange={(e) => { const v = e.target.value; if (/^#[0-9A-Fa-f]{0,6}$/.test(v)) updateColor(v); }} className="flex-1 px-2 py-1 rounded text-xs font-mono outline-none" style={{ background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-default)' }} />
-              <button onClick={() => copyValue(color.toUpperCase(), 'hex')} className="p-1 rounded hover:bg-[var(--bg-hover)]">{copied === 'hex' ? <Check size={12} /> : <Copy size={12} />}</button>
+              <button onClick={() => copyValue(color.toUpperCase(), 'hex')} aria-label="Copy HEX value" className="p-1 rounded hover:bg-[var(--bg-hover)]">{copied === 'hex' ? <Check size={12} /> : <Copy size={12} />}</button>
             </div>
             {/* RGB */}
             <div className="flex items-center gap-2">
@@ -239,7 +239,7 @@ export default function ColorPicker() {
               <input type="number" min={0} max={255} value={r} onChange={(e) => updateFromRgb(Number(e.target.value), g, b)} className="w-14 px-1 py-1 rounded text-xs font-mono outline-none" style={{ background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-default)' }} />
               <input type="number" min={0} max={255} value={g} onChange={(e) => updateFromRgb(r, Number(e.target.value), b)} className="w-14 px-1 py-1 rounded text-xs font-mono outline-none" style={{ background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-default)' }} />
               <input type="number" min={0} max={255} value={b} onChange={(e) => updateFromRgb(r, g, Number(e.target.value))} className="w-14 px-1 py-1 rounded text-xs font-mono outline-none" style={{ background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-default)' }} />
-              <button onClick={() => copyValue(`rgb(${r}, ${g}, ${b})`, 'rgb')} className="p-1 rounded hover:bg-[var(--bg-hover)]">{copied === 'rgb' ? <Check size={12} /> : <Copy size={12} />}</button>
+              <button onClick={() => copyValue(`rgb(${r}, ${g}, ${b})`, 'rgb')} aria-label="Copy RGB value" className="p-1 rounded hover:bg-[var(--bg-hover)]">{copied === 'rgb' ? <Check size={12} /> : <Copy size={12} />}</button>
             </div>
             {/* HSL */}
             <div className="flex items-center gap-2">
@@ -247,7 +247,7 @@ export default function ColorPicker() {
               <input type="number" min={0} max={360} value={h} onChange={(e) => updateFromHsl(Number(e.target.value), s, l)} className="w-14 px-1 py-1 rounded text-xs font-mono outline-none" style={{ background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-default)' }} />
               <input type="number" min={0} max={100} value={s} onChange={(e) => updateFromHsl(h, Number(e.target.value), l)} className="w-14 px-1 py-1 rounded text-xs font-mono outline-none" style={{ background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-default)' }} />
               <input type="number" min={0} max={100} value={l} onChange={(e) => updateFromHsl(h, s, Number(e.target.value))} className="w-14 px-1 py-1 rounded text-xs font-mono outline-none" style={{ background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-default)' }} />
-              <button onClick={() => copyValue(`hsl(${h}, ${s}%, ${l}%)`, 'hsl')} className="p-1 rounded hover:bg-[var(--bg-hover)]">{copied === 'hsl' ? <Check size={12} /> : <Copy size={12} />}</button>
+              <button onClick={() => copyValue(`hsl(${h}, ${s}%, ${l}%)`, 'hsl')} aria-label="Copy HSL value" className="p-1 rounded hover:bg-[var(--bg-hover)]">{copied === 'hsl' ? <Check size={12} /> : <Copy size={12} />}</button>
             </div>
             {/* CMYK */}
             <div className="flex items-center gap-2">
@@ -256,7 +256,7 @@ export default function ColorPicker() {
               <span className="text-xs font-mono w-8 text-center" style={{ color: 'var(--text-primary)' }}>{m}%</span>
               <span className="text-xs font-mono w-8 text-center" style={{ color: 'var(--text-primary)' }}>{y}%</span>
               <span className="text-xs font-mono w-8 text-center" style={{ color: 'var(--text-primary)' }}>{k}%</span>
-              <button onClick={() => copyValue(`cmyk(${c}%, ${m}%, ${y}%, ${k}%)`, 'cmyk')} className="p-1 rounded hover:bg-[var(--bg-hover)]">{copied === 'cmyk' ? <Check size={12} /> : <Copy size={12} />}</button>
+              <button onClick={() => copyValue(`cmyk(${c}%, ${m}%, ${y}%, ${k}%)`, 'cmyk')} aria-label="Copy CMYK value" className="p-1 rounded hover:bg-[var(--bg-hover)]">{copied === 'cmyk' ? <Check size={12} /> : <Copy size={12} />}</button>
             </div>
           </div>
 

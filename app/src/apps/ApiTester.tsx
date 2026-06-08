@@ -245,7 +245,7 @@ export default function ApiTester() {
         >
           <Send size={13} /> {loading ? 'Sending...' : 'Send'}
         </button>
-        <button onClick={saveRequest} className="p-1.5 rounded hover:bg-[var(--bg-hover)]" title="Save request">
+        <button onClick={saveRequest} aria-label="Save request" className="p-1.5 rounded hover:bg-[var(--bg-hover)]" title="Save request">
           <Star size={14} style={{ color: 'var(--text-secondary)' }} />
         </button>
       </div>
@@ -296,7 +296,7 @@ export default function ApiTester() {
                       className="flex-1 px-2 py-1 rounded text-xs outline-none"
                       style={{ background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-default)' }}
                     />
-                    <button onClick={() => removeParam(p.id)} className="p-1 rounded hover:bg-[var(--bg-hover)]"><Trash2 size={12} /></button>
+                    <button onClick={() => removeParam(p.id)} aria-label="Remove parameter" className="p-1 rounded hover:bg-[var(--bg-hover)]"><Trash2 size={12} /></button>
                   </div>
                 ))}
                 <button onClick={addParam} className="flex items-center gap-1 text-xs px-2 py-1 rounded hover:bg-[var(--bg-hover)] mt-1">
@@ -324,7 +324,7 @@ export default function ApiTester() {
                       className="flex-1 px-2 py-1 rounded text-xs outline-none"
                       style={{ background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-default)' }}
                     />
-                    <button onClick={() => removeHeader(h.id)} className="p-1 rounded hover:bg-[var(--bg-hover)]"><Trash2 size={12} /></button>
+                    <button onClick={() => removeHeader(h.id)} aria-label="Remove header" className="p-1 rounded hover:bg-[var(--bg-hover)]"><Trash2 size={12} /></button>
                   </div>
                 ))}
                 <button onClick={addHeader} className="flex items-center gap-1 text-xs px-2 py-1 rounded hover:bg-[var(--bg-hover)] mt-1">

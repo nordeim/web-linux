@@ -125,10 +125,10 @@ export default function ImageGallery() {
         <div className="w-px h-5 mx-1" style={{ background: 'var(--border-subtle)' }} />
 
         {/* View toggle */}
-        <button onClick={() => setViewMode('grid')} className="p-1 rounded" style={{ background: viewMode === 'grid' ? 'var(--bg-active)' : 'transparent' }}>
+        <button onClick={() => setViewMode('grid')} aria-label="Grid view" className="p-1 rounded" style={{ background: viewMode === 'grid' ? 'var(--bg-active)' : 'transparent' }}>
           <LayoutGrid size={14} style={{ color: viewMode === 'grid' ? 'var(--accent-primary)' : 'var(--text-secondary)' }} />
         </button>
-        <button onClick={() => setViewMode('masonry')} className="p-1 rounded" style={{ background: viewMode === 'masonry' ? 'var(--bg-active)' : 'transparent' }}>
+        <button onClick={() => setViewMode('masonry')} aria-label="Masonry view" className="p-1 rounded" style={{ background: viewMode === 'masonry' ? 'var(--bg-active)' : 'transparent' }}>
           <LayoutList size={14} style={{ color: viewMode === 'masonry' ? 'var(--accent-primary)' : 'var(--text-secondary)' }} />
         </button>
 

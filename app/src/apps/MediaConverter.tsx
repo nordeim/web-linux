@@ -140,7 +140,7 @@ export default function MediaConverter() {
             <div className="p-3 rounded-lg border" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-panel)' }}>
               <div className="flex items-center justify-between mb-3">
                 <span className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>Output Settings</span>
-                <button onClick={() => setShowSettings(!showSettings)} className="p-0.5 rounded" style={{ color: 'var(--text-secondary)' }}><Settings2 size={12} /></button>
+                <button onClick={() => setShowSettings(!showSettings)} aria-label="Toggle settings" className="p-0.5 rounded" style={{ color: 'var(--text-secondary)' }}><Settings2 size={12} /></button>
               </div>
               <div className="grid grid-cols-3 gap-2 mb-3">
                 <div>
@@ -212,9 +212,9 @@ export default function MediaConverter() {
                       </div>
                     </div>
                     {job.status === 'completed' && (
-                      <button className="p-1 rounded flex-shrink-0" style={{ color: 'var(--accent-primary)' }} title="Download"><Download size={12} /></button>
+                      <button className="p-1 rounded flex-shrink-0" style={{ color: 'var(--accent-primary)' }} aria-label="Download file" title="Download"><Download size={12} /></button>
                     )}
-                    <button onClick={() => deleteJob(job.id)} className="p-1 rounded flex-shrink-0" style={{ color: 'var(--text-disabled)' }}><X size={10} /></button>
+                    <button onClick={() => deleteJob(job.id)} aria-label="Delete job" className="p-1 rounded flex-shrink-0" style={{ color: 'var(--text-disabled)' }}><X size={10} /></button>
                   </div>
                 ))}
               </div>
@@ -229,7 +229,7 @@ export default function MediaConverter() {
           <div className="rounded-lg shadow-xl overflow-hidden" style={{ width: '480px', maxHeight: '400px', background: 'var(--bg-window)' }}>
             <div className="flex items-center justify-between px-4 py-2 border-b" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-panel)' }}>
               <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Select Media File</span>
-              <button onClick={() => setShowFilePicker(false)} className="p-1 rounded"><X size={14} /></button>
+              <button onClick={() => setShowFilePicker(false)} aria-label="Close file picker" className="p-1 rounded"><X size={14} /></button>
             </div>
             <div className="overflow-auto custom-scrollbar p-2" style={{ maxHeight: '320px' }}>
               {mediaFiles.map(file => {

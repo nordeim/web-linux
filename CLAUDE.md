@@ -121,7 +121,7 @@ Follow this six-phase workflow for all implementation tasks:
 
 ### Testing
 - **TDD is effective for security-critical code**. The `safeEval` tests (24 cases) caught multiple edge cases during development.
-- **Source-level validation as test workaround**: Component-level tests using `@/` aliases fail in vitest due to module resolution issues. Source-level tests (reading file source strings) are used as a workaround for ARIA attribute validation (26 tests in `aria-attributes.test.ts` plus tests in `pinStorage.test.ts`, `vfsHelpers.test.ts`, and `gameHighscore.test.ts`).
+- **Source-level validation as test workaround**: Component-level tests using `@/` aliases fail in vitest due to module resolution issues. Source-level tests (reading file source strings) are used as a workaround for ARIA attribute validation (51 tests in `aria-attributes.test.ts` plus tests in `pinStorage.test.ts`, `vfsHelpers.test.ts`, `gameHighscore.test.ts`, `spreadsheet-race.test.ts`, and `auth-rate-limit.test.ts`).
 - **Component rendering tests work**: `NotImplemented.test.tsx` and `VoiceRecorder.test.tsx` successfully use `render()` from `@testing-library/react` with the `@/` alias, demonstrating that vitest alias resolution works for some component tests.
 - **Game highscore validation tests**: 12 tests in `gameHighscore.test.ts` validate the zod schema pattern for game highscores, ensuring corrupted localStorage data falls back gracefully.
 
@@ -166,13 +166,13 @@ Follow this six-phase workflow for all implementation tasks:
 A real bash terminal has been integrated into UbuntuOS Web via `node-pty` + Docker.
 
 **Backend implementation:**
-- **JWT auth**: Backend `/auth/token` endpoint issues signed JWTs via `jose`; frontend `useAuthToken` fetches from backend in production, falls back to dev-only generator locally.
+- **JWT auth + rate limiting**: Backend `/auth/token` endpoint issues signed JWTs via `jose`; applies `express-rate-limit` (5 req/15 min per IP). Frontend `useAuthToken` fetches from backend in production, falls back to dev-only generator locally.
 - **WebSocket server**: `src/websocket.ts` handles connections, spawns Docker containers, and bridges PTY I/O bidirectionally.
 - **Docker hardening**: `--read-only`, `--cap-drop=ALL`, `--network=none`, `-u 1000:1000`, CPU/memory/PID limits.
 - **Container lifecycle**: `stopAndRemoveContainer()` ensures containers are torn down when sessions end or expire, preventing orphaned containers.
 - **Reconnection**: Sessions are keyed by `sessionId`. If a WebSocket reconnects with an existing `sessionId`, the existing container/PTY is reused, preserving bash state across refreshes.
 - **Session persistence**: In-memory `SessionStore` with disconnect grace period (5 min), heartbeat, cleanup cron, and `ttlMs` (total session TTL).
-- **Tests**: 33 backend tests (9 test files) covering auth, config, docker, sessionStore, message protocol, logger, and policy.
+- **Tests**: 50 backend tests (17 test files) covering auth, config, docker, sessionStore, message protocol, logger, policy, and rate limiting.
 
 **Frontend implementation:**
 - **RealTerminal.tsx**: xterm.js v5 with `@xterm/addon-fit` and `@xterm/addon-web-links`, `ResizeObserver` for auto-fit, WebSocket client with exponential backoff (1–30 s), `sessionId` persisted in localStorage with zod validation (`safeJsonParse`).

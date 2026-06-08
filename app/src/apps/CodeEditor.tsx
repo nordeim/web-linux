@@ -374,6 +374,7 @@ export default function CodeEditor() {
               <button
                 onClick={(e) => { e.stopPropagation(); closeTab(tab.id); }}
                 className="ml-1 p-0.5 rounded hover:bg-[var(--bg-hover)]"
+                aria-label="Close tab"
               >
                 <X size={10} />
               </button>

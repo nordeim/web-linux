@@ -338,8 +338,8 @@ export default function Drawing() {
         <div className="w-px h-5 mx-1" style={{ background: 'var(--border-subtle)' }} />
 
         {/* Undo/Redo */}
-        <button onClick={undo} className="p-1 rounded hover:bg-[var(--bg-hover)]" title="Undo (Ctrl+Z)"><Undo2 size={14} /></button>
-        <button onClick={redo} className="p-1 rounded hover:bg-[var(--bg-hover)]" title="Redo (Ctrl+Y)"><Redo2 size={14} /></button>
+        <button onClick={undo} aria-label="Undo" className="p-1 rounded hover:bg-[var(--bg-hover)]" title="Undo (Ctrl+Z)"><Undo2 size={14} /></button>
+        <button onClick={redo} aria-label="Redo" className="p-1 rounded hover:bg-[var(--bg-hover)]" title="Redo (Ctrl+Y)"><Redo2 size={14} /></button>
 
         <div className="w-px h-5 mx-1" style={{ background: 'var(--border-subtle)' }} />
 
@@ -358,9 +358,9 @@ export default function Drawing() {
 
         <div className="w-px h-5 mx-1" style={{ background: 'var(--border-subtle)' }} />
 
-        <button onClick={() => setShowGrid((v) => !v)} className="p-1 rounded hover:bg-[var(--bg-hover)]" title="Toggle Grid"><Grid3x3 size={14} /></button>
-        <button onClick={clearCanvas} className="p-1 rounded hover:bg-[var(--bg-hover)]" title="Clear"><Trash2 size={14} /></button>
-        <button onClick={exportImage} className="p-1 rounded hover:bg-[var(--bg-hover)]" title="Export PNG"><Download size={14} /></button>
+        <button onClick={() => setShowGrid((v) => !v)} aria-label="Toggle grid" className="p-1 rounded hover:bg-[var(--bg-hover)]" title="Toggle Grid"><Grid3x3 size={14} /></button>
+        <button onClick={clearCanvas} aria-label="Clear canvas" className="p-1 rounded hover:bg-[var(--bg-hover)]" title="Clear"><Trash2 size={14} /></button>
+        <button onClick={exportImage} aria-label="Export image" className="p-1 rounded hover:bg-[var(--bg-hover)]" title="Export PNG"><Download size={14} /></button>
       </div>
 
       {/* Text input overlay */}

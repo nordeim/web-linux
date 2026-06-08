@@ -75,6 +75,16 @@ const loadSheets = (): Sheet[] => {
   return [{ id: 'sheet1', name: 'Sheet1', cells: sampleCells }];
 };
 
+const isValidCellRef = (ref: string): boolean => {
+  const match = ref.match(/^([A-Z]+)(\d+)$/);
+  if (!match) return false;
+  const [, col, rowStr] = match;
+  const row = parseInt(rowStr);
+  return COLS.includes(col) && row >= 1 && row <= ROWS;
+};
+
+const MAX_DEPTH = 100;
+
 const Spreadsheet: React.FC = () => {
   const [sheets, setSheets] = useState<Sheet[]>(loadSheets);
   const [activeSheet, setActiveSheet] = useState(0);
@@ -91,7 +101,8 @@ const Spreadsheet: React.FC = () => {
   }, [sheets]);
 
   // Formula evaluation
-  const evaluateCell = useCallback((cellId: string, visited = new Set<string>()): string => {
+  const evaluateCell = useCallback((cellId: string, visited = new Set<string>(), depth = 0): string => {
+    if (depth > MAX_DEPTH) return '#DEPTH!';
     if (visited.has(cellId)) return '#REF!';
     visited.add(cellId);
 
@@ -121,7 +132,8 @@ const Spreadsheet: React.FC = () => {
       let expr = formula;
       expr = expr.replace(/([A-Z]+\d+)/g, (match) => {
         if (match === cellId) return '0';
-        const val = evaluateCell(match, new Set(visited));
+        if (!isValidCellRef(match)) return '0';
+        const val = evaluateCell(match, new Set(visited), depth + 1);
         const num = parseFloat(val);
         return isNaN(num) ? '0' : String(num);
       });
@@ -310,14 +322,14 @@ const Spreadsheet: React.FC = () => {
     <div className="flex flex-col h-full" style={{ background: 'var(--bg-window)' }} tabIndex={0} onKeyDown={handleKeyDown}>
       {/* Toolbar */}
       <div className="flex items-center gap-1 px-2 py-1.5 border-b shrink-0" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-titlebar)' }}>
-        <button onClick={() => selectedCell && setCellStyle(selectedCell, { bold: !(currentCell?.style?.bold) })} className={`p-1.5 rounded hover:bg-[var(--bg-hover)] ${currentCell?.style?.bold ? 'text-[var(--accent-primary)]' : 'text-[var(--text-secondary)]'}`} title="Bold">
+        <button onClick={() => selectedCell && setCellStyle(selectedCell, { bold: !(currentCell?.style?.bold) })} className={`p-1.5 rounded hover:bg-[var(--bg-hover)] ${currentCell?.style?.bold ? 'text-[var(--accent-primary)]' : 'text-[var(--text-secondary)]'}`} title="Bold" aria-label="Bold">
           <Bold size={13} />
         </button>
-        <button onClick={() => selectedCell && setCellStyle(selectedCell, { italic: !(currentCell?.style?.italic) })} className={`p-1.5 rounded hover:bg-[var(--bg-hover)] ${currentCell?.style?.italic ? 'text-[var(--accent-primary)]' : 'text-[var(--text-secondary)]'}`} title="Italic">
+        <button onClick={() => selectedCell && setCellStyle(selectedCell, { italic: !(currentCell?.style?.italic) })} className={`p-1.5 rounded hover:bg-[var(--bg-hover)] ${currentCell?.style?.italic ? 'text-[var(--accent-primary)]' : 'text-[var(--text-secondary)]'}`} title="Italic" aria-label="Italic">
           <Italic size={13} />
         </button>
         <div className="w-px h-4 mx-1" style={{ background: 'var(--border-subtle)' }} />
-        <button onClick={() => selectedCell && setCellStyle(selectedCell, { bgColor: currentCell?.style?.bgColor ? undefined : 'rgba(124,77,255,0.2)' })} className="p-1.5 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]" title="Background Color">
+        <button onClick={() => selectedCell && setCellStyle(selectedCell, { bgColor: currentCell?.style?.bgColor ? undefined : 'rgba(124,77,255,0.2)' })} className="p-1.5 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]" title="Background Color" aria-label="Background color">
           <Paintbrush size={13} />
         </button>
         <div className="w-px h-4 mx-1" style={{ background: 'var(--border-subtle)' }} />
@@ -430,13 +442,13 @@ const Spreadsheet: React.FC = () => {
             <FileSpreadsheet size={12} />
             {s.name}
             {sheets.length > 1 && (
-              <button onClick={e => { e.stopPropagation(); deleteSheet(i); }} className="ml-1 text-[var(--text-disabled)] hover:text-[var(--accent-error)]">
+              <button onClick={e => { e.stopPropagation(); deleteSheet(i); }} className="ml-1 text-[var(--text-disabled)] hover:text-[var(--accent-error)]" aria-label="Delete sheet">
                 <Trash2 size={10} />
               </button>
             )}
           </button>
         ))}
-        <button onClick={addSheet} className="p-1 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]">
+        <button onClick={addSheet} className="p-1 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]" aria-label="Add sheet">
           <Plus size={14} />
         </button>
       </div>

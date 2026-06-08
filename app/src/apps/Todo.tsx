@@ -225,7 +225,7 @@ const Todo: React.FC = () => {
                   style={{ background: 'var(--bg-input)', border: '1px solid var(--border-default)' }}
                   autoFocus
                 />
-                <button onClick={createProject} className="text-[var(--accent-primary)]"><Check size={14} /></button>
+                <button onClick={createProject} aria-label="Add new task" className="text-[var(--accent-primary)]"><Check size={14} /></button>
               </div>
             )}
           </div>

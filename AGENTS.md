@@ -508,13 +508,31 @@ return color && isValidColor(color) ? `--color-${key}: ${color};` : null;
 **Symptom**: Screen readers cannot identify the purpose of buttons that contain only an icon (no visible text).
 **Root Cause**: Only Calculator, TextEditor, PasswordManager, ScreenRecorder, and VoiceRecorder were audited for ARIA labels. 41 other apps with icon-only buttons were missed.
 **Fix**: Added `aria-label` attributes to FileManager.tsx (5 buttons: navigate up, grid view, list view, new folder, new file) and Settings.tsx (Toggle component and accent color buttons with `aria-pressed`). Follow this pattern for remaining apps.
-**Context**: This was identified during the 2026-06-06 audit. Source-level tests in `aria-attributes.test.ts` validate ARIA presence without requiring full DOM rendering.
+**Context**: This was identified during the 2026-06-06 audit. Source-level tests in `aria-attributes.test.ts` validate ARIA presence without requiring full DOM rendering. Batch 1 (2026-06-08) added labels to ArchiveManager, DocumentViewer, ImageViewer, and Reminders.
+
+### Batch 1 ARIA Remediation — Source-Level Test Strategy (2026-06-08)
+**Symptom**: Adding ARIA labels to 41 remaining apps seems overwhelming; component rendering tests fail due to vitest alias issues.
+**Root Cause**: Not all apps need source-level ARIA tests. Apps where every button has visible text (e.g., JsonFormatter, RegexTester) have no icon-only buttons and nothing to test at the source level.
+**Fix**: For each app, first audit the source manually for icon-only buttons. Only add a source-level test `describe()` block if the component contains at least one `<button>` without visible text. Use `toContain('aria-label="...")` rather than regex for dynamic labels (regex fails when labels include variable interpolation like `\`${label} item\``).
+**Context**: Batch 1 covered ArchiveManager (3 labels), DocumentViewer (4 labels), ImageViewer (9 labels), and Reminders (5 labels). JsonFormatter and RegexTester were skipped because all their buttons have visible text. Remaining: ~17 apps across system/media and games.
+
+### Batch 1 ARIA Lessons — `toContain` vs Regex ANSI Regex
+**Symptom**: Source-level ARIA tests fail when checking for `aria-label="${label}"` using `toMatch(/aria-label="[^"]+"/)` because template literal expressions contain backticks and variable names.
+**Root Cause**: The `aria-label` attribute may be set via template literal (e.g., `aria-label={\`Delete ${name}\`}`), which standard regex patterns struggle to match reliably.
+**Fix**: Use `toContain('aria-label="')` and search for the static prefix. For exact label values, read the whole source and use string.includes. Avoid complex regex for dynamic attribute values in source-level tests.
+**Context**: This was discovered when testing `DocumentViewer.tsx` search navigation buttons, which used template literals for dynamic labels.
+
+### vitest Monorepo Gotcha
+**Symptom**: `npx vitest` from the repo root fails with alias resolution errors (`Cannot find module '@/utils/safeJsonParse'`) and localStorage mocking failures.
+**Root Cause**: `npx vitest` resolves to the monorepo root and ignores `app/vite.config.ts`, which defines path aliases and `jsdom` environment.
+**Fix**: Always run tests from the `app/` directory with `./node_modules/.bin/vitest`. Prevents alias and environment mismatch.
+**Context**: This consistently trips up anyone running tests from the repo root. The fix is to `cd app` and use the local vitest binary.
 
 ### Documentation Test Count Discrepancy
 **Symptom**: README.md stated "18 test files" while CLAUDE.md and status_23.md stated "19 test files".
 **Root Cause**: README.md was not updated when the MINIMIZE_ALL test was added.
-**Fix**: Updated README.md to reflect accurate counts. Current state: 248 tests across 45 test files (201 frontend + 47 backend, as of 2026-06-07).
-**Context**: Always update ALL documentation files when adding tests. The current count is 201 frontend tests (29 test files) and 47 backend tests (16 test files).
+**Fix**: Updated README.md to reflect accurate counts. Current state: 283 tests across 47 test files (233 frontend + 50 backend, as of 2026-06-08).
+**Context**: Always update ALL documentation files when adding tests. The current count is 233 frontend tests (30 test files) and 50 backend tests (17 test files).
 
 ## 🔒 Security Reminders
 
@@ -538,7 +556,7 @@ return color && isValidColor(color) ? `--color-${key}: ${color};` : null;
 18. **Validate CSS color values before injection**. Use `isValidColor()` from `@/utils/colorValidation` when injecting dynamic color values via `dangerouslySetInnerHTML` in CSS context.
 19. **Verify registry completeness when adding apps**. After adding a new app to `AppRouter.tsx`, ensure it has a corresponding entry in `registry.ts`. The registry completeness test will catch mismatches automatically.
 20. **Game highscore stores must use zod validation**. Even simple numeric values like highscores should use `safeJsonParse()` with a zod schema. Pattern: `const HighScoreSchema = z.number().int().min(0); safeJsonParse(val ?? '0', HighScoreSchema, 0)`.
-21. **Keep documentation test counts in sync**. When adding tests, update README.md, CLAUDE.md, and status_23.md. Current count: 248 tests across 45 test files (201 frontend + 47 backend, as of 2026-06-07).
+21. **Keep documentation test counts in sync**. When adding tests, update README.md, CLAUDE.md, and status_23.md. Current count: 283 tests across 47 test files (233 frontend + 50 backend, as of 2026-06-08).
 22. **Component rendering tests work with vitest aliases**. Despite earlier claims, `NotImplemented.test.tsx` and `VoiceRecorder.test.tsx` successfully use `render()` with `@/` aliases. The vitest config correctly resolves aliases via `resolve.alias`.
 23. **Wire security infrastructure into the main code path**. Creating `types.ts`, `logger.ts`, and `policy.ts` is not enough—they must be imported and used by the main handler (`websocket.ts`). The Phase 3 files existed for a full audit cycle without being wired in, leaving command filtering and audit logging effectively disabled.
 24. **Client heartbeat prevents premature session timeout**. WebSocket sessions can expire during long idle periods if the client does not send periodic heartbeats. Always implement a heartbeat (e.g., every 30 seconds) and clear it on disconnect/unmount.
@@ -610,6 +628,9 @@ return color && isValidColor(color) ? `--color-${key}: ${color};` : null;
 - **Reconnect delays need jitter**: A fixed 1 s reconnect delay hammers a struggling server. Exponential backoff (doubling, capped) is the correct pattern for WebSocket reconnection.
 - **Game highscore stores need zod validation**: Seven game apps (Snake, Sudoku, Tetris, FlappyBird, Minesweeper, Game2048, Memory) previously used `parseInt(localStorage.getItem(...))` without validation. While `parseInt` returns `NaN` for corrupted data (which evaluates to `0` in numeric context), this is inconsistent with the project's security policy. All now use `safeJsonParse(val ?? '0', HighScoreSchema, 0)` with zod schemas.
 - **ARIA labels pattern for icon-only buttons**: Icon-only buttons (buttons containing only an icon, no visible text) require `aria-label` attributes for screen reader accessibility. Follow the pattern in `FileManager.tsx` and `Settings.tsx`: add `aria-label="Descriptive label"` to each icon-only button. Toggle buttons should also have `aria-pressed={booleanValue}`.
-- **Source-level tests validate ARIA without rendering**: The `aria-attributes.test.ts` file uses `readFileSync` to read component source files and assert on `aria-label` presence. This pattern works when vitest infrastructure blocks component rendering. Current test count: 26 tests across Dock, WindowFrame, Desktop, Calculator, TextEditor, FileManager, and Settings.
+- **Source-level tests validate ARIA without rendering**: The `aria-attributes.test.ts` file uses `readFileSync` to read component source files and assert on `aria-label` presence. This pattern works when vitest infrastructure blocks component rendering. Current test count: 70 tests across 37 describe blocks covering Dock, WindowFrame, Desktop, Calculator, TextEditor, FileManager, Settings, PasswordManager, ScreenRecorder, VoiceRecorder, ArchiveManager, DocumentViewer, ImageViewer, and Reminders.
 - **Component rendering tests DO work with vitest aliases**: Despite earlier documentation claiming `@/` alias resolution blocks component tests, `NotImplemented.test.tsx` and `VoiceRecorder.test.tsx` successfully use `render()` from `@testing-library/react`. The vitest config in `vitest.config.ts` correctly configures the `@` alias via `resolve.alias`.
-- **Documentation test counts must be kept in sync**: README.md, CLAUDE.md, and status_23.md all document test counts. When adding tests, update ALL documentation files. The current count is 136 tests across 20 test files.
+- **`toContain` is more reliable than regex for dynamic ARIA labels in source-level tests**: Source-level tests reading component source strings should use `toContain('aria-label="')` rather than `toMatch(/aria-label="[^"]+"/)`. Template literal expressions (e.g., `aria-label={\`Delete ${name}\`}`) break standard regex patterns. Using `toContain('aria-label="')` and searching for the static prefix is simpler and more robust.
+- **Apps with all-text buttons do not need ARIA source-level tests**: JsonFormatter and RegexTester were skipped in Batch 1 because every button in those apps has visible text. Source-level ARIA tests should only be added for components that actually contain icon-only buttons.
+- **Batch prioritization for ARIA remediation**: After completing 24 apps with ARIA labels, ~17 apps remain (down from 41). System and media apps (Clock, SystemMonitor, VideoPlayer, etc.) should be prioritized before games, as they are more likely to be used with assistive technologies.
+- **Documentation test counts must be kept in sync**: README.md, CLAUDE.md, and status_23.md all document test counts. When adding tests, update ALL documentation files. The current count is 283 tests across 47 test files (233 frontend + 50 backend).

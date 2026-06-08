@@ -55,6 +55,9 @@ This codebase has undergone multiple comprehensive security audits and remediati
 - **Added `fsEvents` typed event bus (HIGH)**: Created `src/utils/fsEvents.ts` to replace the silent `try/catch { /* ignore */ }` anti-pattern in `useFileSystem.ts`. QuotaExceededErrors and other save failures now emit typed events that the OSProvider subscribes to, surfacing user-visible notifications instead of silently dropping data.
 - **Fixed `index.html` title (LOW)**: Changed `<title>LinuxOS</title>` to `<title>UbuntuOS Web</title>` for brand consistency.
 - **Installed `@testing-library/dom`** (INFRA): Resolved missing peer dependency that caused `VoiceRecorder.test.tsx` and `NotImplemented.test.tsx` to fail.
+- **Added backend rate limiting (CRITICAL)**: Installed `express-rate-limit` in the backend. `POST /auth/token` now enforces 5 requests per 15 minutes per IP, preventing brute-force token generation.
+- **Fixed Spreadsheet cell-reference validation (HIGH)**: Added `isValidCellRef()` helper in `Spreadsheet.tsx` to validate cell references against the `COLS` array (A–T) before evaluation, preventing out-of-bounds errors.
+- **Added Spreadsheet formula recursion cap (HIGH)**: `evaluateCell` now tracks recursion depth with `MAX_DEPTH = 100`, returning `#DEPTH!` for overly long chains instead of causing stack overflow.
 
 ### Audit Remediation (2026-06-06)
 - **Added zod validation to game highscore stores**: Snake, Sudoku, Tetris, FlappyBird, Minesweeper, and Game2048 now use `safeJsonParse()` with zod schemas for localStorage reads, replacing raw `parseInt()` calls.
@@ -183,7 +186,7 @@ After running `npm run dev`, open your browser at the provided port (usually `ht
 | :--- | :--- |
 | `npm run build` | Type-check and production build |
 | `npm run lint` | Run ESLint static analysis |
-| `npm run test` | Run Vitest test suite (248 total: 201 frontend + 47 backend) |
+| `npm run test` | Run Vitest test suite (283 total: 233 frontend + 50 backend) |
 | `npm run preview` | Local preview of the production build |
 | `tsc -b` | Project-wide type checking |
 
@@ -233,16 +236,13 @@ npm run docker:test
 ## ⚠️ Known Issues & Recommendations
 
 1. **VFS localStorage Limit**: The virtual file system uses `localStorage`, which has a ~5 MB limit. For large file storage, consider migrating to IndexedDB. **Status**: `saveFS` now emits typed `FileSystemSaveError` events; the OSProvider surfaces a user-visible notification on quota errors.
-2. **Accessibility - Remaining Work**: Core shell components plus Browser, Calendar, Email, Chat, Weather, and LoginScreen now have ARIA labels. **~36 other apps** with icon-only buttons still need ARIA labels. Run a Lighthouse accessibility audit for details.
-3. **`/auth/token` endpoint lacks rate limiting (CRITICAL)**: The backend `POST /auth/token` endpoint accepts any `userName` without authentication, rate limiting, or CORS. Acceptable for isolated local demo use, but **must not be exposed to the internet** without adding `express-rate-limit` + CORS + per-IP throttling.
-4. **Split osReducer**: The `osReducer` is approximately 379 lines and handles window, dock, notification, context menu, icon, theme, and alt-tab logic. Now `export`ed for testing. Consider splitting into domain-specific reducers.
-5. **CI/CD Pipeline**: Automated build + lint + test gates are not yet implemented.
-6. **Unused Local / Import Hygiene**: The `tsconfig.app.json` enforces `"noUnusedLocals": true` and `"noUnusedParameters": true`. Prior build broke with 43 `TS6133` errors across 16 files. Keep imports lean and remove dead code promptly to prevent build regressions.
-7. **ReDoS from User-Crafted Regex**: RegexTester and TextEditor now limit iterations. Apps accepting user regex (e.g., Notes search, Email filters) use `String.includes()` and are not vulnerable. Audit any app with `new RegExp(userInput)` for missing guards.
-8. **ScreenRecorder**: Now uses real `getDisplayMedia` + `MediaRecorder` API for actual screen capture with `.webm` output.
-9. **Game Highscore Validation**: All 7 game apps now use zod validation for highscore localStorage reads. Pattern: `safeJsonParse(val ?? '0', HighScoreSchema, 0)`.
-10. **Spreadsheet cell-reference regex**: Pattern `([A-Z]+\d+)` matches arbitrary column names (e.g., `W5`) that exceed the 20-column limit (A–T). Consider validating cell refs against the `COLS` array.
-11. **Spreadsheet formula recursion**: `evaluateCell` has no recursion depth cap. Long chains can cause stack overflow. Consider adding a `maxDepth` parameter (suggested: 100).
+2. **Accessibility - Remaining Work**: Core shell components plus 24 apps now have ARIA labels (Browser, Calendar, Email, Chat, Weather, LoginScreen, Whiteboard, Drawing, MarkdownPreview, ApiTester, Contacts, ColorPicker, NetworkTools, MediaConverter, Notes, RssReader, Todo, CodeEditor, ImageGallery, PhotoEditor, FtpClient, Minesweeper, MusicPlayer, PasswordManager, VoiceRecorder, Spreadsheet, ScreenRecorder, ArchiveManager, DocumentViewer, ImageViewer, Reminders). **~17 apps still need ARIA labels** (System/Media apps and games). Run a Lighthouse accessibility audit for details.
+3. **Split osReducer**: The `osReducer` is approximately 379 lines and handles window, dock, notification, context menu, icon, theme, and alt-tab logic. Now `export`ed for testing. Consider splitting into domain-specific reducers.
+4. **CI/CD Pipeline**: Automated build + lint + test gates are not yet implemented.
+5. **Unused Local / Import Hygiene**: The `tsconfig.app.json` enforces `"noUnusedLocals": true` and `"noUnusedParameters": true`. Prior build broke with 43 `TS6133` errors across 16 files. Keep imports lean and remove dead code promptly to prevent build regressions.
+6. **ReDoS from User-Crafted Regex**: RegexTester and TextEditor now limit iterations. Apps accepting user regex (e.g., Notes search, Email filters) use `String.includes()` and are not vulnerable. Audit any app with `new RegExp(userInput)` for missing guards.
+7. **ScreenRecorder**: Now uses real `getDisplayMedia` + `MediaRecorder` API for actual screen capture with `.webm` output.
+8. **Game Highscore Validation**: All 7 game apps now use zod validation for highscore localStorage reads. Pattern: `safeJsonParse(val ?? '0', HighScoreSchema, 0)`.
 
 ## 📜 License
 

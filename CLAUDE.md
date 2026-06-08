@@ -121,7 +121,7 @@ Follow this six-phase workflow for all implementation tasks:
 
 ### Testing
 - **TDD is effective for security-critical code**. The `safeEval` tests (24 cases) caught multiple edge cases during development.
-- **Source-level validation as test workaround**: Component-level tests using `@/` aliases fail in vitest due to module resolution issues. Source-level tests (reading file source strings) are used as a workaround for ARIA attribute validation (51 tests in `aria-attributes.test.ts` plus tests in `pinStorage.test.ts`, `vfsHelpers.test.ts`, `gameHighscore.test.ts`, `spreadsheet-race.test.ts`, and `auth-rate-limit.test.ts`).
+- **Source-level validation as test workaround**: Component-level tests using `@/` aliases fail in vitest due to module resolution issues. Source-level tests (reading file source strings) are used as a workaround for ARIA attribute validation (70 tests in `aria-attributes.test.ts` plus tests in `pinStorage.test.ts`, `vfsHelpers.test.ts`, `gameHighscore.test.ts`, `spreadsheet-race.test.ts`, and `auth-rate-limit.test.ts`).
 - **Component rendering tests work**: `NotImplemented.test.tsx` and `VoiceRecorder.test.tsx` successfully use `render()` from `@testing-library/react` with the `@/` alias, demonstrating that vitest alias resolution works for some component tests.
 - **Game highscore validation tests**: 12 tests in `gameHighscore.test.ts` validate the zod schema pattern for game highscores, ensuring corrupted localStorage data falls back gracefully.
 
@@ -140,7 +140,7 @@ Follow this six-phase workflow for all implementation tasks:
 3. **Add `vitest` coverage collection** to track test coverage across all modules.
 4. **Implement CI/CD pipeline** with automated `build`, `lint`, and `test` gates.
 5. **Split `osReducer` into domain-specific reducers** (window management, notifications, desktop icons, etc.).
-6. **Add ARIA labels to remaining 41 apps**: Browser, Notes, Calendar, Email, and other apps with icon-only buttons need `aria-label` attributes. Follow the pattern in `FileManager.tsx` and `Settings.tsx`.
+6. **Add ARIA labels to remaining ~17 apps**: System/Media apps (Clock, SystemMonitor, VideoPlayer, etc.) and Games (Snake, Tetris, Pong, Chess, Solitaire, Sudoku, Memory, Game2048, FlappyBird, TicTacToe) still need `aria-label` attributes on icon-only buttons. Follow the pattern in `FileManager.tsx` and `Settings.tsx`.
 7. **Enforce import hygiene during code review**: The `noUnusedLocals`/`noUnusedParameters` TypeScript checks catch dead code at build time, but IDE auto-imports can silently add unused imports. Add a pre-commit hook or lint rule to block commits with unused identifiers.
 8. **Replace all remaining `dangerouslySetInnerHTML` usage**: After RegexTester was refactored to use React components, audit all remaining `dangerouslySetInnerHTML` usage and replace with React component rendering where possible.
 9. **Add ReDoS guards to all regex-accepting apps**: TextEditor find bar (now fixed with `countMatchesSafely()`), RegexTester (already has `MAX_EXEC_ITERATIONS = 1000`). Notes search and Email filters use `String.includes()` and are not vulnerable. Audit any app with `new RegExp(userInput)` for missing guards.
@@ -186,7 +186,7 @@ A real bash terminal has been integrated into UbuntuOS Web via `node-pty` + Dock
 
 **Validation:**
 - TypeScript: 0 errors (`tsc -b --noEmit`)
-- Vitest: 201 passing tests frontend + 47 backend tests (248 total). Component tests using `@/` aliases work when run from the `app/` directory.
+- Vitest: 233 tests frontend + 50 backend tests (283 total). Component tests using `@/` aliases work when run from the `app/` directory.
 - Vite build: successful, `RealTerminal` chunk generated (296 KB gzipped for xterm.js)
 
 **Files:**

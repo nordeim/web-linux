@@ -43,7 +43,7 @@
 | Total Applications | 56 |
 | Frontend Test Files | 29 |
 | Backend Test Files | 16 |
-| Total Tests | 248 |
+| Total Tests | 283 |
 | Backend Modules | 9 (index, config, auth, docker, websocket, sessionStore, policy, logger, types) |
 
 ---

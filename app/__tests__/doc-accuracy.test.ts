@@ -43,7 +43,7 @@ describe('Documentation accuracy - app and test counts', () => {
     });
   });
 
-  describe('Test counts (current: 248 total = 201 frontend + 47 backend)', () => {
+  describe('Test counts (current: 283 total = 233 frontend + 50 backend)', () => {
     it('Project_Architecture_Document.md says 29 frontend test files', () => {
       const arch = readDoc('Project_Architecture_Document.md');
       expect(arch).toMatch(/Frontend Test Files\s*\|\s*29/);
@@ -54,19 +54,19 @@ describe('Documentation accuracy - app and test counts', () => {
       expect(arch).toMatch(/Backend Test Files\s*\|\s*16/);
     });
 
-    it('Project_Architecture_Document.md says 248 total tests', () => {
+    it('Project_Architecture_Document.md says 283 total tests', () => {
       const arch = readDoc('Project_Architecture_Document.md');
-      expect(arch).toMatch(/Total Tests\s*\|\s*248/);
+      expect(arch).toMatch(/Total Tests\s*\|\s*283/);
     });
 
-    it('README.md mentions 201 frontend + 47 backend tests', () => {
+    it('README.md mentions 233 frontend + 50 backend tests', () => {
       const readme = readDoc('README.md');
-      expect(readme).toMatch(/201\s+frontend\s*\+\s*47\s+backend/);
+      expect(readme).toMatch(/233\s+frontend\s*\+\s*50\s+backend/);
     });
 
-    it('CLAUDE.md says 201 frontend + 47 backend tests (248 total)', () => {
+    it('CLAUDE.md says 233 frontend + 50 backend tests (283 total)', () => {
       const claude = readDoc('CLAUDE.md');
-      expect(claude).toMatch(/201\s+passing\s+tests\s+frontend\s*\+\s*47\s+backend\s+tests/);
+      expect(claude).toMatch(/233\s+tests\s+frontend\s*\+\s*50\s+backend\s+tests/);
     });
   });
 });
